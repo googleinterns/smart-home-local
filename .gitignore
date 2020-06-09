@@ -1,0 +1,12 @@
+# Dependency directory
+node_modules/
+
+# Vim-related files
+*.swp
+*.vim
+
+# eslint cache
+.eslintrc.json
+
+# this file
+.gitignore
