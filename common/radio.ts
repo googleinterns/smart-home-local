@@ -1,3 +1,0 @@
-/**
-* Module that implements UDP
-**/
