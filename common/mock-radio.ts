@@ -31,6 +31,10 @@ export class DiscoveryData {
 export class MockNetwork {
   udpListeners: Map<string, MockUDPListener[]>;
 
+  constructor() {
+    this.udpListeners = new Map<string, MockUDPListener[]>();
+  }
+
   registerUDPListener(
     listener: MockUDPListener,
     port: number,

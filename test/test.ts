@@ -47,11 +47,11 @@ test('udp-device-connects', (t) => {
 
   // Device data that mock device sends back
   const discoveryData: DiscoveryData = new DiscoveryData(
-    "test-device-id",
-    "2",
-    "0.0.1",
-    "1.2.3",
-    "12345"
+    'test-device-id',
+    '2',
+    '0.0.1',
+    '1.2.3',
+    '12345'
   );
 
   // Mock a network that implements UDP
@@ -79,7 +79,8 @@ test('udp-device-connects', (t) => {
 
   mockNetwork.registerUDPListener(mockDevice, broadcastPort, broadcastAddress);
 
-  // Start scanning 
+  // Start scanning
   mockLocalHomePlatform.triggerScan();
 
-})
+  t.pass();
+});
