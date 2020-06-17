@@ -1,23 +1,19 @@
 {
   "name": "local-home-virual-environment",
   "version": "0.0.1",
-  "description": "apps",
+  "description": "",
   "private": true,
   "license": "Apache-2.0",
-  "main": "app.js",
   "scripts": {
-    "test": "ava",
+    "compile": "tsc",
+    "test": "ava --verbose",
     "lint": "eslint ."
   },
-  "dependencies": {
-    "@google/local-home-sdk": "^1.0.0",
-    "cbor": "^5.0.2",
-    "ts-node": "^8.10.2"
-  },
   "devDependencies": {
-    "@types/node": "^14.0.13",
+    "@google/local-home-sdk": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^3.3.0",
     "@typescript-eslint/parser": "^3.3.0",
+    "ts-node": "^8.10.2",
     "ava": "^2.1.0",
     "eslint": "^7.2.0",
     "eslint-config-google": "^0.14.0",
