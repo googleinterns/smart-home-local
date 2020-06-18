@@ -10,20 +10,20 @@ export interface MockUDPListener {
 export class DiscoveryData {
   id: string;
   model: string;
-  hw_rev: string;
-  fw_rev: string;
-  channels: string;
+  hwRev: string;
+  fwRev: string;
+  channels: number[];
   constructor(
     id: string,
     model: string,
-    hw_rev: string,
-    fw_rev: string,
-    channels: string
+    hwRev: string,
+    fwRev: string,
+    channels: number[]
   ) {
     this.id = id;
     this.model = model;
-    this.hw_rev = hw_rev;
-    this.fw_rev = fw_rev;
+    this.hwRev = hwRev;
+    this.fwRev = fwRev;
     this.channels = channels;
   }
 }
@@ -48,12 +48,21 @@ export class MockNetwork {
     this.udpListeners[key] = [listener];
   }
 
-  sendUDPMessage(msg: Buffer, port: number, address: string) {
+  public sendUDPMessage(
+    msg: Buffer,
+    port: number,
+    address: string,
+    fromPort: number,
+    fromAddress: string
+  ) {
     const key: string = address + ':' + port.toString();
-    if (this.udpListeners.has(key)) {
-      for (const listener of this.udpListeners[key]) {
-        listener.onMessaged(msg);
-      }
+    // TODO check if key present
+    for (const listener of this.udpListeners[key]) {
+      const rinfo = {
+        port: fromPort,
+        address: fromAddress,
+      };
+      listener.onUDPMessage(msg, rinfo);
     }
   }
 }
@@ -61,7 +70,7 @@ export class MockNetwork {
 export class UDPDevice implements MockUDPListener {
   private udpMessageAction: (msg: Buffer, rinfo: Object) => void;
 
-  onUDPMessage(msg: Buffer, rinfo: Object): void {
+  onUDPMessage(msg: Buffer, rinfo): void {
     this.udpMessageAction(msg, rinfo);
   }
 

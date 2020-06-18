@@ -9,7 +9,7 @@ import {
   UDPScanConfig,
   ScanState,
 } from '../common/mock-local-home-platform';
-import cbor from 'cbor';
+import * as cbor from 'cbor';
 
 test('device-manager-throws-error', async (t) => {
   const randomErrorCode = 'some-error';
@@ -45,28 +45,30 @@ test('udp-device-connects', (t) => {
     discoveryPacket
   );
 
+  // Mock a network that implements UDP
+  const mockNetwork = new MockNetwork();
+
+  // Mock the Local Home Platform
+  const mockLocalHomePlatform = new MockLocalHomePlatform(mockNetwork, [
+    scanConfig,
+  ]);
+
+  // Mock a UDP Device
+  const mockDevice = new UDPDevice();
+
   // Device data that mock device sends back
   const discoveryData: DiscoveryData = new DiscoveryData(
     'test-device-id',
     '2',
     '0.0.1',
     '1.2.3',
-    '12345'
+    [12345]
   );
-
-  // Mock a network that implements UDP
-  const mockNetwork = new MockNetwork();
-
-  // Mock the Local Home Platform
-  const mockLocalHomePlatform = new MockLocalHomePlatform(mockNetwork);
-
-  // Mock a UDP Device
-  const mockDevice = new UDPDevice();
 
   // Sample device response
   mockDevice.setUDPMessageAction((msg: Buffer, rinfo: any) => {
-    const parsedPacket = Buffer.from(discoveryPacket, 'hex');
-    if (msg.compare(parsedPacket) !== 0) {
+    const packetBuffer = Buffer.from(discoveryPacket, 'hex');
+    if (msg.compare(packetBuffer) !== 0) {
       console.warn('UDP received unknown payload:', msg, 'from:', rinfo);
       return;
     }
@@ -74,7 +76,13 @@ test('udp-device-connects', (t) => {
 
     // TODO add error path
     const responsePacket = cbor.encode(discoveryData);
-    mockNetwork.sendUDPMessage(responsePacket, rinfo.port, rinfo.address);
+    mockNetwork.sendUDPMessage(
+      responsePacket,
+      rinfo.port,
+      rinfo.address,
+      discoveryData.channels[0],
+      broadcastAddress
+    );
   });
 
   mockNetwork.registerUDPListener(mockDevice, broadcastPort, broadcastAddress);
