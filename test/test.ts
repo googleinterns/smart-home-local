@@ -1,28 +1,18 @@
 /**
- * simple tests to verify stub behaviors
+ * Tests to verify stub behaviors
  **/
+/// <reference types="@google/local-home-sdk" />
+import cbor from 'cbor';
 import test from 'ava';
-import { deviceManagerStub } from '../common/device-manager';
 import { UDPDevice, DiscoveryData, MockNetwork } from '../common/mock-radio';
+// Importing stub-setup loads stubs as a side-effect
+// Bundled HomeApp may not be imported without these globals first being loaded
+import { loadHomeApp } from '../common/stub-setup';
 import {
   MockLocalHomePlatform,
   UDPScanConfig,
   ScanState,
 } from '../common/mock-local-home-platform';
-import * as cbor from 'cbor';
-
-test('device-manager-throws-error', async (t) => {
-  const randomErrorCode = 'some-error';
-  const deviceManager = deviceManagerStub('randomDeviceId', {
-    errorCode: randomErrorCode,
-  });
-  try {
-    const result = await deviceManager.send(null);
-    t.fail();
-  } catch (error) {
-    t.is(error.errorCode, randomErrorCode);
-  }
-});
 
 // Tests a UDP identify flow end-to-end using stubs and mocks
 test('udp-device-connects', (t) => {
@@ -86,6 +76,11 @@ test('udp-device-connects', (t) => {
   });
 
   mockNetwork.registerUDPListener(mockDevice, broadcastPort, broadcastAddress);
+
+  // Runs HomeApp from bundled javascript
+  // Runs HomeApp from bundled javascript
+  // smarthome.App and smarthome.DeviceManager usage will route through stubs
+  loadHomeApp();
 
   // Start scanning
   mockLocalHomePlatform.triggerScan();

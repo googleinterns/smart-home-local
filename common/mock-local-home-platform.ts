@@ -1,6 +1,6 @@
+/// <reference types="@google/local-home-sdk" />
 import { MockNetwork, MockUDPListener } from './mock-radio';
 
-// TODO move to another file
 export enum ScanState {
   Unprovisioned,
   Provisioned,
@@ -35,14 +35,15 @@ export class UDPScanConfig implements ScanConfig {
 export class MockLocalHomePlatform implements MockUDPListener {
   private udpScanConfigs: UDPScanConfig[] = [];
   private network: MockNetwork;
+  // TODO replace with mock
+  private smarthomeApp: smarthome.App;
 
   constructor(network: MockNetwork, udpScanConfigs: UDPScanConfig[]) {
     this.network = network;
     this.udpScanConfigs = udpScanConfigs;
+    this.smarthomeApp = new smarthome.App('0.0.1');
     this.setupUDP();
   }
-
-  // UDP Scan Functionaity
 
   private setupUDP() {
     this.udpScanConfigs.forEach((udpScanConfig) => {

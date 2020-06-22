@@ -1,16 +1,19 @@
 /**
 Stub for App class
 **/
-
 /// <reference types="@google/local-home-sdk" />
 
-const App = class {
+export const AppStub = class {
   private version: string;
+  private deviceManager: any;
   constructor(version: string) {
     this.version = version;
   }
+  public setDeviceManager(deviceManager: any) {
+    this.deviceManager = deviceManager;
+  }
   public getDeviceManager() {
-    return deviceManager;
+    return this.deviceManager;
   }
   public listen() {
     return Promise.resolve();
@@ -25,12 +28,3 @@ const App = class {
     return this;
   }
 };
-
-
-/**
-* Stub function 
-**/ 
-
-export function smarthomeAppStub(deviceManager?: any) {
-  return new App('test-version');
-}
