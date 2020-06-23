@@ -3,6 +3,7 @@
  */
 /// <reference types="@google/local-home-sdk" />
 
+//TODO(cjdaly) fill in implementation of these methods
 export const AppStub = class {
   private version: string;
   private deviceManager: any;

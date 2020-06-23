@@ -9,11 +9,14 @@ export const DeviceManagerStub = class {
   error: boolean;
   public commands = new Array<smarthome.DataFlow.TcpRequestData>();
 
-  public send(command: smarthome.DataFlow.TcpRequestData): Promise<any> {
+  public send(
+    command: smarthome.DataFlow.TcpRequestData
+  ): Promise<smarthome.DataFlow.CommandSuccess> {
     if (this.error) {
       return Promise.reject(this.error);
     }
     this.commands.push(command);
-    return Promise.resolve(this.deviceId);
+    //TODO(cjdaly) build a proper CommandSuccess
+    return Promise.resolve(new smarthome.DataFlow.HttpRequestData());
   }
-}
+};

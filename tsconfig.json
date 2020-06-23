@@ -3,7 +3,6 @@
     "moduleResolution": "node",
     "typeRoots": [
       "node_modules/@types",
-      "node_modules/@google/local-home-sdk"
     ],
     "lib": ["es2019", "DOM"],
     "esModuleInterop": true

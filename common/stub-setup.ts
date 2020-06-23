@@ -11,6 +11,7 @@ import { AppStub } from './smart-home-app';
 };
 
 //TODO(cjdaly) find a cleaner way to do this.
-export function loadHomeApp() {
-  require('../home-app/bundle');
+export function loadHomeApp(path: string) {
+  // Implicitly runs the JavaScript module at `path`
+  require(path);
 }

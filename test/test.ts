@@ -4,7 +4,7 @@
 /// <reference types="@google/local-home-sdk" />
 import cbor from 'cbor';
 import test from 'ava';
-import { UDPDevice, DiscoveryData, MockNetwork } from '../common/mock-radio';
+import { UDPDevice, DiscoveryData, MockNetwork, RemoteAddressInfo } from '../common/mock-radio';
 
 // Importing stub-setup loads stubs into global scope as a side-effect
 // Bundled HomeApp may not be imported without these globals first being loaded
@@ -26,7 +26,6 @@ test('udp-device-connects', (t) => {
     'A5A5A5A5'
   );
 
-  // Mock a network that implements UDP
   const mockNetwork = new MockNetwork();
 
   // Mock the Local Home Platform
@@ -37,6 +36,7 @@ test('udp-device-connects', (t) => {
   // Mock a UDP Device
   const mockDevice = new UDPDevice();
 
+  const deviceId = 'test-device-id';
   // Device data that mock device sends back
   const discoveryData: DiscoveryData = new DiscoveryData(
     'test-device-id',
@@ -47,7 +47,7 @@ test('udp-device-connects', (t) => {
   );
 
   // Sample device response
-  mockDevice.setUDPMessageAction((msg: Buffer, rinfo: any) => {
+  mockDevice.setUDPMessageAction((msg: Buffer, rinfo: RemoteAddressInfo) => {
     const packetBuffer = Buffer.from(scanConfig.discoveryPacket, 'hex');
     if (msg.compare(packetBuffer) !== 0) {
       console.warn('UDP received unknown payload:', msg, 'from:', rinfo);
@@ -76,10 +76,11 @@ test('udp-device-connects', (t) => {
   // Runs HomeApp from bundled javascript
   // HomeApp will call smarthome.App and smarthome.DeviceManager,
   // the class definitions of which we set in stub-setup.ts
-  loadHomeApp();
+  loadHomeApp('../home-app/bundle.js');
 
   // Start scanning
   mockLocalHomePlatform.triggerScan();
 
-  t.pass();
+  t.is(mockLocalHomePlatform.getLocalDeviceIds().length, 1);
+  t.is(mockLocalHomePlatform.getLocalDeviceIds()[0], deviceId);
 });
