@@ -6,7 +6,7 @@ export interface MockUDPListener {
   onUDPMessage(msg: Buffer, rinfo: Object): void;
 }
 
-// TODO Builders
+// TODO(cjdaly) Builders
 export class DiscoveryData {
   id: string;
   model: string;
@@ -28,6 +28,7 @@ export class DiscoveryData {
   }
 }
 
+// Simulates a network with simple UDP messaging functionality
 export class MockNetwork {
   udpListeners: Map<string, MockUDPListener[]>;
 
@@ -56,7 +57,6 @@ export class MockNetwork {
     fromAddress: string
   ) {
     const key: string = address + ':' + port.toString();
-    // TODO check if key present
     for (const listener of this.udpListeners[key]) {
       const rinfo = {
         port: fromPort,

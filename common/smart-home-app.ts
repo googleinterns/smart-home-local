@@ -1,7 +1,6 @@
-/**
-Stub for App class
-**/
-
+/*
+ * Stub for App class
+ */
 /// <reference types="@google/local-home-sdk" />
 
 const App = class {
