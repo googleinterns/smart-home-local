@@ -1,6 +1,6 @@
 /**
- * DeviceManager Stub For local radio functionality
- * TODO remove comments from local home SDK: just here for reference from sample
+ * DeviceManager Stub
+ * TODO(cjdaly) integrate with Mock Local Home Platform and Mock Network
  **/
 
 // <reference types="@google/local-home-sdk" />
