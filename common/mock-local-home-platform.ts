@@ -1,3 +1,10 @@
+/*
+ * Mock Local Home Platform class
+ * - Interacts with bundled HomeApp
+ * - Accepts scan config
+ * - Interacts with virtual network
+ */
+
 /// <reference types="@google/local-home-sdk" />
 import { MockNetwork, MockUDPListener } from './mock-radio';
 
@@ -31,11 +38,13 @@ export class UDPScanConfig implements ScanConfig {
   }
 }
 
-// TODO add other radio support
+// TODO(cjdaly): figure out how to direct arbitrary instances of stub classes to an arbitrary
+// instance of MockLocalHomePlatform. May need to use some static event or singleton pattern.
+
+// TODO(cjdaly): add other radio scan support
 export class MockLocalHomePlatform implements MockUDPListener {
   private udpScanConfigs: UDPScanConfig[] = [];
   private network: MockNetwork;
-  // TODO replace with mock
   private smarthomeApp: smarthome.App;
 
   constructor(network: MockNetwork, udpScanConfigs: UDPScanConfig[]) {
@@ -88,7 +97,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
       rinfo,
     });
     const identifyBuffer: Buffer = Buffer.from(identifyRequest, 'utf-8');
-    // TODO send this to app.identifyHandler
+    // TODO(cjdaly): send this to homeApp.identifyHandler
   }
 
   public addUDPScanConfig(scanConfig: UDPScanConfig) {
@@ -96,9 +105,9 @@ export class MockLocalHomePlatform implements MockUDPListener {
   }
 
   public triggerScan() {
-    // First, UDP
     this.udpScanConfigs.forEach((udpScanConfig) => {
       this.sendUDPBroadcast(udpScanConfig);
     });
+    // TODO(cjdaly) other scans
   }
 }

@@ -1,11 +1,12 @@
-/**
+/*
  * Tests to verify stub behaviors
- **/
+ */
 /// <reference types="@google/local-home-sdk" />
 import cbor from 'cbor';
 import test from 'ava';
 import { UDPDevice, DiscoveryData, MockNetwork } from '../common/mock-radio';
-// Importing stub-setup loads stubs as a side-effect
+
+// Importing stub-setup loads stubs into global scope as a side-effect
 // Bundled HomeApp may not be imported without these globals first being loaded
 import { loadHomeApp } from '../common/stub-setup';
 import {
@@ -14,25 +15,15 @@ import {
   ScanState,
 } from '../common/mock-local-home-platform';
 
-// Tests a UDP identify flow end-to-end using stubs and mocks
+// Tests a UDP identify flow end-to-end
 test('udp-device-connects', (t) => {
-  // LHP detects virtual device
-  // send IDENTITY request to compiled 3P javascript
-  // await IdentityResponse from 3P javascript
-  // fulfillment path confirmed
-  // Pass test
-
-  // Scan configuration
-  const broadcastAddress: string = '255.255.255.255';
-  const broadcastPort: number = 3312;
-  const listenPort: number = 3311;
-  const discoveryPacket: string = 'A5A5A5A5';
+  // First, create a scan configuration
   const scanConfig = new UDPScanConfig(
     ScanState.Unprovisioned,
-    broadcastAddress,
-    listenPort,
-    broadcastPort,
-    discoveryPacket
+    '255.255.255.255',
+    3311,
+    3312,
+    'A5A5A5A5'
   );
 
   // Mock a network that implements UDP
@@ -57,29 +48,34 @@ test('udp-device-connects', (t) => {
 
   // Sample device response
   mockDevice.setUDPMessageAction((msg: Buffer, rinfo: any) => {
-    const packetBuffer = Buffer.from(discoveryPacket, 'hex');
+    const packetBuffer = Buffer.from(scanConfig.discoveryPacket, 'hex');
     if (msg.compare(packetBuffer) !== 0) {
       console.warn('UDP received unknown payload:', msg, 'from:', rinfo);
       return;
     }
     console.debug('UDP received discovery payload:', msg, 'from:', rinfo);
 
-    // TODO add error path
+    // TODO(cjdaly) Add error path
     const responsePacket = cbor.encode(discoveryData);
     mockNetwork.sendUDPMessage(
       responsePacket,
       rinfo.port,
       rinfo.address,
       discoveryData.channels[0],
-      broadcastAddress
+      scanConfig.broadcastAddress
     );
   });
 
-  mockNetwork.registerUDPListener(mockDevice, broadcastPort, broadcastAddress);
+  //Mock network needs to listen for device response
+  mockNetwork.registerUDPListener(
+    mockDevice,
+    scanConfig.broadcastPort,
+    scanConfig.broadcastAddress
+  );
 
   // Runs HomeApp from bundled javascript
-  // Runs HomeApp from bundled javascript
-  // smarthome.App and smarthome.DeviceManager usage will route through stubs
+  // HomeApp will call smarthome.App and smarthome.DeviceManager,
+  // the class definitions of which we set in stub-setup.ts
   loadHomeApp();
 
   // Start scanning
