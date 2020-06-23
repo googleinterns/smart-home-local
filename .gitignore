@@ -9,4 +9,4 @@ node_modules/
 package-lock.json
 
 # bundle file
-./home-app/bundle.js
+home-app/bundle.js
