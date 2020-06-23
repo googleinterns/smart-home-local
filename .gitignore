@@ -10,9 +10,3 @@ package-lock.json
 
 # bundle file
 home-app/bundle.js
-
-# eslint cache
-.eslintrc.json
-
-# this file
-.gitignore

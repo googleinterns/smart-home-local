@@ -69,7 +69,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
   }
 
   // Establish fulfillment path using app code
-  onUDPMessage(msg: Buffer, rinfo: Object): void {
+  onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): void {
     console.log('received discovery payload:', msg, 'from:', rinfo);
     const identifyRequest: string = JSON.stringify({
       requestId: 'request-id',
@@ -90,7 +90,11 @@ export class MockLocalHomePlatform implements MockUDPListener {
       rinfo,
     });
     const identifyBuffer: Buffer = Buffer.from(identifyRequest, 'utf-8');
+
     // TODO(cjdaly): send this to homeApp.identifyHandler
+    const discoveryData: DiscoveryData = cbor.decodeFirstSync(msg);
+    console.log(discoveryData);
+    this.localDeviceIds.push(discoveryData.id);
   }
 
   public addUDPScanConfig(scanConfig: UDPScanConfig) {

@@ -3,7 +3,20 @@
  */
 
 export interface MockUDPListener {
-  onUDPMessage(msg: Buffer, rinfo: Object): void;
+  onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): void;
+}
+
+export class RemoteAddressInfo {
+  address: string;
+  family: string;
+  port: number;
+  size: number;
+  constructor(address: string, family: string, port: number, size: number) {
+    this.address = address;
+    this.family = family;
+    this.port = port;
+    this.size = size;
+  }
 }
 
 // TODO(cjdaly) Builders
@@ -41,7 +54,7 @@ export class MockNetwork {
     port: number,
     address: string
   ) {
-    const key: string = address + ':' + port.toString();
+    const key = address + ':' + port.toString();
     if (this.udpListeners.has(key)) {
       this.udpListeners[key].push(listener);
       return;
@@ -56,7 +69,7 @@ export class MockNetwork {
     fromPort: number,
     fromAddress: string
   ) {
-    const key: string = address + ':' + port.toString();
+    const key = address + ':' + port.toString();
     for (const listener of this.udpListeners[key]) {
       const rinfo = {
         port: fromPort,
@@ -68,13 +81,15 @@ export class MockNetwork {
 }
 
 export class UDPDevice implements MockUDPListener {
-  private udpMessageAction: (msg: Buffer, rinfo: Object) => void;
+  private udpMessageAction: (msg: Buffer, rinfo: RemoteAddressInfo) => void;
 
-  onUDPMessage(msg: Buffer, rinfo): void {
+  onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): void {
     this.udpMessageAction(msg, rinfo);
   }
 
-  setUDPMessageAction(messageAction: (msg: Buffer, rinfo: Object) => void) {
+  setUDPMessageAction(
+    messageAction: (msg: Buffer, rinfo: RemoteAddressInfo) => void
+  ) {
     this.udpMessageAction = messageAction;
   }
 }
