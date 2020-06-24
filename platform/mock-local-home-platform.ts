@@ -38,28 +38,52 @@ export class UDPScanConfig implements ScanConfig {
   }
 }
 
-// TODO(cjdaly): figure out how to direct arbitrary instances of stub classes to an arbitrary
-// instance of MockLocalHomePlatform. May need to use some static event or singleton pattern.
-
 // TODO(cjdaly): add other radio scan support
 export class MockLocalHomePlatform implements MockUDPListener {
+  //  Singleton instance
+  private static instance: MockLocalHomePlatform;
+
   private udpScanConfigs: UDPScanConfig[] = [];
-  private network: MockNetwork;
+  private mockNetwork: MockNetwork;
+  private app: smarthome.App;
   private localDeviceIds: string[] = [];
 
-  constructor(network: MockNetwork, udpScanConfigs: UDPScanConfig[]) {
-    this.network = network;
+  private constructor() {
+    this.setupUDP();
+  }
+
+  public initializeRadio(
+    mockNetwork: MockNetwork,
+    udpScanConfigs: UDPScanConfig[]
+  ) {
+    this.mockNetwork = mockNetwork;
     this.udpScanConfigs = udpScanConfigs;
     this.setupUDP();
+  }
+
+  public setApp(app: smarthome.App){
+    this.app = app;
+  }
+
+  //  Singleton getter
+  public static getInstance(): MockLocalHomePlatform {
+    if (!MockLocalHomePlatform.instance) {
+      MockLocalHomePlatform.instance = new MockLocalHomePlatform();
+    }
+    return MockLocalHomePlatform.instance;
   }
 
   public getLocalDeviceIds(): string[] {
     return this.localDeviceIds;
   }
 
+  public getMockNetwork(): MockNetwork {
+    return this.mockNetwork;
+  }
+
   private setupUDP() {
     this.udpScanConfigs.forEach((udpScanConfig) => {
-      this.network.registerUDPListener(
+      this.mockNetwork.registerUDPListener(
         this,
         udpScanConfig.listenPort,
         udpScanConfig.broadcastAddress
@@ -69,7 +93,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
 
   private sendUDPBroadcast(scanConfig: UDPScanConfig) {
     const packetBuffer = Buffer.from(scanConfig.discoveryPacket, 'hex');
-    this.network.sendUDPMessage(
+    this.mockNetwork.sendUDPMessage(
       packetBuffer,
       scanConfig.broadcastPort,
       scanConfig.broadcastAddress,

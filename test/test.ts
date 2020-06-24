@@ -25,12 +25,13 @@ test('udp-device-connects', (t) => {
     'A5A5A5A5'
   );
 
+  // Mock a UDP Network
   const mockNetwork = new MockNetwork();
 
   // Mock the Local Home Platform
-  const mockLocalHomePlatform = new MockLocalHomePlatform(mockNetwork, [
-    scanConfig,
-  ]);
+  const mockLocalHomePlatform = MockLocalHomePlatform.getInstance();
+
+  mockLocalHomePlatform.initializeRadio(mockNetwork, [scanConfig]);
 
   // Mock a UDP Device
   const mockDevice = new UDPDevice();
