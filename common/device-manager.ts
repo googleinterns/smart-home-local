@@ -11,6 +11,10 @@ class DeviceManager {
   error: boolean;
   public commands = new Array<smarthome.DataFlow.TcpRequestData>();
 
+  constructor(mockNetwork: MockNetwork) {
+    this.mockNetwork = mockNetwork;
+  }
+
   public send(
     command: smarthome.DataFlow.TcpRequestData
   ): Promise<smarthome.DataFlow.CommandSuccess> {
@@ -20,5 +24,12 @@ class DeviceManager {
     this.commands.push(command);
     //TODO(cjdaly) build a proper CommandSuccess
     return Promise.resolve(new smarthome.DataFlow.HttpRequestData());
+  }
+
+  public markPending(request: any): Promise<void> {
+    return Promise.resolve();
+  }
+  public getProxyInfo(id: string): any {
+    return {};
   }
 };
