@@ -93,7 +93,6 @@ export class MockLocalHomePlatform implements MockUDPListener {
 
     // TODO(cjdaly): send this to homeApp.identifyHandler
     const discoveryData: DiscoveryData = cbor.decodeFirstSync(msg);
-    console.log(discoveryData);
     this.localDeviceIds.push(discoveryData.id);
   }
 
