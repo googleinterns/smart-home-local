@@ -48,6 +48,14 @@ test('udp-device-connects', (t) => {
     channels: [discoveryPort],
   });
 
+  // Sets global smarthome namespace
+  injectAppStub();
+
+  (global as any).smarthome.Intents = {
+    IDENTIFY: 'action.devices.IDENTIFY',
+    EXECUTE: 'action.devices.EXECUTE',
+  };
+
   // Sample device response
   mockDevice.setUDPMessageAction((msg: Buffer, rinfo: RemoteAddressInfo) => {
     const packetBuffer = Buffer.from(scanConfig.discoveryPacket, 'hex');

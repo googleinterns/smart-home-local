@@ -38,7 +38,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
 
   private udpScanConfigs: UDPScanConfig[] = [];
   private mockNetwork: MockNetwork;
-  private app: smarthome.App;
+  private app: App;
   private localDeviceIds: string[] = [];
 
   private constructor() {
@@ -54,7 +54,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
     this.setupUDP();
   }
 
-  public setApp(app: smarthome.App){
+  public setApp(app: App) {
     this.app = app;
   }
 
@@ -95,18 +95,33 @@ export class MockLocalHomePlatform implements MockUDPListener {
     );
   }
 
+  private isPromise<RS>(response: RS | Promise<RS>): response is Promise<RS> {
+    return (response as Promise<RS>).then !== undefined;
+  }
+
+  private async processIntentResponse<RS>(
+    response: RS | Promise<RS>
+  ): Promise<RS> {
+    if (this.isPromise<RS>(response)) {
+      return response;
+    } else {
+      return Promise.resolve(response);
+    }
+  }
+
   // Establish fulfillment path using app code
   onUDPMessage(msg: Buffer, rinfo: Object): void {
     console.log('received discovery payload:', msg, 'from:', rinfo);
-    const identifyRequest: string = JSON.stringify({
+
+    const identifyRequest: smarthome.IntentFlow.IdentifyRequest = {
       requestId: 'request-id',
       inputs: [
         {
-          intent: 'action.devices.IDENTIFY',
+          intent: smarthome.Intents.IDENTIFY,
           payload: {
             device: {
               radioTypes: [],
-              udpScanData: msg.toString('hex'),
+              udpScanData: { data: msg.toString('hex') },
             },
             structureData: {},
             params: {},
@@ -114,10 +129,15 @@ export class MockLocalHomePlatform implements MockUDPListener {
         },
       ],
       devices: [],
-      rinfo,
+    };
+
+    this.processIntentResponse<smarthome.IntentFlow.IdentifyResponse>(
+      this.app.identifyHandler(identifyRequest)
+    ).then((identifyResponse: smarthome.IntentFlow.IdentifyResponse) => {
+      console.log('Recieved IdentifyResponse:' + identifyResponse);
+      const localDeviceId: string = identifyResponse.payload.device.id;
+      this.localDeviceIds.push(localDeviceId);
     });
-    const identifyBuffer: Buffer = Buffer.from(identifyRequest, 'utf-8');
-    // TODO(cjdaly): send this to homeApp.identifyHandler
   }
 
   public addUDPScanConfig(scanConfig: UDPScanConfig) {
