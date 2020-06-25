@@ -2,18 +2,17 @@
  * Tests to verify stub behaviors
  */
 /// <reference types="@google/local-home-sdk" />
-import cbor from 'cbor';
 import test from 'ava';
-import { UDPDevice, DiscoveryData, MockNetwork, RemoteAddressInfo } from '../common/mock-radio';
-
-// Importing stub-setup loads stubs into global scope as a side-effect
-// Bundled HomeApp may not be imported without these globals first being loaded
-import { loadHomeApp } from '../common/stub-setup';
+import {
+  UDPDevice,
+  MockNetwork,
+  RemoteAddressInfo,
+} from '../platform/mock-radio';
 import {
   MockLocalHomePlatform,
   UDPScanConfig,
   ScanState,
-} from '../common/mock-local-home-platform';
+} from '../platform/mock-local-home-platform';
 
 // Tests a UDP identify flow end-to-end
 test('udp-device-connects', (t) => {
@@ -38,13 +37,15 @@ test('udp-device-connects', (t) => {
 
   const deviceId = 'test-device-id';
   // Device data that mock device sends back
-  const discoveryData: DiscoveryData = new DiscoveryData(
-    'test-device-id',
-    '2',
-    '0.0.1',
-    '1.2.3',
-    [12345]
-  );
+
+  const discoveryPort = 12345;
+  const discoveryData = JSON.stringify({
+    id: 'test-device-id',
+    model: '2',
+    hw_rev: '0.0.1',
+    fw_rev: '1.2.3',
+    channels: [discoveryPort],
+  });
 
   // Sample device response
   mockDevice.setUDPMessageAction((msg: Buffer, rinfo: RemoteAddressInfo) => {
@@ -55,13 +56,14 @@ test('udp-device-connects', (t) => {
     }
     console.debug('UDP received discovery payload:', msg, 'from:', rinfo);
 
+    const discoveryBuffer = Buffer.from(discoveryData);
+
     // TODO(cjdaly) Add error path
-    const responsePacket = cbor.encode(discoveryData);
     mockNetwork.sendUDPMessage(
-      responsePacket,
+      discoveryBuffer,
       rinfo.port,
       rinfo.address,
-      discoveryData.channels[0],
+      discoveryPort,
       scanConfig.broadcastAddress
     );
   });
@@ -73,14 +75,8 @@ test('udp-device-connects', (t) => {
     scanConfig.broadcastAddress
   );
 
-  // Runs HomeApp from bundled javascript
-  // HomeApp will call smarthome.App and smarthome.DeviceManager,
-  // the class definitions of which we set in stub-setup.ts
-  loadHomeApp('../home-app/bundle.js');
-
   // Start scanning
   mockLocalHomePlatform.triggerScan();
 
   t.is(mockLocalHomePlatform.getLocalDeviceIds().length, 1);
-  t.is(mockLocalHomePlatform.getLocalDeviceIds()[0], deviceId);
 });

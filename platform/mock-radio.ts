@@ -19,28 +19,6 @@ export class RemoteAddressInfo {
   }
 }
 
-// TODO(cjdaly) Builders
-export class DiscoveryData {
-  id: string;
-  model: string;
-  hwRev: string;
-  fwRev: string;
-  channels: number[];
-  constructor(
-    id: string,
-    model: string,
-    hwRev: string,
-    fwRev: string,
-    channels: number[]
-  ) {
-    this.id = id;
-    this.model = model;
-    this.hwRev = hwRev;
-    this.fwRev = fwRev;
-    this.channels = channels;
-  }
-}
-
 // Simulates a network with simple UDP messaging functionality
 export class MockNetwork {
   udpListeners: Map<string, MockUDPListener[]>;

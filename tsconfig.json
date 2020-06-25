@@ -7,5 +7,5 @@
     "lib": ["es2019", "DOM"],
     "esModuleInterop": true
   },
-  "include": ["common/*.ts", "home-app/*.ts"]
+  "include": ["platform/*.ts", "home-app/*.ts"]
 }

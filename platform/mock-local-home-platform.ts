@@ -6,13 +6,7 @@
  */
 
 /// <reference types="@google/local-home-sdk" />
-import {
-  MockNetwork,
-  MockUDPListener,
-  DiscoveryData,
-  RemoteAddressInfo,
-} from './mock-radio';
-import cbor from 'cbor';
+import { MockNetwork, MockUDPListener, RemoteAddressInfo } from './mock-radio';
 
 export enum ScanState {
   Unprovisioned,
@@ -51,13 +45,11 @@ export class UDPScanConfig implements ScanConfig {
 export class MockLocalHomePlatform implements MockUDPListener {
   private udpScanConfigs: UDPScanConfig[] = [];
   private network: MockNetwork;
-  private smarthomeApp: smarthome.App;
   private localDeviceIds: string[] = [];
 
   constructor(network: MockNetwork, udpScanConfigs: UDPScanConfig[]) {
     this.network = network;
     this.udpScanConfigs = udpScanConfigs;
-    this.smarthomeApp = new smarthome.App('0.0.1');
     this.setupUDP();
   }
 
@@ -107,11 +99,8 @@ export class MockLocalHomePlatform implements MockUDPListener {
       devices: [],
       rinfo,
     });
-    const identifyBuffer: Buffer = Buffer.from(identifyRequest, 'utf-8');
-
-    // TODO(cjdaly): send this to homeApp.identifyHandler
-    const discoveryData: DiscoveryData = cbor.decodeFirstSync(msg);
-    this.localDeviceIds.push(discoveryData.id);
+    // TODO(cjdaly): push the actual deviceId
+    this.localDeviceIds.push(identifyRequest);
   }
 
   public addUDPScanConfig(scanConfig: UDPScanConfig) {
