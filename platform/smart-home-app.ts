@@ -9,23 +9,15 @@ import { MockNetwork } from './mock-radio';
 
 export class AppStub implements smarthome.App {
   private version: string;
-  private deviceManager: smarthome.DeviceManager;
 
   constructor(version: string) {
     this.version = version;
-    //  Critical link of App with Local Home Platform
     //  Allows Local Home Platform to access handlers
     MockLocalHomePlatform.getInstance().setApp(this);
-    this.initializeDeviceManager();
-  }
-
-  private initializeDeviceManager(): void {
-    const mockNetwork: MockNetwork = MockLocalHomePlatform.getInstance().getMockNetwork();
-    this.deviceManager = new DeviceManagerStub(mockNetwork);
   }
 
   getDeviceManager(): smarthome.DeviceManager {
-    return this.deviceManager;
+    return MockLocalHomePlatform.getInstance().getDeviceManager();
   }
 
   //TODO(cjdaly) fill in implementation of the below methods

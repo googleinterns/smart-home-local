@@ -7,6 +7,7 @@
 
 /// <reference types="@google/local-home-sdk" />
 import { MockNetwork, MockUDPListener, RemoteAddressInfo } from './mock-radio';
+import { DeviceManagerStub } from './device-manager';
 
 export enum ScanState {
   Unprovisioned,
@@ -46,6 +47,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
   private udpScanConfigs: UDPScanConfig[] = [];
   private mockNetwork: MockNetwork;
   private app: smarthome.App;
+  private deviceManager: smarthome.DeviceManager;
   private localDeviceIds: string[] = [];
 
   private constructor() {
@@ -57,6 +59,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
     udpScanConfigs: UDPScanConfig[]
   ) {
     this.mockNetwork = mockNetwork;
+    this.deviceManager = new DeviceManagerStub(mockNetwork);
     this.udpScanConfigs = udpScanConfigs;
     this.setupUDP();
   }
@@ -71,6 +74,10 @@ export class MockLocalHomePlatform implements MockUDPListener {
       MockLocalHomePlatform.instance = new MockLocalHomePlatform();
     }
     return MockLocalHomePlatform.instance;
+  }
+
+  public getDeviceManager(): smarthome.DeviceManager {
+    return this.deviceManager;
   }
 
   public getLocalDeviceIds(): string[] {
