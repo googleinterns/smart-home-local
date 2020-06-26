@@ -3,18 +3,35 @@
  */
 /// <reference types="@google/local-home-sdk" />
 
-import { App } from '@google/local-home-sdk';
+import { DeviceManagerStub } from './device-manager';
+import { MockLocalHomePlatform } from './mock-local-home-platform';
+import { MockNetwork } from './mock-radio';
 
-//TODO(cjdaly) fill in implementation of these methods
-class AppStub implements App {
+export class AppStub implements smarthome.App {
   private version: string;
-  private deviceManager: any;
+  private deviceManager: smarthome.DeviceManager;
+  public identifyHandler: smarthome.IntentFlow.IdentifyHandler;
+  public executeHandler: smarthome.IntentFlow.ExecuteHandler;
+  public reachableDevicesHandler: smarthome.IntentFlow.ReachableDevicesHandler;
+
   constructor(version: string) {
     this.version = version;
+    //  Critical link of App with Local Home Platform
+    //  Allows Local Home Platform to access handlers
+    MockLocalHomePlatform.getInstance().setApp(this);
+    this.initializeDeviceManager();
   }
+
+  private initializeDeviceManager(): void {
+    const mockNetwork: MockNetwork = MockLocalHomePlatform.getInstance().getMockNetwork();
+    this.deviceManager = new DeviceManagerStub(mockNetwork);
+  }
+
   getDeviceManager(): smarthome.DeviceManager {
-    return;
+    return this.deviceManager;
   }
+
+  //TODO(cjdaly) fill in implementation of the below methods
   listen(): Promise<void> {
     return;
   }
