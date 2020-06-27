@@ -9,6 +9,9 @@ import { MockNetwork } from './mock-radio';
 
 export class AppStub implements smarthome.App {
   private version: string;
+  public identifyHandler: smarthome.IntentFlow.IdentifyHandler;
+  public executeHandler: smarthome.IntentFlow.ExecuteHandler;
+  public reachableDevicesHandler: smarthome.IntentFlow.ReachableDevicesHandler;
 
   constructor(version: string) {
     this.version = version;
@@ -20,19 +23,26 @@ export class AppStub implements smarthome.App {
     return MockLocalHomePlatform.getInstance().getDeviceManager();
   }
 
-  //TODO(cjdaly) fill in implementation of the below methods
   listen(): Promise<void> {
-    return;
+    return Promise.resolve();
   }
-  onExecute(handler: smarthome.IntentFlow.ExecuteHandler): this {
-    return;
+
+  public onExecute(executeHandler: smarthome.IntentFlow.ExecuteHandler): this {
+    this.executeHandler = executeHandler;
+    return this;
   }
-  onIdentify(handler: smarthome.IntentFlow.IdentifyHandler): this {
-    return;
-  }
-  onReachableDevices(
-    handler: smarthome.IntentFlow.ReachableDevicesHandler
+
+  public onIdentify(
+    identifyHandler: smarthome.IntentFlow.IdentifyHandler
   ): this {
-    return;
+    this.identifyHandler = identifyHandler;
+    return this;
+  }
+
+  public onReachableDevices(
+    reachableDevicesHandler: smarthome.IntentFlow.ReachableDevicesHandler
+  ): this {
+    this.reachableDevicesHandler = reachableDevicesHandler;
+    return this;
   }
 }

@@ -2,13 +2,15 @@
  * Injects the App stub into the global scope.
  * Bundled HomeApp cannot be loaded until this global is set.
  */
-import { App } from './smart-home-app';
+import { AppStub } from './smart-home-app';
 
-export function injectAppStub() {
-  (global as any).smarthome = {
-    App: App,
-  };
-}
+(global as any).smarthome = {
+  App: AppStub,
+  Intents: {
+    IDENTIFY: 'action.devices.IDENTIFY',
+    EXECUTE: 'action.devices.EXECUTE',
+  },
+};
 
 //TODO(cjdaly) find a cleaner way to do this.
 export function loadHomeApp(path: string) {

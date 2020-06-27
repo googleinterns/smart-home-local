@@ -3,11 +3,13 @@
  */
 /// <reference types="@google/local-home-sdk" />
 import test from 'ava';
+import cbor from 'cbor';
 import {
   UDPDevice,
   MockNetwork,
   RemoteAddressInfo,
 } from '../platform/mock-radio';
+import { loadHomeApp } from '../platform/stub-setup';
 import {
   MockLocalHomePlatform,
   UDPScanConfig,
@@ -40,20 +42,12 @@ test('udp-device-connects', (t) => {
   // Device data that mock device sends back
 
   const discoveryPort = 12345;
-  const discoveryData = JSON.stringify({
+  const discoveryData = {
     id: 'test-device-id',
     model: '2',
     hw_rev: '0.0.1',
     fw_rev: '1.2.3',
     channels: [discoveryPort],
-  });
-
-  // Sets global smarthome namespace
-  injectAppStub();
-
-  (global as any).smarthome.Intents = {
-    IDENTIFY: 'action.devices.IDENTIFY',
-    EXECUTE: 'action.devices.EXECUTE',
   };
 
   // Sample device response
@@ -65,7 +59,7 @@ test('udp-device-connects', (t) => {
     }
     console.debug('UDP received discovery payload:', msg, 'from:', rinfo);
 
-    const discoveryBuffer = Buffer.from(discoveryData);
+    const discoveryBuffer = cbor.encode(discoveryData);
 
     // TODO(cjdaly) Add error path
     mockNetwork.sendUDPMessage(
@@ -84,8 +78,10 @@ test('udp-device-connects', (t) => {
     scanConfig.broadcastAddress
   );
 
+  loadHomeApp('../home-app/bundle');
+
   // Start scanning
   mockLocalHomePlatform.triggerScan();
 
-  t.is(mockLocalHomePlatform.getLocalDeviceIds().length, 1);
+  t.pass();
 });

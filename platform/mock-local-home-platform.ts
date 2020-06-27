@@ -8,6 +8,7 @@
 /// <reference types="@google/local-home-sdk" />
 import { MockNetwork, MockUDPListener, RemoteAddressInfo } from './mock-radio';
 import { DeviceManagerStub } from './device-manager';
+import { AppStub } from './smart-home-app';
 
 export enum ScanState {
   Unprovisioned,
@@ -46,7 +47,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
 
   private udpScanConfigs: UDPScanConfig[] = [];
   private mockNetwork: MockNetwork;
-  private app: smarthome.App;
+  private app: AppStub;
   private deviceManager: smarthome.DeviceManager;
   private localDeviceIds: string[] = [];
 
@@ -62,7 +63,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
     this.setupUDP();
   }
 
-  public setApp(app: smarthome.App) {
+  public setApp(app: AppStub) {
     this.app = app;
   }
 
@@ -80,10 +81,6 @@ export class MockLocalHomePlatform implements MockUDPListener {
 
   public getLocalDeviceIds(): string[] {
     return this.localDeviceIds;
-  }
-
-  public getMockNetwork(): MockNetwork {
-    return this.mockNetwork;
   }
 
   private setupUDP() {
@@ -106,19 +103,33 @@ export class MockLocalHomePlatform implements MockUDPListener {
       scanConfig.broadcastAddress
     );
   }
+  private isPromise<RS>(response: RS | Promise<RS>): response is Promise<RS> {
+    return (response as Promise<RS>).then !== undefined;
+  }
+
+  private async processIntentResponse<RS>(
+    response: RS | Promise<RS>
+  ): Promise<RS> {
+    if (this.isPromise<RS>(response)) {
+      return response;
+    } else {
+      return Promise.resolve(response);
+    }
+  }
 
   // Establish fulfillment path using app code
   onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): void {
     console.log('received discovery payload:', msg, 'from:', rinfo);
-    const identifyRequest: string = JSON.stringify({
+
+    const identifyRequest: smarthome.IntentFlow.IdentifyRequest = {
       requestId: 'request-id',
       inputs: [
         {
-          intent: 'action.devices.IDENTIFY',
+          intent: smarthome.Intents.IDENTIFY,
           payload: {
             device: {
               radioTypes: [],
-              udpScanData: msg.toString('hex'),
+              udpScanData: { data: msg.toString('hex') },
             },
             structureData: {},
             params: {},
@@ -126,10 +137,15 @@ export class MockLocalHomePlatform implements MockUDPListener {
         },
       ],
       devices: [],
-      rinfo,
+    };
+
+    this.processIntentResponse<smarthome.IntentFlow.IdentifyResponse>(
+      this.app.identifyHandler(identifyRequest)
+    ).then((identifyResponse: smarthome.IntentFlow.IdentifyResponse) => {
+      console.log('Recieved IdentifyResponse:' + identifyResponse);
+      const localDeviceId: string = identifyResponse.payload.device.id;
+      this.localDeviceIds.push(localDeviceId);
     });
-    // TODO(cjdaly): push the actual deviceId
-    this.localDeviceIds.push(identifyRequest);
   }
 
   public addUDPScanConfig(scanConfig: UDPScanConfig) {
