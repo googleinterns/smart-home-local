@@ -34,10 +34,17 @@ export class MockNetwork {
   ) {
     const key = address + ':' + port.toString();
     if (this.udpListeners.has(key)) {
-      this.udpListeners[key].push(listener);
+      const listeners = this.udpListeners.get(key);
+      if (listeners !== undefined) {
+        listeners.push(listener);
+      }
+      const tlisteners = this.udpListeners.get(key);
+      if (tlisteners !== undefined) {
+        console.log(tlisteners.length);
+      }
       return;
     }
-    this.udpListeners[key] = [listener];
+    this.udpListeners.set(key, [listener]);
   }
 
   public sendUDPMessage(
@@ -48,18 +55,27 @@ export class MockNetwork {
     fromAddress: string
   ) {
     const key = address + ':' + port.toString();
-    for (const listener of this.udpListeners[key]) {
-      const rinfo = {
-        port: fromPort,
-        address: fromAddress,
-      };
+    const listeners = this.udpListeners.get(key);
+    if (listeners === undefined) {
+      return;
+    }
+    for (const listener of listeners) {
+      const rinfo: RemoteAddressInfo = new RemoteAddressInfo(
+        fromAddress,
+        '',
+        fromPort,
+        0
+      );
       listener.onUDPMessage(msg, rinfo);
     }
   }
 }
 
 export class UDPDevice implements MockUDPListener {
-  private udpMessageAction: (msg: Buffer, rinfo: RemoteAddressInfo) => void;
+  private udpMessageAction: (
+    msg: Buffer,
+    rinfo: RemoteAddressInfo
+  ) => void = () => {};
 
   onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): void {
     this.udpMessageAction(msg, rinfo);
