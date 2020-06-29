@@ -142,8 +142,8 @@ export class MockLocalHomePlatform implements MockUDPListener {
     this.processIntentResponse<smarthome.IntentFlow.IdentifyResponse>(
       this.app.identifyHandler(identifyRequest)
     ).then((identifyResponse: smarthome.IntentFlow.IdentifyResponse) => {
-      console.log('Recieved IdentifyResponse:' + identifyResponse);
       const localDeviceId: string = identifyResponse.payload.device.id;
+      console.log('Registering localDeviceId: ' + localDeviceId);
       this.localDeviceIds.push(localDeviceId);
     });
   }
