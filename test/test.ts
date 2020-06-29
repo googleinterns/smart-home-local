@@ -17,7 +17,7 @@ import {
 } from '../platform/mock-local-home-platform';
 
 // Tests a UDP identify flow end-to-end
-test('udp-device-connects', (t) => {
+test('udp-device-connects', async (t) => {
   // First, create a scan configuration
   const scanConfig = new UDPScanConfig(
     ScanState.Unprovisioned,
@@ -43,7 +43,7 @@ test('udp-device-connects', (t) => {
 
   const discoveryPort = 12345;
   const discoveryData = {
-    id: 'test-device-id',
+    id: deviceId,
     model: '2',
     hw_rev: '0.0.1',
     fw_rev: '1.2.3',
@@ -80,8 +80,18 @@ test('udp-device-connects', (t) => {
 
   loadHomeApp('../home-app/bundle');
 
+  const connectedDeviceId = new Promise<string>((resolve, reject) => {
+    mockLocalHomePlatform.addOnNewDeviceIdRegistered(
+      (localDeviceId: string) => {
+        resolve(localDeviceId);
+      }
+    );
+  });
+
   // Start scanning
   mockLocalHomePlatform.triggerScan();
 
-  t.pass();
+  t.is(await connectedDeviceId, deviceId);
+  t.is(mockLocalHomePlatform.getLocalDeviceIds().length, 1);
+  t.is(mockLocalHomePlatform.getLocalDeviceIds()[0], deviceId);
 });

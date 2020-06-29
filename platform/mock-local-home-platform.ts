@@ -50,6 +50,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
   private app: AppStub;
   private deviceManager: smarthome.DeviceManager;
   private localDeviceIds: string[] = [];
+  private newDeviceRegisteredActions: ((localDeviceId: string) => void)[] = [];
 
   private constructor() {}
 
@@ -65,6 +66,18 @@ export class MockLocalHomePlatform implements MockUDPListener {
 
   public setApp(app: AppStub) {
     this.app = app;
+  }
+
+  public addOnNewDeviceIdRegistered(
+    newDeviceRegisteredAction: (localDeviceId: string) => void
+  ) {
+    this.newDeviceRegisteredActions.push(newDeviceRegisteredAction);
+  }
+
+  private onNewDeviceIdRegistered(localDeviceId: string) {
+    this.newDeviceRegisteredActions.forEach((newDeviceRegisteredAction) => {
+      newDeviceRegisteredAction(localDeviceId);
+    });
   }
 
   //  Singleton getter
@@ -107,9 +120,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
     return (response as Promise<RS>).then !== undefined;
   }
 
-  private async processIntentResponse<RS>(
-    response: RS | Promise<RS>
-  ): Promise<RS> {
+  private processIntentResponse<RS>(response: RS | Promise<RS>): Promise<RS> {
     if (this.isPromise<RS>(response)) {
       return response;
     } else {
@@ -145,6 +156,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
       const localDeviceId: string = identifyResponse.payload.device.id;
       console.log('Registering localDeviceId: ' + localDeviceId);
       this.localDeviceIds.push(localDeviceId);
+      this.onNewDeviceIdRegistered(localDeviceId);
     });
   }
 
