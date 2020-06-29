@@ -50,9 +50,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
   private deviceManager: smarthome.DeviceManager;
   private localDeviceIds: string[] = [];
 
-  private constructor() {
-    this.setupUDP();
-  }
+  private constructor() {}
 
   public initializeRadio(
     mockNetwork: MockNetwork,
@@ -64,7 +62,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
     this.setupUDP();
   }
 
-  public setApp(app: smarthome.App){
+  public setApp(app: smarthome.App) {
     this.app = app;
   }
 
