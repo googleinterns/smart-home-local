@@ -47,9 +47,9 @@ export class MockLocalHomePlatform implements MockUDPListener {
 
   private udpScanConfigs: UDPScanConfig[] = [];
   private mockNetwork: MockNetwork;
-  private app: AppStub;
   private deviceManager: smarthome.DeviceManager;
-  private localDeviceIds: string[] = [];
+  private app: AppStub;
+  private localDeviceIds: Map<string, string> = new Map<string, string>();
   private newDeviceRegisteredActions: ((localDeviceId: string) => void)[] = [];
 
   private constructor() {}
@@ -59,7 +59,6 @@ export class MockLocalHomePlatform implements MockUDPListener {
     udpScanConfigs: UDPScanConfig[]
   ) {
     this.mockNetwork = mockNetwork;
-    this.deviceManager = new DeviceManagerStub(mockNetwork);
     this.udpScanConfigs = udpScanConfigs;
     this.setupUDP();
   }
@@ -68,15 +67,17 @@ export class MockLocalHomePlatform implements MockUDPListener {
     this.app = app;
   }
 
-  public addOnNewDeviceIdRegistered(
-    newDeviceRegisteredAction: (localDeviceId: string) => void
-  ) {
-    this.newDeviceRegisteredActions.push(newDeviceRegisteredAction);
-  }
-
   private onNewDeviceIdRegistered(localDeviceId: string) {
     this.newDeviceRegisteredActions.forEach((newDeviceRegisteredAction) => {
       newDeviceRegisteredAction(localDeviceId);
+    });
+  }
+
+  public async getNextDeviceIdRegistered(): Promise<string> {
+    return new Promise((resolve) => {
+      this.newDeviceRegisteredActions.push((localDeviceId) => {
+        resolve(localDeviceId);
+      });
     });
   }
 
@@ -92,7 +93,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
     return this.deviceManager;
   }
 
-  public getLocalDeviceIds(): string[] {
+  public getLocalDeviceIdMap(): Map<string, string> {
     return this.localDeviceIds;
   }
 
@@ -116,21 +117,11 @@ export class MockLocalHomePlatform implements MockUDPListener {
       scanConfig.broadcastAddress
     );
   }
-  private isPromise<RS>(response: RS | Promise<RS>): response is Promise<RS> {
-    return (response as Promise<RS>).then !== undefined;
-  }
-
-  private processIntentResponse<RS>(response: RS | Promise<RS>): Promise<RS> {
-    if (this.isPromise<RS>(response)) {
-      return response;
-    } else {
-      return Promise.resolve(response);
-    }
-  }
 
   // Establish fulfillment path using app code
-  onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): void {
+  async onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): Promise<void> {
     console.log('received discovery payload:', msg, 'from:', rinfo);
+    console.log(smarthome);
 
     const identifyRequest: smarthome.IntentFlow.IdentifyRequest = {
       requestId: 'request-id',
@@ -150,14 +141,14 @@ export class MockLocalHomePlatform implements MockUDPListener {
       devices: [],
     };
 
-    this.processIntentResponse<smarthome.IntentFlow.IdentifyResponse>(
-      this.app.identifyHandler(identifyRequest)
-    ).then((identifyResponse: smarthome.IntentFlow.IdentifyResponse) => {
-      const localDeviceId: string = identifyResponse.payload.device.id;
-      console.log('Registering localDeviceId: ' + localDeviceId);
-      this.localDeviceIds.push(localDeviceId);
-      this.onNewDeviceIdRegistered(localDeviceId);
-    });
+    const identifyResponse: smarthome.IntentFlow.IdentifyResponse = await this.app.identifyHandler(
+      identifyRequest
+    );
+
+    const device = identifyResponse.payload.device;
+    console.log('Registering localDeviceId: ' + device.verificationId);
+    this.localDeviceIds.set(device.id, device.verificationId);
+    this.onNewDeviceIdRegistered(device.verificationId);
   }
 
   public addUDPScanConfig(scanConfig: UDPScanConfig) {

@@ -1,7 +1,6 @@
 /*
  * Tests to verify stub behaviors
  */
-/// <reference types="@google/local-home-sdk" />
 import test from 'ava';
 import cbor from 'cbor';
 import {
@@ -16,7 +15,6 @@ import {
   ScanState,
 } from '../platform/mock-local-home-platform';
 
-// Tests a UDP identify flow end-to-end
 test('udp-device-connects', async (t) => {
   // First, create a scan configuration
   const scanConfig = new UDPScanConfig(
@@ -80,18 +78,15 @@ test('udp-device-connects', async (t) => {
 
   loadHomeApp('../home-app/bundle');
 
-  const connectedDeviceId = new Promise<string>((resolve, reject) => {
-    mockLocalHomePlatform.addOnNewDeviceIdRegistered(
-      (localDeviceId: string) => {
-        resolve(localDeviceId);
-      }
-    );
-  });
+  const connectedDeviceId = mockLocalHomePlatform.getNextDeviceIdRegistered();
 
   // Start scanning
   mockLocalHomePlatform.triggerScan();
 
   t.is(await connectedDeviceId, deviceId);
-  t.is(mockLocalHomePlatform.getLocalDeviceIds().length, 1);
-  t.is(mockLocalHomePlatform.getLocalDeviceIds()[0], deviceId);
+  t.is(mockLocalHomePlatform.getLocalDeviceIdMap().size, 1);
+  t.is(
+    mockLocalHomePlatform.getLocalDeviceIdMap().values().next().value,
+    deviceId
+  );
 });

@@ -9,11 +9,6 @@ export class DeviceManagerStub implements smarthome.DeviceManager {
   deviceId: string;
   error: boolean;
   commands: smarthome.DataFlow.TcpRequestData[] = [];
-  private mockNetwork: MockNetwork;
-
-  constructor(mockNetwork: MockNetwork) {
-    this.mockNetwork = mockNetwork;
-  }
 
   public send(
     command: smarthome.DataFlow.TcpRequestData
