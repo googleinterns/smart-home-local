@@ -15,6 +15,7 @@ import {
   ScanState,
 } from '../platform/mock-local-home-platform';
 
+// Tests a UDP identify flow end-to-end
 test('udp-device-connects', async (t) => {
   // First, create a scan configuration
   const scanConfig = new UDPScanConfig(

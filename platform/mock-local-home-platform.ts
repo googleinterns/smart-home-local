@@ -47,7 +47,6 @@ export class MockLocalHomePlatform implements MockUDPListener {
 
   private udpScanConfigs: UDPScanConfig[] = [];
   private mockNetwork: MockNetwork;
-  private deviceManager: smarthome.DeviceManager;
   private app: AppStub;
   private localDeviceIds: Map<string, string> = new Map<string, string>();
   private newDeviceRegisteredActions: ((localDeviceId: string) => void)[] = [];

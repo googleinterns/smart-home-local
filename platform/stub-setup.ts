@@ -2,7 +2,6 @@
  * Injects the App stub into the global scope.
  * Bundled HomeApp cannot be loaded until this global is set.
  */
-/// <reference types="@google/local-home-sdk" />
 import { AppStub } from './smart-home-app';
 
 (global as any).smarthome = {

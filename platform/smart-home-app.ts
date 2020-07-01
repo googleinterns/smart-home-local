@@ -3,9 +3,7 @@
  */
 /// <reference types="@google/local-home-sdk" />
 
-import { DeviceManagerStub } from './device-manager';
 import { MockLocalHomePlatform } from './mock-local-home-platform';
-import { MockNetwork } from './mock-radio';
 
 export class AppStub implements smarthome.App {
   private version: string;
