@@ -6,27 +6,27 @@
 import { App } from '@google/local-home-sdk';
 
 //TODO(cjdaly) fill in implementation of these methods
-class AppStub implements App {
+export class AppStub implements App {
   private version: string;
   private deviceManager: any;
   constructor(version: string) {
     this.version = version;
   }
   getDeviceManager(): smarthome.DeviceManager {
-    return;
+    return this.deviceManager;
   }
   listen(): Promise<void> {
-    return;
+    return Promise.resolve();
   }
   onExecute(handler: smarthome.IntentFlow.ExecuteHandler): this {
-    return;
+    return this;
   }
   onIdentify(handler: smarthome.IntentFlow.IdentifyHandler): this {
-    return;
+    return this;
   }
   onReachableDevices(
     handler: smarthome.IntentFlow.ReachableDevicesHandler
   ): this {
-    return;
+    return this;
   }
 }

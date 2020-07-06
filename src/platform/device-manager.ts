@@ -4,22 +4,21 @@
  **/
 /// <reference types="@google/local-home-sdk" />
 
-import { DeviceManager } from "@google/local-home-sdk";
+import { DeviceManager } from '@google/local-home-sdk';
 
-export class DeviceManagerStub implements DeviceManager{
-
+export class DeviceManagerStub implements DeviceManager {
   markPending(request: smarthome.IntentRequest): Promise<void> {
     //TODO(cjdaly) implementation
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 
   getProxyInfo(id: string): smarthome.ProxyInfo {
     //TODO(cjdaly) implementation
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 
-  deviceId: string;
-  error: boolean;
+  deviceId: string = '';
+  error: boolean = true;
   commands: smarthome.DataFlow.TcpRequestData[] = [];
   public send(
     command: smarthome.DataFlow.TcpRequestData
@@ -31,4 +30,4 @@ export class DeviceManagerStub implements DeviceManager{
     //TODO(cjdaly) build a proper CommandSuccess
     return Promise.resolve(new smarthome.DataFlow.HttpRequestData());
   }
-};
+}

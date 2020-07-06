@@ -1,18 +1,19 @@
 /*
- * Tests to verify stub behaviors
+ * Example tests against stubs
  */
 /// <reference types="@google/local-home-sdk" />
+/// <reference types="@types/node" />
 import test from 'ava';
 import {
   UDPDevice,
   MockNetwork,
   RemoteAddressInfo,
-} from '../platform/mock-radio';
+} from '../../src/platform/mock-radio';
 import {
   MockLocalHomePlatform,
   UDPScanConfig,
   ScanState,
-} from '../platform/mock-local-home-platform';
+} from '../../src/platform/mock-local-home-platform';
 
 // Tests a UDP identify flow end-to-end
 test('udp-device-connects', (t) => {

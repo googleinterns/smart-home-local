@@ -34,15 +34,7 @@ export class MockNetwork {
   ) {
     const key = address + ':' + port.toString();
     if (this.udpListeners.has(key)) {
-      const listeners = this.udpListeners.get(key);
-      if (listeners !== undefined) {
-        listeners.push(listener);
-      }
-      const tlisteners = this.udpListeners.get(key);
-      if (tlisteners !== undefined) {
-        console.log(tlisteners.length);
-      }
-      return;
+      this.udpListeners.get(key)!.push(listener);
     }
     this.udpListeners.set(key, [listener]);
   }
