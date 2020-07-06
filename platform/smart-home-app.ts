@@ -22,6 +22,7 @@ export class AppStub implements smarthome.App {
   }
 
   listen(): Promise<void> {
+    MockLocalHomePlatform.getInstance().notifyHomeAppReady();
     return Promise.resolve();
   }
 

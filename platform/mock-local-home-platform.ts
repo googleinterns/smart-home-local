@@ -51,6 +51,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
   private app: AppStub;
   private localDeviceIds: Map<string, string> = new Map<string, string>();
   private newDeviceRegisteredActions: ((localDeviceId: string) => void)[] = [];
+  private isHomeAppReady: boolean = false;
 
   private constructor() {}
 
@@ -79,6 +80,14 @@ export class MockLocalHomePlatform implements MockUDPListener {
         resolve(localDeviceId);
       });
     });
+  }
+
+  public getIsHomeAppReady(): boolean {
+    return this.isHomeAppReady;
+  }
+
+  public notifyHomeAppReady(): void {
+    this.isHomeAppReady = true;
   }
 
   //  Singleton getter

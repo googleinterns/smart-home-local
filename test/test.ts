@@ -79,6 +79,8 @@ test('udp-device-connects', async (t) => {
 
   loadHomeApp('../home-app/bundle');
 
+  t.is(mockLocalHomePlatform.getIsHomeAppReady(), true);
+
   const connectedDeviceId = mockLocalHomePlatform.getNextDeviceIdRegistered();
 
   // Start scanning
