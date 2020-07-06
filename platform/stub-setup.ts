@@ -4,14 +4,19 @@
  */
 import { AppStub } from './smart-home-app';
 
-(global as any).smarthome = {
+const smarthomeStub: {
+  App: typeof smarthome.App;
+  Intents: { [key in keyof typeof smarthome.Intents]: string };
+} = {
   App: AppStub,
   Intents: {
     EXECUTE: 'action.devices.EXECUTE',
     IDENTIFY: 'action.devices.IDENTIFY',
-    REACHABLE_DEVICES: 'action.devices.REACHABLE_DEVICES',
+    REACHABLE_DEVICES: 'action.devices.REACHABLE_DEVICES'
   },
 };
+
+(global as any).smarthome = smarthomeStub;
 
 //TODO(cjdaly) find a cleaner way to do this.
 export function loadHomeApp(path: string) {
