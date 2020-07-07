@@ -7,7 +7,6 @@
 
 /// <reference types="@google/local-home-sdk" />
 import { MockNetwork, MockUDPListener, RemoteAddressInfo } from './mock-radio';
-import { DeviceManagerStub } from './device-manager';
 import { AppStub } from './smart-home-app';
 
 export enum ScanState {
@@ -116,17 +115,6 @@ export class MockLocalHomePlatform implements MockUDPListener {
     });
   }
 
-  private sendUDPBroadcast(scanConfig: UDPScanConfig) {
-    const packetBuffer = Buffer.from(scanConfig.discoveryPacket, 'hex');
-    this.mockNetwork.sendUDPMessage(
-      packetBuffer,
-      scanConfig.broadcastPort,
-      scanConfig.broadcastAddress,
-      scanConfig.listenPort,
-      scanConfig.broadcastAddress
-    );
-  }
-
   // Establish fulfillment path using app code
   async onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): Promise<void> {
     console.log('received discovery payload:', msg, 'from:', rinfo);
@@ -158,16 +146,5 @@ export class MockLocalHomePlatform implements MockUDPListener {
     console.log('Registering localDeviceId: ' + device.verificationId);
     this.localDeviceIds.set(device.id, device.verificationId);
     this.onNewDeviceIdRegistered(device.verificationId);
-  }
-
-  public addUDPScanConfig(scanConfig: UDPScanConfig) {
-    this.udpScanConfigs.push(scanConfig);
-  }
-
-  public triggerScan() {
-    this.udpScanConfigs.forEach((udpScanConfig) => {
-      this.sendUDPBroadcast(udpScanConfig);
-    });
-    // TODO(cjdaly) other scans
   }
 }

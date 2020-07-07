@@ -27,7 +27,7 @@ export class MockNetwork {
     this.udpListeners = new Map<string, MockUDPListener[]>();
   }
 
-  registerUDPListener(
+  public registerUDPListener(
     listener: MockUDPListener,
     port: number,
     address: string
@@ -58,16 +58,43 @@ export class MockNetwork {
   }
 }
 
-export class UDPDevice implements MockUDPListener {
-  private udpMessageAction: (msg: Buffer, rinfo: RemoteAddressInfo) => void;
+export class UDPDevice {
+  private deviceId: string;
+  private port: number;
+  private address: string;
+  private network: MockNetwork;
 
-  onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): void {
-    this.udpMessageAction(msg, rinfo);
+  public constructor(
+    deviceId: string,
+    network: MockNetwork,
+    port: number,
+    address: string
+  ) {
+    this.deviceId = deviceId;
+    this.network = network;
+    this.port = port;
+    this.address = address;
   }
 
-  setUDPMessageAction(
-    messageAction: (msg: Buffer, rinfo: RemoteAddressInfo) => void
-  ) {
-    this.udpMessageAction = messageAction;
+  public getDeviceId(): string {
+    return this.deviceId;
+  }
+
+  public getDevicePort(): number {
+    return this.port;
+  }
+
+  public triggerIdentify(
+    discoveryBuffer: Buffer,
+    discoveryPort: number,
+    disvoceryAddress: string
+  ): void {
+    this.network.sendUDPMessage(
+      discoveryBuffer,
+      discoveryPort,
+      disvoceryAddress,
+      this.port,
+      this.address
+    );
   }
 }

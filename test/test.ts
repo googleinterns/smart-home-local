@@ -3,11 +3,7 @@
  */
 import test from 'ava';
 import cbor from 'cbor';
-import {
-  UDPDevice,
-  MockNetwork,
-  RemoteAddressInfo,
-} from '../platform/mock-radio';
+import { UDPDevice, MockNetwork } from '../platform/mock-radio';
 import { loadHomeApp } from '../platform/stub-setup';
 import {
   MockLocalHomePlatform,
@@ -17,13 +13,16 @@ import {
 
 // Tests a UDP identify flow end-to-end
 test('udp-device-connects', async (t) => {
+  // Common address for all UDP messaging
+  const updAddress: string = '255.255.255.255';
+
   // First, create a scan configuration
-  const scanConfig = new UDPScanConfig(
+  const scanConfig: UDPScanConfig = new UDPScanConfig(
     ScanState.Unprovisioned,
-    '255.255.255.255',
+    updAddress,
     3311,
-    3312,
-    'A5A5A5A5'
+    3322,
+    'A5A5A5'
   );
 
   // Mock a UDP Network
@@ -31,65 +30,41 @@ test('udp-device-connects', async (t) => {
 
   // Mock the Local Home Platform
   const mockLocalHomePlatform = MockLocalHomePlatform.getInstance();
-
   mockLocalHomePlatform.initializeRadio(mockNetwork, [scanConfig]);
 
-  // Mock a UDP Device
-  const mockDevice = new UDPDevice();
-
-  const deviceId = 'test-device-id';
-  // Device data that mock device sends back
-
-  const discoveryPort = 12345;
-  const discoveryData = {
-    id: deviceId,
-    model: '2',
-    hw_rev: '0.0.1',
-    fw_rev: '1.2.3',
-    channels: [discoveryPort],
-  };
-
-  // Sample device response
-  mockDevice.setUDPMessageAction((msg: Buffer, rinfo: RemoteAddressInfo) => {
-    const packetBuffer = Buffer.from(scanConfig.discoveryPacket, 'hex');
-    if (msg.compare(packetBuffer) !== 0) {
-      console.warn('UDP received unknown payload:', msg, 'from:', rinfo);
-      return;
-    }
-    console.debug('UDP received discovery payload:', msg, 'from:', rinfo);
-
-    const discoveryBuffer = cbor.encode(discoveryData);
-
-    // TODO(cjdaly) Add error path
-    mockNetwork.sendUDPMessage(
-      discoveryBuffer,
-      rinfo.port,
-      rinfo.address,
-      discoveryPort,
-      scanConfig.broadcastAddress
-    );
-  });
-
-  //Mock network needs to listen for device response
-  mockNetwork.registerUDPListener(
-    mockDevice,
-    scanConfig.broadcastPort,
-    scanConfig.broadcastAddress
+  const mockDevice = new UDPDevice(
+    'test-device-id',
+    mockNetwork,
+    12345,
+    updAddress
   );
 
-  loadHomeApp('../home-app/bundle');
+  // Load HomeApp and ensure
+  loadHomeApp('../bundle');
 
+  // Assert listen() was called and handlers were loaded
   t.is(mockLocalHomePlatform.isHomeAppReady(), true);
 
-  const connectedDeviceId = mockLocalHomePlatform.getNextDeviceIdRegistered();
+  // Create promise to catch next deviceId registered
+  const connectedDeviceId: Promise<string> = mockLocalHomePlatform.getNextDeviceIdRegistered();
 
-  // Start scanning
-  mockLocalHomePlatform.triggerScan();
+  // Trigger Identify message to be sent to the Local Home Platform's port
+  mockDevice.triggerIdentify(
+    cbor.encode({
+      id: 'test-device-id',
+      model: '2',
+      hw_rev: '0.0.1',
+      fw_rev: '1.2.3',
+      channels: [12345],
+    }),
+    scanConfig.listenPort,
+    updAddress
+  );
 
-  t.is(await connectedDeviceId, deviceId);
+  t.is(await connectedDeviceId, mockDevice.getDeviceId());
   t.is(mockLocalHomePlatform.getLocalDeviceIdMap().size, 1);
   t.is(
     mockLocalHomePlatform.getLocalDeviceIdMap().values().next().value,
-    deviceId
+    mockDevice.getDeviceId()
   );
 });
