@@ -118,7 +118,6 @@ export class MockLocalHomePlatform implements MockUDPListener {
   // Establish fulfillment path using app code
   async onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): Promise<void> {
     console.log('received discovery payload:', msg, 'from:', rinfo);
-    console.log(smarthome);
 
     const identifyRequest: smarthome.IntentFlow.IdentifyRequest = {
       requestId: 'request-id',
