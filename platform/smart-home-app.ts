@@ -3,30 +3,45 @@
  */
 /// <reference types="@google/local-home-sdk" />
 
-import { App } from '@google/local-home-sdk';
+import { MockLocalHomePlatform } from './mock-local-home-platform';
 
-//TODO(cjdaly) fill in implementation of these methods
-class AppStub implements App {
+export class AppStub implements smarthome.App {
   private version: string;
-  private deviceManager: any;
+  public identifyHandler: smarthome.IntentFlow.IdentifyHandler;
+  public executeHandler: smarthome.IntentFlow.ExecuteHandler;
+  public reachableDevicesHandler: smarthome.IntentFlow.ReachableDevicesHandler;
+
   constructor(version: string) {
     this.version = version;
+    //  Allows Local Home Platform to access handlers
+    MockLocalHomePlatform.getInstance().setApp(this);
   }
+
   getDeviceManager(): smarthome.DeviceManager {
-    return;
+    return MockLocalHomePlatform.getInstance().getDeviceManager();
   }
+
   listen(): Promise<void> {
-    return;
+    MockLocalHomePlatform.getInstance().notifyHomeAppReady();
+    return Promise.resolve();
   }
-  onExecute(handler: smarthome.IntentFlow.ExecuteHandler): this {
-    return;
+
+  public onExecute(executeHandler: smarthome.IntentFlow.ExecuteHandler): this {
+    this.executeHandler = executeHandler;
+    return this;
   }
-  onIdentify(handler: smarthome.IntentFlow.IdentifyHandler): this {
-    return;
-  }
-  onReachableDevices(
-    handler: smarthome.IntentFlow.ReachableDevicesHandler
+
+  public onIdentify(
+    identifyHandler: smarthome.IntentFlow.IdentifyHandler
   ): this {
-    return;
+    this.identifyHandler = identifyHandler;
+    return this;
+  }
+
+  public onReachableDevices(
+    reachableDevicesHandler: smarthome.IntentFlow.ReachableDevicesHandler
+  ): this {
+    this.reachableDevicesHandler = reachableDevicesHandler;
+    return this;
   }
 }

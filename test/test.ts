@@ -1,13 +1,14 @@
 /*
  * Tests to verify stub behaviors
  */
-/// <reference types="@google/local-home-sdk" />
 import test from 'ava';
+import cbor from 'cbor';
 import {
   UDPDevice,
   MockNetwork,
   RemoteAddressInfo,
 } from '../platform/mock-radio';
+import { loadHomeApp } from '../platform/stub-setup';
 import {
   MockLocalHomePlatform,
   UDPScanConfig,
@@ -15,7 +16,7 @@ import {
 } from '../platform/mock-local-home-platform';
 
 // Tests a UDP identify flow end-to-end
-test('udp-device-connects', (t) => {
+test('udp-device-connects', async (t) => {
   // First, create a scan configuration
   const scanConfig = new UDPScanConfig(
     ScanState.Unprovisioned,
@@ -25,12 +26,13 @@ test('udp-device-connects', (t) => {
     'A5A5A5A5'
   );
 
+  // Mock a UDP Network
   const mockNetwork = new MockNetwork();
 
   // Mock the Local Home Platform
-  const mockLocalHomePlatform = new MockLocalHomePlatform(mockNetwork, [
-    scanConfig,
-  ]);
+  const mockLocalHomePlatform = MockLocalHomePlatform.getInstance();
+
+  mockLocalHomePlatform.initializeRadio(mockNetwork, [scanConfig]);
 
   // Mock a UDP Device
   const mockDevice = new UDPDevice();
@@ -39,13 +41,13 @@ test('udp-device-connects', (t) => {
   // Device data that mock device sends back
 
   const discoveryPort = 12345;
-  const discoveryData = JSON.stringify({
-    id: 'test-device-id',
+  const discoveryData = {
+    id: deviceId,
     model: '2',
     hw_rev: '0.0.1',
     fw_rev: '1.2.3',
     channels: [discoveryPort],
-  });
+  };
 
   // Sample device response
   mockDevice.setUDPMessageAction((msg: Buffer, rinfo: RemoteAddressInfo) => {
@@ -56,7 +58,7 @@ test('udp-device-connects', (t) => {
     }
     console.debug('UDP received discovery payload:', msg, 'from:', rinfo);
 
-    const discoveryBuffer = Buffer.from(discoveryData);
+    const discoveryBuffer = cbor.encode(discoveryData);
 
     // TODO(cjdaly) Add error path
     mockNetwork.sendUDPMessage(
@@ -75,8 +77,19 @@ test('udp-device-connects', (t) => {
     scanConfig.broadcastAddress
   );
 
+  loadHomeApp('../home-app/bundle');
+
+  t.is(mockLocalHomePlatform.isHomeAppReady(), true);
+
+  const connectedDeviceId = mockLocalHomePlatform.getNextDeviceIdRegistered();
+
   // Start scanning
   mockLocalHomePlatform.triggerScan();
 
-  t.is(mockLocalHomePlatform.getLocalDeviceIds().length, 1);
+  t.is(await connectedDeviceId, deviceId);
+  t.is(mockLocalHomePlatform.getLocalDeviceIdMap().size, 1);
+  t.is(
+    mockLocalHomePlatform.getLocalDeviceIdMap().values().next().value,
+    deviceId
+  );
 });
