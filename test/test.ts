@@ -39,8 +39,8 @@ test('udp-device-connects', async (t) => {
     updAddress
   );
 
-  // Load HomeApp and ensure
-  loadHomeApp('../bundle');
+  // Run Home App and set handlers
+  // loadHomeApp('../bundle');
 
   // Assert listen() was called and handlers were loaded
   t.is(mockLocalHomePlatform.isHomeAppReady(), true);
