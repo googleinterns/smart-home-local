@@ -2,9 +2,9 @@
   "name": "local-home-testing",
   "version": "0.0.1",
   "description": "Testing environment for Local Fulfillment Apps. Mocks behavior of Local Home Platform.",
-  "author": "Google",
+  "author": "Google LLC",
   "private": true,
-  "main": "./src/index.ts",
+  "main": "./build/src/index.js",
   "license": "Apache-2.0",
   "scripts": {
     "compile": "tsc",
@@ -17,6 +17,7 @@
     "@types/node": "^13.11.1",
     "ava": "^3.10.0",
     "tslint": "^6.1.2",
+    "prettier": "^2.0.5",
     "typescript": "^3.8.3",
     "gts": "^2.0.2"
   },

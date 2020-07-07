@@ -17,17 +17,9 @@ export class DeviceManagerStub implements DeviceManager {
     throw new Error('Method not implemented.');
   }
 
-  deviceId: string = '';
-  error: boolean = true;
-  commands: smarthome.DataFlow.TcpRequestData[] = [];
   public send(
     command: smarthome.DataFlow.TcpRequestData
   ): Promise<smarthome.DataFlow.CommandSuccess> {
-    if (this.error) {
-      return Promise.reject(this.error);
-    }
-    this.commands.push(command);
-    //TODO(cjdaly) build a proper CommandSuccess
-    return Promise.resolve(new smarthome.DataFlow.HttpRequestData());
+    throw new Error('Method not implemented.');
   }
 }
