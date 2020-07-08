@@ -46,9 +46,9 @@ export class MockLocalHomePlatform implements MockUDPListener {
   private static instance: MockLocalHomePlatform;
 
   private udpScanConfigs: UDPScanConfig[] = [];
-  private mockNetwork: MockNetwork;
-  private deviceManager: smarthome.DeviceManager;
-  private app: AppStub;
+  private mockNetwork!: MockNetwork;
+  private deviceManager!: smarthome.DeviceManager;
+  private app!: AppStub;
   private localDeviceIds: Map<string, string> = new Map<string, string>();
   private newDeviceRegisteredActions: ((localDeviceId: string) => void)[] = [];
   private homeAppReady: boolean = false;
@@ -156,8 +156,8 @@ export class MockLocalHomePlatform implements MockUDPListener {
 
     const device = identifyResponse.payload.device;
     console.log('Registering localDeviceId: ' + device.verificationId);
-    this.localDeviceIds.set(device.id, device.verificationId);
-    this.onNewDeviceIdRegistered(device.verificationId);
+    this.localDeviceIds.set(device.id, device.verificationId!);
+    this.onNewDeviceIdRegistered(device.verificationId!);
   }
 
   public addUDPScanConfig(scanConfig: UDPScanConfig) {

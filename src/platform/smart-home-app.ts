@@ -3,13 +3,13 @@
  */
 /// <reference types="@google/local-home-sdk" />
 
-import { MockLocalHomePlatform } from './mock-local-home-platform';
+import {MockLocalHomePlatform} from './mock-local-home-platform';
 
 export class AppStub implements smarthome.App {
   private version: string;
-  public identifyHandler: smarthome.IntentFlow.IdentifyHandler;
-  public executeHandler: smarthome.IntentFlow.ExecuteHandler;
-  public reachableDevicesHandler: smarthome.IntentFlow.ReachableDevicesHandler;
+  public identifyHandler!: smarthome.IntentFlow.IdentifyHandler;
+  public executeHandler!: smarthome.IntentFlow.ExecuteHandler;
+  public reachableDevicesHandler!: smarthome.IntentFlow.ReachableDevicesHandler;
 
   constructor(version: string) {
     this.version = version;

@@ -15,9 +15,10 @@ import {
   UDPScanConfig,
   ScanState,
 } from '../../src/platform/mock-local-home-platform';
+import {injectSmarthomeStubs} from '../../src/platform/stub-setup';
 
 // Tests a UDP identify flow end-to-end
-test('udp-device-connects', async (t) => {
+test('udp-device-connects', async t => {
   // First, create a scan configuration
   const scanConfig = new UDPScanConfig(
     ScanState.Unprovisioned,
@@ -78,7 +79,7 @@ test('udp-device-connects', async (t) => {
     scanConfig.broadcastAddress
   );
 
-  loadHomeApp('../home-app/bundle');
+  injectSmarthomeStubs();
 
   t.is(mockLocalHomePlatform.isHomeAppReady(), true);
 
