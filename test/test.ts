@@ -49,7 +49,7 @@ test('udp-device-connects', async (t) => {
   const connectedDeviceId: Promise<string> = mockLocalHomePlatform.getNextDeviceIdRegistered();
 
   // Trigger Identify message to be sent to the Local Home Platform's port
-  mockDevice.triggerIdentify(
+  mockDevice.sendDiscoveryBuffer(
     cbor.encode({
       id: 'test-device-id',
       model: '2',
