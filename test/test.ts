@@ -11,11 +11,11 @@ import {
   ScanState,
 } from '../platform/mock-local-home-platform';
 
+// Common address for all UDP messaging
+const updAddress: string = '255.255.255.255';
+
 // Tests a UDP identify flow end-to-end
 test('udp-device-connects', async (t) => {
-  // Common address for all UDP messaging
-  const updAddress: string = '255.255.255.255';
-
   // First, create a scan configuration
   const scanConfig: UDPScanConfig = new UDPScanConfig(
     ScanState.Unprovisioned,
@@ -57,8 +57,7 @@ test('udp-device-connects', async (t) => {
       fw_rev: '1.2.3',
       channels: [12345],
     }),
-    scanConfig.listenPort,
-    updAddress
+    scanConfig
   );
 
   t.is(await connectedDeviceId, mockDevice.getDeviceId());

@@ -2,6 +2,8 @@
  * Mock radio for interfacing with mock devices
  */
 
+import { UDPScanConfig } from './mock-local-home-platform';
+
 export interface MockUDPListener {
   onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): void;
 }
@@ -84,15 +86,19 @@ export class UDPDevice {
     return this.port;
   }
 
-  public triggerIdentify(
+  /**
+   * Sends a `discoveryBuffer` to the port specified in a `UDPScanConfig`
+   * @param discoveryBuffer
+   * @param scanConfig
+   */
+  public sendDiscoveryBuffer(
     discoveryBuffer: Buffer,
-    discoveryPort: number,
-    disvoceryAddress: string
+    scanConfig: UDPScanConfig
   ): void {
     this.network.sendUDPMessage(
       discoveryBuffer,
-      discoveryPort,
-      disvoceryAddress,
+      scanConfig.listenPort,
+      scanConfig.broadcastAddress,
       this.port,
       this.address
     );
