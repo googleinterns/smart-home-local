@@ -61,7 +61,7 @@ export class MockLocalHomePlatform {
 
   /**
    * Takes a `discoveryBuffer` and passes it to the fulfillment app in an `IdentifyRequest`
-   * @param discoveryBuffer
+   * @param discoveryBuffer  the buffer to be included in the `IdentifyRequest` scan data
    */
   public async triggerIdentify(discoveryBuffer: Buffer): Promise<void> {
     console.log('received discovery payload:', discoveryBuffer);
