@@ -1,22 +1,24 @@
 /*
- * Tests to verify stub behaviors
+ * Example tests against stubs
  */
+/// <reference types="@google/local-home-sdk" />
+/// <reference types="@types/node" />
 import test from 'ava';
 import cbor from 'cbor';
 import {
   UDPDevice,
   MockNetwork,
   RemoteAddressInfo,
-} from '../platform/mock-radio';
-import { loadHomeApp } from '../platform/stub-setup';
+} from '../../src/platform/mock-radio';
 import {
   MockLocalHomePlatform,
   UDPScanConfig,
   ScanState,
-} from '../platform/mock-local-home-platform';
+} from '../../src/platform/mock-local-home-platform';
+import {injectSmarthomeStubs} from '../../src/platform/stub-setup';
 
 // Tests a UDP identify flow end-to-end
-test('udp-device-connects', async (t) => {
+test('udp-device-connects', async t => {
   // First, create a scan configuration
   const scanConfig = new UDPScanConfig(
     ScanState.Unprovisioned,
@@ -77,7 +79,7 @@ test('udp-device-connects', async (t) => {
     scanConfig.broadcastAddress
   );
 
-  loadHomeApp('../home-app/bundle');
+  injectSmarthomeStubs();
 
   t.is(mockLocalHomePlatform.isHomeAppReady(), true);
 
