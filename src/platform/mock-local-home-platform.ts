@@ -130,11 +130,15 @@ export class MockLocalHomePlatform implements MockUDPListener {
   // Establish fulfillment path using app code
   async onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): Promise<void> {
     if (this.app === undefined) {
-      return;
+      throw new Error('Cannot trigger IdentifyRequest: App was undefined');
+    }
+    if (!this.isHomeAppReady()) {
+      throw new Error(
+        'Cannot trigger IdentifyRequest: listen() was not called'
+      );
     }
 
     console.log('received discovery payload:', msg, 'from:', rinfo);
-    console.log(smarthome);
 
     const identifyRequest: smarthome.IntentFlow.IdentifyRequest = {
       requestId: 'request-id',
@@ -154,12 +158,20 @@ export class MockLocalHomePlatform implements MockUDPListener {
       devices: [],
     };
 
+    if (this.app.identifyHandler === undefined) {
+      throw new Error(
+        'identifyHandler has not been set by the fulfillment HomeApp'
+      );
+    }
     const identifyResponse: smarthome.IntentFlow.IdentifyResponse = await this.app.identifyHandler(
       identifyRequest
     );
 
     const device = identifyResponse.payload.device;
     if (device.verificationId == null) {
+      throw new Error(
+        'Cannot register a localDeviceId: verficationId from IdentifyResponse was undefined'
+      );
     }
     console.log('Registering localDeviceId: ' + device.verificationId);
     this.localDeviceIds.set(device.id, device.verificationId);
