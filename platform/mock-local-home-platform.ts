@@ -1,51 +1,14 @@
 /*
  * Mock Local Home Platform class
- * - Interacts with bundled HomeApp
- * - Accepts scan config
- * - Interacts with virtual network
  */
 
 /// <reference types="@google/local-home-sdk" />
-import { MockNetwork, MockUDPListener, RemoteAddressInfo } from './mock-radio';
 import { AppStub } from './smart-home-app';
 
-export enum ScanState {
-  Unprovisioned,
-  Provisioned,
-}
-
-interface ScanConfig {
-  state: ScanState;
-}
-
-export class UDPScanConfig implements ScanConfig {
-  state: ScanState;
-  broadcastAddress: string;
-  listenPort: number;
-  broadcastPort: number;
-  discoveryPacket: string;
-  constructor(
-    state: ScanState,
-    broadcastAddress: string,
-    listenport: number,
-    broadcastPort: number,
-    discoveryPacket: string
-  ) {
-    this.state = state;
-    this.broadcastAddress = broadcastAddress;
-    this.broadcastPort = broadcastPort;
-    this.listenPort = listenport;
-    this.discoveryPacket = discoveryPacket;
-  }
-}
-
 // TODO(cjdaly): add other radio scan support
-export class MockLocalHomePlatform implements MockUDPListener {
+export class MockLocalHomePlatform {
   //  Singleton instance
   private static instance: MockLocalHomePlatform;
-
-  private udpScanConfigs: UDPScanConfig[] = [];
-  private mockNetwork: MockNetwork;
   private deviceManager: smarthome.DeviceManager;
   private app: AppStub;
   private localDeviceIds: Map<string, string> = new Map<string, string>();
@@ -54,17 +17,32 @@ export class MockLocalHomePlatform implements MockUDPListener {
 
   private constructor() {}
 
-  public initializeRadio(
-    mockNetwork: MockNetwork,
-    udpScanConfigs: UDPScanConfig[]
-  ) {
-    this.mockNetwork = mockNetwork;
-    this.udpScanConfigs = udpScanConfigs;
-    this.setupUDP();
-  }
-
   public setApp(app: AppStub) {
     this.app = app;
+  }
+
+  public isHomeAppReady(): boolean {
+    return this.homeAppReady;
+  }
+
+  public notifyHomeAppReady(): void {
+    this.homeAppReady = true;
+  }
+
+  public getDeviceManager(): smarthome.DeviceManager {
+    return this.deviceManager;
+  }
+
+  public getLocalDeviceIdMap(): Map<string, string> {
+    return this.localDeviceIds;
+  }
+
+  //  Singleton getter
+  public static getInstance(): MockLocalHomePlatform {
+    if (!MockLocalHomePlatform.instance) {
+      MockLocalHomePlatform.instance = new MockLocalHomePlatform();
+    }
+    return MockLocalHomePlatform.instance;
   }
 
   private onNewDeviceIdRegistered(localDeviceId: string) {
@@ -81,43 +59,12 @@ export class MockLocalHomePlatform implements MockUDPListener {
     });
   }
 
-  public isHomeAppReady(): boolean {
-    return this.homeAppReady;
-  }
-
-  public notifyHomeAppReady(): void {
-    this.homeAppReady = true;
-  }
-
-  //  Singleton getter
-  public static getInstance(): MockLocalHomePlatform {
-    if (!MockLocalHomePlatform.instance) {
-      MockLocalHomePlatform.instance = new MockLocalHomePlatform();
-    }
-    return MockLocalHomePlatform.instance;
-  }
-
-  public getDeviceManager(): smarthome.DeviceManager {
-    return this.deviceManager;
-  }
-
-  public getLocalDeviceIdMap(): Map<string, string> {
-    return this.localDeviceIds;
-  }
-
-  private setupUDP() {
-    this.udpScanConfigs.forEach((udpScanConfig) => {
-      this.mockNetwork.registerUDPListener(
-        this,
-        udpScanConfig.listenPort,
-        udpScanConfig.broadcastAddress
-      );
-    });
-  }
-
-  // Establish fulfillment path using app code
-  async onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): Promise<void> {
-    console.log('received discovery payload:', msg, 'from:', rinfo);
+  /**
+   * Takes a `discoveryBuffer` and passes it to the fulfillment app in an `IdentifyRequest`
+   * @param discoveryBuffer
+   */
+  public async triggerIdentify(discoveryBuffer: Buffer): Promise<void> {
+    console.log('received discovery payload:', discoveryBuffer);
 
     const identifyRequest: smarthome.IntentFlow.IdentifyRequest = {
       requestId: 'request-id',
@@ -127,7 +74,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
           payload: {
             device: {
               radioTypes: [],
-              udpScanData: { data: msg.toString('hex') },
+              udpScanData: { data: discoveryBuffer.toString('hex') },
             },
             structureData: {},
             params: {},
