@@ -66,6 +66,12 @@ export class MockLocalHomePlatform {
   public async triggerIdentify(discoveryBuffer: Buffer): Promise<void> {
     console.log('received discovery payload:', discoveryBuffer);
 
+    if (this.app == null) {
+      throw new Error(
+        'triggerIdentify() was called while the App was null.  App must first be set with setApp()'
+      );
+    }
+
     const identifyRequest: smarthome.IntentFlow.IdentifyRequest = {
       requestId: 'request-id',
       inputs: [
@@ -90,7 +96,7 @@ export class MockLocalHomePlatform {
 
     const device = identifyResponse.payload.device;
     if (device.verificationId == null) {
-      throw new Error("IdentifyResponse verificationId was null");
+      throw new Error('IdentifyResponse verificationId was null');
     }
     console.log('Registering localDeviceId: ' + device.verificationId);
     this.localDeviceIds.set(device.id, device.verificationId);
