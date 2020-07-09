@@ -36,7 +36,7 @@ test('udp-device-connects', async t => {
     // Trigger Identify message to be sent to the Local Home Platform's port
     mockLocalHomePlatform.triggerIdentify(
       cbor.encode({
-        id: mockDevice.getDeviceId,
+        id: mockDevice.getDeviceId(),
         model: '2',
         hw_rev: '0.0.1',
         fw_rev: '1.2.3',
@@ -57,4 +57,5 @@ test('udp-device-connects', async t => {
     mockLocalHomePlatform.getLocalDeviceIdMap().values().next().value,
     mockDevice.getDeviceId()
   );
+
 });
