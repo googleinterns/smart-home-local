@@ -1,17 +1,19 @@
 /*
- * Tests to verify stub behaviors
+ * Example tests against stubs
  */
+/// <reference types="@google/local-home-sdk" />
+/// <reference types="@types/node" />
 import test from 'ava';
 import cbor from 'cbor';
-import { UDPDevice, MockNetwork } from '../platform/mock-radio';
-import '../platform/stub-setup';
-import { MockLocalHomePlatform } from '../platform/mock-local-home-platform';
+import {UDPDevice, MockNetwork} from '../../src/platform/mock-radio';
+import {injectSmarthomeStubs} from '../../src/platform/stub-setup';
+import {MockLocalHomePlatform} from '../../src/platform/mock-local-home-platform';
 
 // Common address for all UDP messaging
 const updAddress: string = '255.255.255.255';
 
 // Tests a UDP identify flow end-to-end
-test('udp-device-connects', async (t) => {
+test('udp-device-connects', async t => {
   // Mock a UDP Network
   const mockNetwork = new MockNetwork();
 
@@ -25,9 +27,11 @@ test('udp-device-connects', async (t) => {
     updAddress
   );
 
+  injectSmarthomeStubs();
+
   // Assert listen() was called and handlers were loaded
   t.is(mockLocalHomePlatform.isHomeAppReady(), true);
-
+  injectSmarthomeStubs;
   try {
     // Trigger Identify message to be sent to the Local Home Platform's port
     mockLocalHomePlatform.triggerIdentify(
