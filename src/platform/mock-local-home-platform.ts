@@ -159,9 +159,11 @@ export class MockLocalHomePlatform implements MockUDPListener {
     );
 
     const device = identifyResponse.payload.device;
+    if (device.verificationId == null) {
+    }
     console.log('Registering localDeviceId: ' + device.verificationId);
-    this.localDeviceIds.set(device.id, device.verificationId!);
-    this.onNewDeviceIdRegistered(device.verificationId!);
+    this.localDeviceIds.set(device.id, device.verificationId);
+    this.onNewDeviceIdRegistered(device.verificationId);
   }
 
   public addUDPScanConfig(scanConfig: UDPScanConfig) {
