@@ -89,6 +89,9 @@ export class MockLocalHomePlatform {
     );
 
     const device = identifyResponse.payload.device;
+    if (device.verificationId == null) {
+      throw new Error("IdentifyResponse verificationId was null");
+    }
     console.log('Registering localDeviceId: ' + device.verificationId);
     this.localDeviceIds.set(device.id, device.verificationId);
     this.onNewDeviceIdRegistered(device.verificationId);
