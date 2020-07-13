@@ -48,7 +48,10 @@ export class MockLocalHomePlatform {
     return this.localDeviceIds;
   }
 
-  //  Singleton getter
+  /**
+   * Returns the static singleton instance, creating it if needed.
+   * @param resetState  Whether or not to force a new instance.  Useful for initializing tests.
+   */
   public static getInstance(
     resetState: boolean = false
   ): MockLocalHomePlatform {
