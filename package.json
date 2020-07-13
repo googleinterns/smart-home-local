@@ -9,21 +9,33 @@
   "scripts": {
     "compile": "tsc",
     "lint": "tslint --project .",
+    "test": "ava --verbose",
     "clean": "gts clean",
     "fix": "gts fix"
   },
   "devDependencies": {
+    "@ava/typescript": "^1.1.1",
     "@google/local-home-sdk": "^1.0.0",
     "@types/node": "^13.11.1",
     "ava": "^3.10.0",
     "tslint": "^6.1.2",
     "prettier": "^2.0.5",
     "typescript": "^3.8.3",
-    "gts": "^2.0.2"
+    "gts": "^2.0.2",
+    "esm": "^3.2.25"
   },
   "ava": {
-    "extensions": [
-      "ts"
-    ]
+    "files": [
+      "test/**/*",
+      "!test/example/**/*"
+    ],
+    "require": [
+      "esm"
+    ],
+    "typescript": {
+      "rewritePaths": {
+        "test/": "build/test/"
+      }
+    }
   }
 }
