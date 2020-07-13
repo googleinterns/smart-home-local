@@ -12,6 +12,7 @@ export class AppStub implements smarthome.App {
   public reachableDevicesHandler:
     | smarthome.IntentFlow.ReachableDevicesHandler
     | undefined;
+  private allHandlersSet: boolean = false;
 
   constructor(version: string) {
     this.version = version;
@@ -19,12 +20,16 @@ export class AppStub implements smarthome.App {
     MockLocalHomePlatform.getInstance().setApp(this);
   }
 
+  isAllHandlersSet(): boolean {
+    return this.allHandlersSet;
+  }
+
   getDeviceManager(): smarthome.DeviceManager {
     return MockLocalHomePlatform.getInstance().getDeviceManager();
   }
 
   listen(): Promise<void> {
-    MockLocalHomePlatform.getInstance().notifyHomeAppReady();
+    this.allHandlersSet = true;
     return Promise.resolve();
   }
 

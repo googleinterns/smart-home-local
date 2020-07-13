@@ -18,6 +18,10 @@ test.before(t => {
   injectSmarthomeStubs();
 });
 
+/**
+ * Tests that a `MockLocalHomePlatform` on its own throws an error.
+ * Identify functionality cannot continue if no App has been created.
+ */
 test('trigger-identify-with-undefined-app-throws', async t => {
   const mockLocalHomePlatform = MockLocalHomePlatform.getInstance(true);
   t.is(
@@ -30,6 +34,10 @@ test('trigger-identify-with-undefined-app-throws', async t => {
   );
 });
 
+/**
+ * Tests that `listen()` was called on the created App.
+ * This is a required flag that indicates handlers have been set.
+ */
 test('trigger-identify-without-listen-throws', async t => {
   const mockLocalHomePlatform = MockLocalHomePlatform.getInstance(true);
   const app: AppStub = new AppStub(APP_VERSION);
@@ -43,6 +51,10 @@ test('trigger-identify-without-listen-throws', async t => {
   );
 });
 
+/**
+ * Tests that the Identify handler was set on the `App` member.
+ * Otherwise, there is no processor for an `IdentifyRequest`.
+ */
 test('trigger-identify-with-undefined-handler-throws', async t => {
   const mockLocalHomePlatform = MockLocalHomePlatform.getInstance(true);
   const app: AppStub = new AppStub(APP_VERSION);
@@ -57,6 +69,9 @@ test('trigger-identify-with-undefined-handler-throws', async t => {
   );
 });
 
+/**
+ * Tests that the returned `IdentifyResponse` contains a verificationId.
+ */
 test('trigger-identify-with-undefined-verificationId-throws', async t => {
   const mockLocalHomePlatform = MockLocalHomePlatform.getInstance(true);
   const app: AppStub = new AppStub(APP_VERSION);
@@ -82,6 +97,9 @@ test('trigger-identify-with-undefined-verificationId-throws', async t => {
   );
 });
 
+/**
+ * Tests `triggerIdentify()` when all requirements are met
+ */
 test('trigger-identify-with-valid-state', async t => {
   const discoveryBuffer = Buffer.from('discovery buffer 123');
   const mockLocalHomePlatform = MockLocalHomePlatform.getInstance(true);
@@ -116,16 +134,23 @@ test('trigger-identify-with-valid-state', async t => {
   );
 });
 
+/**
+ * Tests that the Local Home Platform is reset when `getInstance()` flag is set
+ */
 test('trigger-identify-without-reset-state-throws', async t => {
   const oldPlatform = MockLocalHomePlatform.getInstance(true);
+  //Implicitly attaches to current `MockLocalHomePlatform` singleton instance
   const app: AppStub = new AppStub(APP_VERSION);
-  const mockLocalHomePlatform = MockLocalHomePlatform.getInstance(false);
+
+  //Resets the singleton instance
+  const mockLocalHomePlatform = MockLocalHomePlatform.getInstance(true);
+  //Now expecting no attached `App`
   t.is(
     (
       await t.throwsAsync<Error>(
         mockLocalHomePlatform.triggerIdentify(DISCOVERY_BUFFER)
       )
     ).message,
-    ERROR_LISTEN_NOT_CALLED
+    ERROR_UNDEFINED_APP
   );
 });

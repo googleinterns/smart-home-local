@@ -11,9 +11,10 @@ export const ERROR_UNDEFINED_APP: string =
 export const ERROR_LISTEN_NOT_CALLED: string =
   'Cannot trigger IdentifyRequest: listen() was not called';
 export const ERROR_UNDEFINED_IDENTIFYHANDLER: string =
-  'identifyhandler has not been set by the fulfillment homeapp';
+  'Cannot trigger IdentifyRequest: No Identify handler has been set by the fulfillment app';
 export const ERROR_UNDEFINED_VERIFICATIONID: string =
-  'verficationId from IdentifyResponse was undefined';
+  'Cannot trigger IdentifyRequest: The handler returned an IdentifyResponse ' + 
+  'with an undefined verificationId';
 
 // TODO(cjdaly): add other radio scan support
 export class MockLocalHomePlatform {
@@ -24,20 +25,11 @@ export class MockLocalHomePlatform {
   private app: AppStub | undefined;
   private localDeviceIds: Map<string, string> = new Map<string, string>();
   private newDeviceRegisteredActions: ((localDeviceId: string) => void)[] = [];
-  private homeAppReady: boolean = false;
 
   private constructor() {}
 
   public setApp(app: AppStub) {
     this.app = app;
-  }
-
-  public isHomeAppReady(): boolean {
-    return this.homeAppReady;
-  }
-
-  public notifyHomeAppReady(): void {
-    this.homeAppReady = true;
   }
 
   public getDeviceManager(): smarthome.DeviceManager {
@@ -67,6 +59,10 @@ export class MockLocalHomePlatform {
     });
   }
 
+  /**
+   * Asyncronously returns the next localDeviceId registered to the Local Home Platform.
+   * This localDeviceId is referred to as the verificationId in the IdentifyResponse
+   */
   public async getNextDeviceIdRegistered(): Promise<string> {
     return new Promise(resolve => {
       this.newDeviceRegisteredActions.push(localDeviceId => {
@@ -82,10 +78,13 @@ export class MockLocalHomePlatform {
   public async triggerIdentify(discoveryBuffer: Buffer): Promise<void> {
     console.log('Received discovery payload:', discoveryBuffer);
 
+    // Need a reference to the `App` instance to be able to pass an `IdentifyRequest`
     if (this.app === undefined) {
       throw new Error(ERROR_UNDEFINED_APP);
     }
-    if (!this.isHomeAppReady()) {
+
+    // Cannot start processing until all handlers have been set on the `App`
+    if (!this.app.isAllHandlersSet()) {
       throw new Error(ERROR_LISTEN_NOT_CALLED);
     }
 
@@ -107,7 +106,8 @@ export class MockLocalHomePlatform {
       devices: [],
     };
 
-    if (this.app.identifyHandler === undefined) {
+    // No handler has been set to process `IdentifyRequest`s
+    if (this.app.identifyHandler == undefined) {
       throw new Error(ERROR_UNDEFINED_IDENTIFYHANDLER);
     }
     const identifyResponse: smarthome.IntentFlow.IdentifyResponse = await this.app.identifyHandler(
@@ -115,6 +115,8 @@ export class MockLocalHomePlatform {
     );
 
     const device = identifyResponse.payload.device;
+
+    // The handler returned an `IdentifyResponse` that was missing a local device id
     if (device.verificationId == null) {
       throw new Error(ERROR_UNDEFINED_VERIFICATIONID);
     }
