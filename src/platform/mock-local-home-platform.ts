@@ -13,8 +13,7 @@ export const ERROR_LISTEN_NOT_CALLED: string =
 export const ERROR_UNDEFINED_IDENTIFYHANDLER: string =
   'Cannot trigger IdentifyRequest: No Identify handler has been set by the fulfillment app';
 export const ERROR_UNDEFINED_VERIFICATIONID: string =
-  'The handler returned an IdentifyResponse ' +
-  'with an undefined verificationId';
+  'The handler returned an IdentifyResponse with an undefined verificationId';
 
 // TODO(cjdaly): add other radio scan support
 export class MockLocalHomePlatform {
