@@ -137,7 +137,7 @@ test('trigger-identify-with-valid-state', async t => {
 /**
  * Tests that the Local Home Platform is reset when `getInstance()` flag is set
  */
-test('trigger-identify-without-reset-state-throws', async t => {
+test('trigger-identify-with-reset-state', async t => {
   const oldPlatform = MockLocalHomePlatform.getInstance(true);
   //Implicitly attaches to current `MockLocalHomePlatform` singleton instance
   const app: AppStub = new AppStub(APP_VERSION);
