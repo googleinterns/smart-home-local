@@ -9,7 +9,7 @@
   "scripts": {
     "compile": "tsc",
     "lint": "tslint --project .",
-    "test": "ava --verbose",
+    "test": "ava",
     "clean": "gts clean",
     "fix": "gts fix"
   },

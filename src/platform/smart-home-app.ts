@@ -3,7 +3,15 @@
  */
 /// <reference types="@google/local-home-sdk" />
 
-import {MockLocalHomePlatform} from './mock-local-home-platform';
+import {
+  MockLocalHomePlatform,
+  ERROR_UNDEFINED_APP,
+} from './mock-local-home-platform';
+
+export const ERROR_UNDEFINED_IDENTIFYHANDLER: string =
+  'Identify handler must be set before listen() can be called';
+export const ERROR_UNDEFINED_EXECUTEHANDLER: string =
+  'Execute handler must be set before listen() can be called';
 
 export class AppStub implements smarthome.App {
   private version: string;
@@ -29,8 +37,16 @@ export class AppStub implements smarthome.App {
   }
 
   listen(): Promise<void> {
+    if (this.identifyHandler === undefined) {
+      this.allHandlersSet = false;
+      return Promise.reject(new Error(ERROR_UNDEFINED_IDENTIFYHANDLER));
+    }
+    if (this.executeHandler === undefined) {
+      this.allHandlersSet = false;
+      return Promise.reject(new Error(ERROR_UNDEFINED_EXECUTEHANDLER));
+    }
     this.allHandlersSet = true;
-    return Promise.resolve();
+    return Promise.resolve(undefined);
   }
 
   public onExecute(executeHandler: smarthome.IntentFlow.ExecuteHandler): this {
