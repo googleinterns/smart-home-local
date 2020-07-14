@@ -46,7 +46,7 @@ export class AppStub implements smarthome.App {
       return Promise.reject(new Error(ERROR_UNDEFINED_EXECUTEHANDLER));
     }
     this.allHandlersSet = true;
-    return Promise.resolve(undefined);
+    return Promise.resolve();
   }
 
   public onExecute(executeHandler: smarthome.IntentFlow.ExecuteHandler): this {
