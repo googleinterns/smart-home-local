@@ -5,8 +5,6 @@
 /// <reference types="@google/local-home-sdk" />
 import {AppStub} from './smart-home-app';
 import {DeviceManagerStub} from './device-manager';
-import {PerformanceObserver} from 'perf_hooks';
-import {promises} from 'dns';
 
 export const ERROR_UNDEFINED_APP: string =
   'Cannot trigger IdentifyRequest: App was undefined';
