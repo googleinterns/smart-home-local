@@ -20,10 +20,12 @@ const IDENTIFY_HANDLER: smarthome.IntentFlow.IdentifyHandler = () => {
   };
 };
 
+// Needed to define smarthome.Intents.IDENTIFY
 test.before(t => {
   injectSmarthomeStubs();
 });
 
+// Cannot call listen without setting both required handlers
 test('listen-with-undefined-identify-throws', async t => {
   const app: AppStub = new AppStub(APP_VERSION);
   await t.throwsAsync(app.listen(), {
@@ -32,6 +34,7 @@ test('listen-with-undefined-identify-throws', async t => {
   });
 });
 
+// Cannot call listen without setting both required handlers
 test('listen-with-undefined-execute-throws', async t => {
   const app: AppStub = new AppStub(APP_VERSION);
   app.onIdentify(IDENTIFY_HANDLER);
@@ -41,6 +44,7 @@ test('listen-with-undefined-execute-throws', async t => {
   });
 });
 
+// A call to `listen()` with both handlers should not throw any error
 test('listen-with-valid-handlers', async t => {
   const executeHandler: smarthome.IntentFlow.ExecuteHandler = () => {
     return {

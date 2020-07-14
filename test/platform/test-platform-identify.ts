@@ -132,11 +132,13 @@ test('trigger-identify-with-valid-state', async t => {
  */
 test('trigger-identify-with-reset-state', async t => {
   const oldPlatform = MockLocalHomePlatform.getInstance(true);
+
   //Implicitly attaches to current `MockLocalHomePlatform` singleton instance
   const app: AppStub = new AppStub(APP_VERSION);
 
   //Resets the singleton instance
   const mockLocalHomePlatform = MockLocalHomePlatform.getInstance(true);
+
   //Now expecting no attached `App`
   await t.throwsAsync(mockLocalHomePlatform.triggerIdentify(DISCOVERY_BUFFER), {
     instanceOf: Error,
