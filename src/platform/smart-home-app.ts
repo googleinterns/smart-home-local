@@ -4,7 +4,6 @@
 /// <reference types="@google/local-home-sdk" />
 
 import {MockLocalHomePlatform} from './mock-local-home-platform';
-import {setActiveAppStub} from './stub-setup';
 
 export const ERROR_UNDEFINED_IDENTIFYHANDLER: string =
   'Identify handler must be set before listen() can be called';
@@ -29,15 +28,13 @@ export class AppStub implements smarthome.App {
   constructor(version: string) {
     this.version = version;
     this.mockLocalHomePlatform = new MockLocalHomePlatform(this);
-    // Module-level function to allow access in testing
-    setActiveAppStub(this);
   }
 
   public getLocalHomePlatform(): MockLocalHomePlatform {
     return this.mockLocalHomePlatform;
   }
 
-  isAllHandlersSet(): boolean {
+  areAllHandlersSet(): boolean {
     return this.allHandlersSet;
   }
 

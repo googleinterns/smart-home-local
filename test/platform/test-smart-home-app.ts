@@ -46,9 +46,11 @@ test('listen-with-undefined-execute-throws', async t => {
 
 // A call to `listen()` with both handlers should not throw any error
 test('listen-with-valid-handlers', async t => {
-  const executeHandler: smarthome.IntentFlow.ExecuteHandler = () => {
+  const executeHandler: smarthome.IntentFlow.ExecuteHandler = (
+    executeRequest: smarthome.IntentFlow.ExecuteRequest
+  ) => {
     return {
-      requestId: 'request-id',
+      requestId: executeRequest.requestId,
       intent: smarthome.Intents.IDENTIFY,
       payload: {
         commands: [

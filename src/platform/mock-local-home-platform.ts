@@ -25,6 +25,10 @@ export class MockLocalHomePlatform {
     this.app = app;
   }
 
+  public areAllHandlersSet() {
+    return this.app.areAllHandlersSet();
+  }
+
   public getDeviceManager(): smarthome.DeviceManager {
     return this.deviceManager;
   }
@@ -42,7 +46,7 @@ export class MockLocalHomePlatform {
     console.debug('Received discovery payload:', discoveryBuffer);
 
     // Cannot start processing until all handlers have been set on the `App`
-    if (!this.app.isAllHandlersSet()) {
+    if (!this.app.areAllHandlersSet()) {
       return Promise.reject(new Error(ERROR_LISTEN_NOT_CALLED));
     }
 
@@ -73,7 +77,7 @@ export class MockLocalHomePlatform {
     if (device.verificationId == null) {
       return Promise.reject(new Error(ERROR_UNDEFINED_VERIFICATIONID));
     }
-    console.log('Registering localDeviceId: ' + device.verificationId);
+    console.debug('Registering localDeviceId: ' + device.verificationId);
     this.localDeviceIds.set(device.id, device.verificationId);
     return Promise.resolve(device.verificationId);
   }

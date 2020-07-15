@@ -3,9 +3,7 @@
  * Bundled HomeApp cannot be loaded until this global is set.
  */
 import {AppStub} from './smart-home-app';
-
-export var ERROR_UNDEFINED_APP_STUB: string =
-  'Active AppStub is undefined.  Has an App been initialized?';
+import {MockLocalHomePlatform} from './mock-local-home-platform';
 
 const smarthomeStub: {
   App: typeof smarthome.App;
@@ -24,18 +22,12 @@ export function injectSmarthomeStubs(): void {
   (global as any).smarthome = smarthomeStub;
 }
 
-// Module-level variable to hold the active instance the AppStub
-var activeAppStub: AppStub | undefined;
-
-// Module-level getter for the active AppStub
-export function getActiveAppStub(): AppStub {
-  if (activeAppStub === undefined) {
-    throw new Error(ERROR_UNDEFINED_APP_STUB);
+// Promotes App to AppStub
+export function extractMockLocalHomePlatform(
+  app: smarthome.App
+): MockLocalHomePlatform | undefined {
+  if (app instanceof AppStub) {
+    return app.getLocalHomePlatform();
   }
-  return activeAppStub;
-}
-
-// Module-level setter for the active AppStub
-export function setActiveAppStub(app: AppStub) {
-  activeAppStub = app;
+  return undefined;
 }

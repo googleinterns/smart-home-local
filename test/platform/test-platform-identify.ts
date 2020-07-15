@@ -1,12 +1,10 @@
 /// <reference types="@google/local-home-sdk" />
 import test from 'ava';
 import {
-  injectSmarthomeStubs,
-  MockLocalHomePlatform,
   ERROR_LISTEN_NOT_CALLED,
   ERROR_UNDEFINED_VERIFICATIONID,
-  getActiveAppStub,
-  ERROR_UNDEFINED_APP_STUB,
+  extractMockLocalHomePlatform,
+  injectSmarthomeStubs,
 } from '../../src';
 
 const DISCOVERY_BUFFER: Buffer = Buffer.from('discovery buffer 123');
@@ -42,10 +40,6 @@ const EXECUTE_HANDLER: smarthome.IntentFlow.ExecuteHandler = () => {
  */
 test.before(t => {
   injectSmarthomeStubs();
-  t.throws(() => getActiveAppStub(), {
-    instanceOf: Error,
-    message: ERROR_UNDEFINED_APP_STUB,
-  });
 });
 
 /**
@@ -54,7 +48,7 @@ test.before(t => {
  */
 test('trigger-identify-without-listen-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
-  const mockLocalHomePlatform = getActiveAppStub().getLocalHomePlatform();
+  const mockLocalHomePlatform = extractMockLocalHomePlatform(app)!;
   await t.throwsAsync(mockLocalHomePlatform.triggerIdentify(DISCOVERY_BUFFER), {
     instanceOf: Error,
     message: ERROR_LISTEN_NOT_CALLED,
@@ -66,7 +60,7 @@ test('trigger-identify-without-listen-throws', async t => {
  */
 test('trigger-identify-with-undefined-verificationId-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
-  const mockLocalHomePlatform = getActiveAppStub().getLocalHomePlatform();
+  const mockLocalHomePlatform = extractMockLocalHomePlatform(app)!;
   const invalidIdentifyHandler: smarthome.IntentFlow.IdentifyHandler = () => {
     return {
       requestId: 'request-id',
@@ -105,7 +99,7 @@ test('trigger-identify-with-valid-state', async t => {
   };
   const app: smarthome.App = new smarthome.App(APP_VERSION);
   app.onIdentify(validIdentifyHandler).onExecute(EXECUTE_HANDLER).listen();
-  const mockLocalHomePlatform = getActiveAppStub().getLocalHomePlatform();
+  const mockLocalHomePlatform = extractMockLocalHomePlatform(app)!;
   await t.notThrowsAsync(async () => {
     const verificationId = await mockLocalHomePlatform.triggerIdentify(
       discoveryBuffer
