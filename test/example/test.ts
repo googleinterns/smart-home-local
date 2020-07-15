@@ -57,8 +57,8 @@ const executeHandler: smarthome.IntentFlow.ExecuteHandler = (
   };
 };
 
-// Tests a UDP identify flow end-to-end
-test('udp-device-connects', async t => {
+// Tests an identify flow end-to-end
+test('identify-handler-registers-local-id', async t => {
   // Create the App to test against
   const app: smarthome.App = new smarthome.App('0.0.1');
 
