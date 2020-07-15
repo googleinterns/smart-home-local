@@ -2,10 +2,6 @@
 
 This is a mock Local Home Platform that depends on the Local Home SDK and a compiled [Local Fulfillment App](https://github.com/actions-on-google/smart-home-local)
 
-## Usage
-
-See example usage in `test/example/test.ts`
-
 ## References & Issues
 
 - Questions? Go to [StackOverflow](https://stackoverflow.com/questions/tagged/actions-on-google), [Assistant Developer Community on Reddit](https://www.reddit.com/r/GoogleAssistantDev/) or [Support](https://developers.google.com/assistant/support).
