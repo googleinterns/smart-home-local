@@ -1,9 +1,10 @@
+/// <reference types="@google/local-home-sdk" />
 import test from 'ava';
 import {
+  injectSmarthomeStubs,
   ERROR_UNDEFINED_IDENTIFYHANDLER,
   ERROR_UNDEFINED_EXECUTEHANDLER,
-} from '../../src/platform/smart-home-app';
-import {injectSmarthomeStubs} from '../../src';
+} from '../../src';
 
 const APP_VERSION = '0.0.1';
 const IDENTIFY_HANDLER: smarthome.IntentFlow.IdentifyHandler = () => {
@@ -19,7 +20,7 @@ const IDENTIFY_HANDLER: smarthome.IntentFlow.IdentifyHandler = () => {
   };
 };
 
-// Needed to define smarthome.Intents.IDENTIFY
+// Inject AppStub and intent enums
 test.before(t => {
   injectSmarthomeStubs();
 });
