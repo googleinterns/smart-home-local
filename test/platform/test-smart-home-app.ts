@@ -1,6 +1,5 @@
 import test from 'ava';
 import {
-  AppStub,
   ERROR_UNDEFINED_IDENTIFYHANDLER,
   ERROR_UNDEFINED_EXECUTEHANDLER,
 } from '../../src/platform/smart-home-app';
@@ -27,7 +26,7 @@ test.before(t => {
 
 // Cannot call listen without setting both required handlers
 test('listen-with-undefined-identify-throws', async t => {
-  const app: AppStub = new AppStub(APP_VERSION);
+  const app: smarthome.App = new smarthome.App(APP_VERSION);
   await t.throwsAsync(app.listen(), {
     instanceOf: Error,
     message: ERROR_UNDEFINED_IDENTIFYHANDLER,
@@ -36,7 +35,7 @@ test('listen-with-undefined-identify-throws', async t => {
 
 // Cannot call listen without setting both required handlers
 test('listen-with-undefined-execute-throws', async t => {
-  const app: AppStub = new AppStub(APP_VERSION);
+  const app: smarthome.App = new smarthome.App(APP_VERSION);
   app.onIdentify(IDENTIFY_HANDLER);
   await t.throwsAsync(app.listen(), {
     instanceOf: Error,
@@ -69,7 +68,7 @@ test('listen-with-valid-handlers', async t => {
       },
     };
   };
-  const app: AppStub = new AppStub(APP_VERSION);
+  const app: smarthome.App = new smarthome.App(APP_VERSION);
   app.onIdentify(IDENTIFY_HANDLER).onExecute(executeHandler);
   const error = await app.listen();
   t.is(error, undefined);

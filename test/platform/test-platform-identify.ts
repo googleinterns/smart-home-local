@@ -6,7 +6,6 @@ import {
   ERROR_LISTEN_NOT_CALLED,
   ERROR_UNDEFINED_VERIFICATIONID,
 } from '../../src/platform/mock-local-home-platform';
-import {AppStub} from '../../src/platform/smart-home-app';
 import {injectSmarthomeStubs} from '../../src';
 
 const DISCOVERY_BUFFER: Buffer = Buffer.from('discovery buffer 123');
@@ -58,7 +57,7 @@ test('trigger-identify-with-undefined-app-throws', async t => {
  */
 test('trigger-identify-without-listen-throws', async t => {
   const mockLocalHomePlatform = MockLocalHomePlatform.getInstance(true);
-  const app: AppStub = new AppStub(APP_VERSION);
+  const app: smarthome.App = new smarthome.App(APP_VERSION);
   await t.throwsAsync(mockLocalHomePlatform.triggerIdentify(DISCOVERY_BUFFER), {
     instanceOf: Error,
     message: ERROR_LISTEN_NOT_CALLED,
@@ -70,7 +69,7 @@ test('trigger-identify-without-listen-throws', async t => {
  */
 test('trigger-identify-with-undefined-verificationId-throws', async t => {
   const mockLocalHomePlatform = MockLocalHomePlatform.getInstance(true);
-  const app: AppStub = new AppStub(APP_VERSION);
+  const app: smarthome.App = new smarthome.App(APP_VERSION);
   const invalidIdentifyHandler: smarthome.IntentFlow.IdentifyHandler = () => {
     return {
       requestId: 'request-id',
@@ -108,7 +107,7 @@ test('trigger-identify-with-valid-state', async t => {
       },
     };
   };
-  const app: AppStub = new AppStub(APP_VERSION);
+  const app: smarthome.App = new smarthome.App(APP_VERSION);
   app.onIdentify(validIdentifyHandler).onExecute(EXECUTE_HANDLER).listen();
   await t.notThrowsAsync(async () => {
     const verificationId = await mockLocalHomePlatform.triggerIdentify(
@@ -134,7 +133,7 @@ test('trigger-identify-with-reset-state', async t => {
   const oldPlatform = MockLocalHomePlatform.getInstance(true);
 
   //Implicitly attaches to current `MockLocalHomePlatform` singleton instance
-  const app: AppStub = new AppStub(APP_VERSION);
+  const app: smarthome.App = new smarthome.App(APP_VERSION);
 
   //Resets the singleton instance
   const mockLocalHomePlatform = MockLocalHomePlatform.getInstance(true);
