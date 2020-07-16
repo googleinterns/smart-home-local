@@ -6,10 +6,12 @@
 import {AppStub} from './smart-home-app';
 import {DeviceManagerStub} from './device-manager';
 
-export const ERROR_LISTEN_NOT_CALLED: string =
-  'Cannot trigger IdentifyRequest: listen() was not called';
 export const ERROR_UNDEFINED_VERIFICATIONID: string =
   'The handler returned an IdentifyResponse with an undefined verificationId';
+export const ERROR_UNDEFINED_IDENTIFY_HANDLER: string =
+  "Couldn't trigger an IdentifyRequest: The App identifyHandler was undefined.";
+export const ERROR_NO_LOCAL_DEVICE_ID_FOUND: string =
+  'Cannot get localDeviceId of unregistered deviceId';
 
 // TODO(cjdaly): add other radio scan support
 export class MockLocalHomePlatform {
@@ -25,16 +27,19 @@ export class MockLocalHomePlatform {
     this.app = app;
   }
 
-  public areAllHandlersSet() {
-    return this.app.areAllHandlersSet();
-  }
-
   public getDeviceManager(): smarthome.DeviceManager {
     return this.deviceManager;
   }
 
-  public getLocalDeviceIdMap(): Map<string, string> {
-    return this.localDeviceIds;
+  public isDeviceIdRegistered(deviceId: string): boolean {
+    return this.localDeviceIds.has(deviceId);
+  }
+
+  public getLocalDeviceId(deviceId: string): string {
+    if (!this.isDeviceIdRegistered(deviceId)) {
+      throw new Error(ERROR_NO_LOCAL_DEVICE_ID_FOUND);
+    }
+    return this.localDeviceIds.get(deviceId)!;
   }
 
   /**
@@ -46,8 +51,8 @@ export class MockLocalHomePlatform {
     console.debug('Received discovery payload:', discoveryBuffer);
 
     // Cannot start processing until all handlers have been set on the `App`
-    if (!this.app.areAllHandlersSet()) {
-      return Promise.reject(new Error(ERROR_LISTEN_NOT_CALLED));
+    if (!this.app.identifyHandler) {
+      return Promise.reject(new Error(ERROR_UNDEFINED_IDENTIFY_HANDLER));
     }
 
     const identifyRequest: smarthome.IntentFlow.IdentifyRequest = {

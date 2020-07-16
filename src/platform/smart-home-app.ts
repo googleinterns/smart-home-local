@@ -5,10 +5,12 @@
 
 import {MockLocalHomePlatform} from './mock-local-home-platform';
 
-export const ERROR_UNDEFINED_IDENTIFYHANDLER: string =
+export const ERROR_LISTEN_WITHOUT_IDENTIFY_HANDLER: string =
   'Identify handler must be set before listen() can be called';
-export const ERROR_UNDEFINED_EXECUTEHANDLER: string =
+export const ERROR_LISTEN_WITHOUT_EXECUTE_HANDLER: string =
   'Execute handler must be set before listen() can be called';
+export const ERROR_HANDLERS_NOT_SET: string =
+  'All handlers must be set and listen() must be called before accessing the Platform';
 
 export class AppStub implements smarthome.App {
   private version: string;
@@ -31,11 +33,11 @@ export class AppStub implements smarthome.App {
   }
 
   public getLocalHomePlatform(): MockLocalHomePlatform {
-    return this.mockLocalHomePlatform;
-  }
-
-  areAllHandlersSet(): boolean {
-    return this.allHandlersSet;
+    if (this.allHandlersSet) {
+      return this.mockLocalHomePlatform;
+    } else {
+      throw new Error(ERROR_HANDLERS_NOT_SET);
+    }
   }
 
   getDeviceManager(): smarthome.DeviceManager {
@@ -45,11 +47,11 @@ export class AppStub implements smarthome.App {
   listen(): Promise<void> {
     if (this.identifyHandler === undefined) {
       this.allHandlersSet = false;
-      return Promise.reject(new Error(ERROR_UNDEFINED_IDENTIFYHANDLER));
+      return Promise.reject(new Error(ERROR_LISTEN_WITHOUT_IDENTIFY_HANDLER));
     }
     if (this.executeHandler === undefined) {
       this.allHandlersSet = false;
-      return Promise.reject(new Error(ERROR_UNDEFINED_EXECUTEHANDLER));
+      return Promise.reject(new Error(ERROR_LISTEN_WITHOUT_EXECUTE_HANDLER));
     }
     this.allHandlersSet = true;
     return Promise.resolve();

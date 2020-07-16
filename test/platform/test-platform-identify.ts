@@ -1,9 +1,9 @@
 /// <reference types="@google/local-home-sdk" />
 import test from 'ava';
 import {
-  ERROR_LISTEN_NOT_CALLED,
   ERROR_UNDEFINED_VERIFICATIONID,
   extractMockLocalHomePlatform,
+  ERROR_HANDLERS_NOT_SET,
 } from '../../src';
 
 const DISCOVERY_BUFFER: Buffer = Buffer.from('discovery buffer 123');
@@ -39,11 +39,15 @@ const EXECUTE_HANDLER: smarthome.IntentFlow.ExecuteHandler = () => {
  */
 test('trigger-identify-without-listen-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app)!;
-  await t.throwsAsync(mockLocalHomePlatform.triggerIdentify(DISCOVERY_BUFFER), {
-    instanceOf: Error,
-    message: ERROR_LISTEN_NOT_CALLED,
-  });
+  await t.throws(
+    () => {
+      extractMockLocalHomePlatform(app);
+    },
+    {
+      instanceOf: Error,
+      message: ERROR_HANDLERS_NOT_SET,
+    }
+  );
 });
 
 /**
@@ -51,7 +55,6 @@ test('trigger-identify-without-listen-throws', async t => {
  */
 test('trigger-identify-with-undefined-verificationId-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app)!;
   const invalidIdentifyHandler: smarthome.IntentFlow.IdentifyHandler = () => {
     return {
       requestId: 'request-id',
@@ -64,6 +67,7 @@ test('trigger-identify-with-undefined-verificationId-throws', async t => {
     };
   };
   app.onIdentify(invalidIdentifyHandler).onExecute(EXECUTE_HANDLER).listen();
+  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
   await t.throwsAsync(mockLocalHomePlatform.triggerIdentify(DISCOVERY_BUFFER), {
     instanceOf: Error,
     message: ERROR_UNDEFINED_VERIFICATIONID,
@@ -90,20 +94,17 @@ test('trigger-identify-with-valid-state', async t => {
   };
   const app: smarthome.App = new smarthome.App(APP_VERSION);
   app.onIdentify(validIdentifyHandler).onExecute(EXECUTE_HANDLER).listen();
-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app)!;
+  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
   await t.notThrowsAsync(async () => {
     const verificationId = await mockLocalHomePlatform.triggerIdentify(
       discoveryBuffer
     );
     t.is(verificationId, localDeviceId);
   });
-  t.is(mockLocalHomePlatform.getLocalDeviceIdMap().size, 1);
-  t.is(
-    mockLocalHomePlatform.getLocalDeviceIdMap().keys().next().value,
-    DEVICE_ID
-  );
-  t.is(
-    mockLocalHomePlatform.getLocalDeviceIdMap().values().next().value,
-    localDeviceId
-  );
+  t.notThrows(() => {
+    t.is(mockLocalHomePlatform.isDeviceIdRegistered(DEVICE_ID), true);
+  });
+  t.notThrows(() => {
+    t.is(mockLocalHomePlatform.getLocalDeviceId(DEVICE_ID), localDeviceId);
+  });
 });

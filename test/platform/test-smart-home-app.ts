@@ -1,8 +1,8 @@
 /// <reference types="@google/local-home-sdk" />
 import test from 'ava';
 import {
-  ERROR_UNDEFINED_IDENTIFYHANDLER,
-  ERROR_UNDEFINED_EXECUTEHANDLER,
+  ERROR_LISTEN_WITHOUT_IDENTIFY_HANDLER,
+  ERROR_LISTEN_WITHOUT_EXECUTE_HANDLER,
 } from '../../src';
 
 const APP_VERSION = '0.0.1';
@@ -24,7 +24,7 @@ test('listen-with-undefined-identify-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
   await t.throwsAsync(app.listen(), {
     instanceOf: Error,
-    message: ERROR_UNDEFINED_IDENTIFYHANDLER,
+    message: ERROR_LISTEN_WITHOUT_IDENTIFY_HANDLER,
   });
 });
 
@@ -34,7 +34,7 @@ test('listen-with-undefined-execute-throws', async t => {
   app.onIdentify(IDENTIFY_HANDLER);
   await t.throwsAsync(app.listen(), {
     instanceOf: Error,
-    message: ERROR_UNDEFINED_EXECUTEHANDLER,
+    message: ERROR_LISTEN_WITHOUT_EXECUTE_HANDLER,
   });
 });
 

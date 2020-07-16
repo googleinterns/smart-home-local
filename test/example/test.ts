@@ -61,7 +61,7 @@ test('identify-handler-registers-local-id', async t => {
   await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();
 
   // Obtain the Mock Local Home Platform from the App stub
-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app)!;
+  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
 
   const discoveryBuffer = Buffer.from('sample-buffer');
 
@@ -75,9 +75,6 @@ test('identify-handler-registers-local-id', async t => {
   });
 
   // Double check our Identify handler did its job and returned the local device id
-  t.is(mockLocalHomePlatform.getLocalDeviceIdMap().size, 1);
-  t.is(
-    mockLocalHomePlatform.getLocalDeviceIdMap().values().next().value,
-    LOCAL_DEVICE_ID
-  );
+  t.is(mockLocalHomePlatform.isDeviceIdRegistered(DEVICE_ID), true);
+  t.is(mockLocalHomePlatform.getLocalDeviceId(DEVICE_ID), LOCAL_DEVICE_ID);
 });

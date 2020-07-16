@@ -20,9 +20,9 @@ export const smarthomeStub: {
 // Promotes App to AppStub
 export function extractMockLocalHomePlatform(
   app: smarthome.App
-): MockLocalHomePlatform | undefined {
+): MockLocalHomePlatform{
   if (app instanceof AppStub) {
     return app.getLocalHomePlatform();
   }
-  return undefined;
+  throw new Error("Couldn't downcast App to AppStub");
 }
