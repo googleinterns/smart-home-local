@@ -86,4 +86,52 @@ export class MockLocalHomePlatform {
     this.localDeviceIds.set(device.id, device.verificationId);
     return device.verificationId;
   }
+
+  public async triggerExecute(
+    command: string, //smarthome.DataFlow.command
+    params: object,
+    deviceId: string
+  ): Promise<boolean> {
+    if (!this.localDeviceIds.has(deviceId)) {
+      return Promise.reject("deviceId didn't match");
+    }
+
+    const executeRequest: smarthome.IntentFlow.ExecuteRequest = {
+      requestId: 'request-id',
+      inputs: [
+        {
+          intent: smarthome.Intents.EXECUTE,
+          payload: {
+            commands: [
+              {
+                execution: [
+                  {
+                    command,
+                    params,
+                  },
+                ],
+                devices: [
+                  {
+                    id: deviceId,
+                    customData: {
+                      channel: 1,
+                      leds: 8,
+                      control_protocol: 'TCP',
+                    },
+                  },
+                ],
+              },
+            ],
+            structureData: {},
+          },
+        },
+      ],
+    };
+    const response = await this.app.executeHandler!(executeRequest);
+
+    if (response.payload.commands[0].status == 'SUCCESS') {
+      return Promise.resolve(true);
+    }
+    return Promise.reject(new Error(response.payload.commands[0].status));
+  }
 }

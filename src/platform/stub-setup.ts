@@ -8,6 +8,7 @@ import {MockLocalHomePlatform} from './mock-local-home-platform';
 export const smarthomeStub: {
   App: typeof smarthome.App;
   Intents: {[key in keyof typeof smarthome.Intents]: string};
+  DataFlow: typeof smarthome.DataFlow;
   Execute: typeof smarthome.Execute;
 } = {
   App: AppStub,
@@ -15,6 +16,33 @@ export const smarthomeStub: {
     EXECUTE: 'action.devices.EXECUTE',
     IDENTIFY: 'action.devices.IDENTIFY',
     REACHABLE_DEVICES: 'action.devices.REACHABLE_DEVICES',
+  },
+  DataFlow: {
+    HttpRequestData: class {
+      data!: string;
+      requestId!: string;
+      deviceId!: string;
+      protocol: any;
+      dataType!: string;
+      headers!: string;
+      method!: any;
+      path!: string;
+    },
+    TcpRequestData: class {
+      data!: string;
+      requestId!: string;
+      deviceId!: string;
+      protocol: any;
+      port!: number;
+      operation: any;
+    },
+    UdpRequestData: class {
+      data!: string;
+      requestId!: string;
+      deviceId!: string;
+      protocol: any;
+      port!: number;
+    },
   },
   Execute: {
     Response: {
@@ -60,7 +88,7 @@ export const smarthomeStub: {
 // Promotes App to AppStub
 export function extractMockLocalHomePlatform(
   app: smarthome.App
-): MockLocalHomePlatform{
+): MockLocalHomePlatform {
   if (app instanceof AppStub) {
     return app.getLocalHomePlatform();
   }

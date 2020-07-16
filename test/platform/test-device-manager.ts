@@ -1,19 +1,17 @@
 /// <reference types="@google/local-home-sdk" />
 /// <reference types="@types/node" />
 import test from 'ava';
-import {injectSmarthomeStubs, extractMockLocalHomePlatform} from '../../src';
-import {makeSendCommand, ControlKind} from '../../src/platform/device-manager';
-
-// Set stub definition of smarthome.App and set intent enums
-test.before(() => {
-  injectSmarthomeStubs();
-});
+import {
+  makeSendCommand,
+  ControlKind,
+  extractMockLocalHomePlatform,
+} from '../../src';
 
 const DEVICE_ID = 'device-id-123';
 const DEVICE_PORT = 12345;
 const LOCAL_DEVICE_ID = 'local-device-id-123';
 const BASE_SEND_COMMAND = makeSendCommand(
-  ControlKind.HTTP,
+  ControlKind.UDP,
   Buffer.from('sample-buffer')
 );
 
@@ -73,18 +71,16 @@ function getExecuteHandler(deviceManager: smarthome.DeviceManager) {
 test('execute-handler-registers-local-id', async t => {
   // Create the App to test against
   const app: smarthome.App = new smarthome.App('0.0.1');
-
   const deviceManager = app.getDeviceManager();
   const executeHandler = getExecuteHandler(deviceManager);
 
   // Set intent fulfillment handlers
   await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();
-
   // Obtain the Mock Local Home Platform from the App stub
   const mockLocalHomePlatform = extractMockLocalHomePlatform(app)!;
 
   const discoveryBuffer = Buffer.from('sample-buffer');
-  // Trigger an Identify intent from the platformn
+  // Trigger an Identify intent from the platform, registering the device id
   await t.notThrowsAsync(async () => {
     t.is(
       // This call will return the local device id
@@ -93,10 +89,18 @@ test('execute-handler-registers-local-id', async t => {
     );
   });
 
-  // Double check our Identify handler did its job and returned the local device id
-  t.is(mockLocalHomePlatform.getLocalDeviceIdMap().size, 1);
-  t.is(
-    mockLocalHomePlatform.getLocalDeviceIdMap().values().next().value,
-    LOCAL_DEVICE_ID
+  //TODO: interface to mock
+
+  // Double check our Identify handler did its job and passed up the proper values
+  t.is(mockLocalHomePlatform.isDeviceIdRegistered(DEVICE_ID), true);
+  t.is(mockLocalHomePlatform.getLocalDeviceId(DEVICE_ID), LOCAL_DEVICE_ID);
+
+  // Trigger an Execute intent from the platform
+  await t.throwsAsync(
+    mockLocalHomePlatform.triggerExecute('Command.Test', {}, DEVICE_ID),
+    {
+      instanceOf: Error,
+      message: 'ERROR',
+    }
   );
 });
