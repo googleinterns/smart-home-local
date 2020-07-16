@@ -89,8 +89,6 @@ test('execute-handler-registers-local-id', async t => {
     );
   });
 
-  //TODO: interface to mock
-
   // Double check our Identify handler did its job and passed up the proper values
   t.is(mockLocalHomePlatform.isDeviceIdRegistered(DEVICE_ID), true);
   t.is(mockLocalHomePlatform.getLocalDeviceId(DEVICE_ID), LOCAL_DEVICE_ID);
