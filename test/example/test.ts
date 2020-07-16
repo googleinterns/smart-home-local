@@ -4,12 +4,7 @@
 /// <reference types="@google/local-home-sdk" />
 /// <reference types="@types/node" />
 import test from 'ava';
-import {injectSmarthomeStubs, extractMockLocalHomePlatform} from '../../src';
-
-// Set stub definition of smarthome.App and set intent enums
-test.before(() => {
-  injectSmarthomeStubs();
-});
+import {extractMockLocalHomePlatform, AppStub} from '../../src';
 
 const DEVICE_ID = 'device-id-123';
 const LOCAL_DEVICE_ID = 'local-device-id-123';

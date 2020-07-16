@@ -4,7 +4,6 @@ import {
   ERROR_LISTEN_NOT_CALLED,
   ERROR_UNDEFINED_VERIFICATIONID,
   extractMockLocalHomePlatform,
-  injectSmarthomeStubs,
 } from '../../src';
 
 const DISCOVERY_BUFFER: Buffer = Buffer.from('discovery buffer 123');
@@ -33,14 +32,6 @@ const EXECUTE_HANDLER: smarthome.IntentFlow.ExecuteHandler = () => {
     },
   };
 };
-
-/**
- * Inject stubs into smarthome namespace
- * Assert no active AppStub
- */
-test.before(t => {
-  injectSmarthomeStubs();
-});
 
 /**
  * Tests that `listen()` was called on the created App.

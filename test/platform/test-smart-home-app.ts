@@ -1,7 +1,6 @@
 /// <reference types="@google/local-home-sdk" />
 import test from 'ava';
 import {
-  injectSmarthomeStubs,
   ERROR_UNDEFINED_IDENTIFYHANDLER,
   ERROR_UNDEFINED_EXECUTEHANDLER,
 } from '../../src';
@@ -19,11 +18,6 @@ const IDENTIFY_HANDLER: smarthome.IntentFlow.IdentifyHandler = () => {
     },
   };
 };
-
-// Inject AppStub and intent enums
-test.before(t => {
-  injectSmarthomeStubs();
-});
 
 // Cannot call listen without setting both required handlers
 test('listen-with-undefined-identify-throws', async t => {

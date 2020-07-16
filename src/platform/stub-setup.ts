@@ -5,7 +5,7 @@
 import {AppStub} from './smart-home-app';
 import {MockLocalHomePlatform} from './mock-local-home-platform';
 
-const smarthomeStub: {
+export const smarthomeStub: {
   App: typeof smarthome.App;
   Intents: {[key in keyof typeof smarthome.Intents]: string};
 } = {
@@ -16,11 +16,6 @@ const smarthomeStub: {
     REACHABLE_DEVICES: 'action.devices.REACHABLE_DEVICES',
   },
 };
-
-// Injects stubs into the global scope, allowing implicit usage for testing
-export function injectSmarthomeStubs(): void {
-  (global as any).smarthome = smarthomeStub;
-}
 
 // Promotes App to AppStub
 export function extractMockLocalHomePlatform(
