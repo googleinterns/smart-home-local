@@ -4,12 +4,15 @@
  */
 import {AppStub} from './smart-home-app';
 import {MockLocalHomePlatform} from './mock-local-home-platform';
-import {Protocol} from './device-manager';
+import {DeviceManagerStub} from './device-manager';
 
 export const smarthomeStub: {
   App: typeof smarthome.App;
   Intents: {[key in keyof typeof smarthome.Intents]: string};
   DataFlow: typeof smarthome.DataFlow;
+  Constants: {
+    Protocol: {[key in keyof typeof smarthome.Constants.Protocol]: string};
+  };
   Execute: typeof smarthome.Execute;
 } = {
   App: AppStub,
@@ -23,7 +26,8 @@ export const smarthomeStub: {
       data!: string;
       requestId!: string;
       deviceId!: string;
-      protocol: Protocol = Protocol.HTTP;
+      protocol: smarthome.Constants.Protocol =
+        smarthome.Constants.Protocol.HTTP;
       dataType!: string;
       headers!: string;
       method!: any;
@@ -33,7 +37,7 @@ export const smarthomeStub: {
       data!: string;
       requestId!: string;
       deviceId!: string;
-      protocol: Protocol = Protocol.HTTP;
+      protocol: smarthome.Constants.Protocol = smarthome.Constants.Protocol.TCP;
       port!: number;
       operation: any;
     },
@@ -41,8 +45,17 @@ export const smarthomeStub: {
       data!: string;
       requestId!: string;
       deviceId!: string;
-      protocol: Protocol = Protocol.UDP;
+      protocol: smarthome.Constants.Protocol = smarthome.Constants.Protocol.UDP;
       port!: number;
+    },
+  },
+  Constants: {
+    Protocol: {
+      BLE: 'BLE',
+      HTTP: 'HTTP',
+      TCP: 'TCP',
+      UDP: 'UDP',
+      BLE_MESH: 'BLE_MESH',
     },
   },
   Execute: {
@@ -94,4 +107,14 @@ export function extractMockLocalHomePlatform(
     return app.getLocalHomePlatform();
   }
   throw new Error("Couldn't downcast App to AppStub");
+}
+
+export function extractDeviceManagerStub(
+  app: smarthome.App
+): DeviceManagerStub {
+  const deviceManager = app.getDeviceManager();
+  if (deviceManager instanceof DeviceManagerStub) {
+    return deviceManager;
+  }
+  throw new Error('DeviceManagerStub not found');
 }

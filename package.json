@@ -26,7 +26,8 @@
   },
   "ava": {
     "files": [
-      "test/**/*"
+      "test/**/*",
+      "!test/**/*fixtures.ts"
     ],
     "require": [
       "esm"

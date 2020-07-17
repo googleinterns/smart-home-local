@@ -5,35 +5,16 @@ import {
   extractMockLocalHomePlatform,
   ERROR_HANDLERS_NOT_SET,
 } from '../../src';
+import {
+  createExecuteHandler,
+  createIdentifyHandler,
+  createDeviceCommand,
+} from './test-platform-fixtures';
 
 const DISCOVERY_BUFFER: Buffer = Buffer.from('discovery buffer 123');
 const APP_VERSION: string = '0.0.1';
 const DEVICE_ID: string = 'device-id-123';
 const IDENTIFY_REQUEST_ID = 'identify-request-id';
-const EXECUTE_HANDLER: smarthome.IntentFlow.ExecuteHandler = () => {
-  return {
-    requestId: 'request-id',
-    intent: smarthome.Intents.IDENTIFY,
-    payload: {
-      commands: [
-        {
-          ids: ['123'],
-          status: 'SUCCESS',
-          states: {
-            on: true,
-            online: true,
-          },
-        },
-        {
-          ids: ['456'],
-          status: 'ERROR',
-          errorCode: 'deviceTurnedOff',
-        },
-      ],
-    },
-  };
-};
-
 /**
  * Tests that `listen()` was called on the created App.
  * This is a required flag that indicates handlers have been set.
@@ -56,6 +37,17 @@ test('trigger-identify-without-listen-throws', async t => {
  */
 test('trigger-identify-with-undefined-verificationId-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
+  const deviceManager = app.getDeviceManager();
+  const validExecuteHandler = createExecuteHandler(
+    createDeviceCommand(
+      smarthome.Constants.Protocol.UDP,
+      Buffer.from('execute-buffer'),
+      'execute-request-id',
+      DEVICE_ID,
+      12345
+    ),
+    deviceManager
+  );
   const invalidIdentifyHandler: smarthome.IntentFlow.IdentifyHandler = () => {
     return {
       requestId: 'request-id',
@@ -67,7 +59,10 @@ test('trigger-identify-with-undefined-verificationId-throws', async t => {
       },
     };
   };
-  app.onIdentify(invalidIdentifyHandler).onExecute(EXECUTE_HANDLER).listen();
+  app
+    .onIdentify(invalidIdentifyHandler)
+    .onExecute(validExecuteHandler)
+    .listen();
   const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
   await t.throwsAsync(
     mockLocalHomePlatform.triggerIdentify(
@@ -87,20 +82,20 @@ test('trigger-identify-with-undefined-verificationId-throws', async t => {
 test('trigger-identify-with-valid-state', async t => {
   const discoveryBuffer = Buffer.from('discovery buffer 123');
   const localDeviceId = 'local-device-id-123';
-  const validIdentifyHandler: smarthome.IntentFlow.IdentifyHandler = () => {
-    return {
-      requestId: 'request-id',
-      intent: smarthome.Intents.IDENTIFY,
-      payload: {
-        device: {
-          id: DEVICE_ID,
-          verificationId: localDeviceId,
-        },
-      },
-    };
-  };
   const app: smarthome.App = new smarthome.App(APP_VERSION);
-  app.onIdentify(validIdentifyHandler).onExecute(EXECUTE_HANDLER).listen();
+  const deviceManager = app.getDeviceManager();
+  const validIdentifyHandler = createIdentifyHandler(DEVICE_ID, localDeviceId);
+  const validExecuteHandler = createExecuteHandler(
+    createDeviceCommand(
+      smarthome.Constants.Protocol.UDP,
+      Buffer.from('execute-buffer'),
+      'execute-request-id',
+      DEVICE_ID,
+      12345
+    ),
+    deviceManager
+  );
+  app.onIdentify(validIdentifyHandler).onExecute(validExecuteHandler).listen();
   const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
   await t.notThrowsAsync(async () => {
     const verificationId = await mockLocalHomePlatform.triggerIdentify(
