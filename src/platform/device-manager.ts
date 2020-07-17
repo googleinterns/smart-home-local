@@ -37,6 +37,7 @@ export class DeviceManagerStub implements smarthome.DeviceManager {
   }
 
   getProxyInfo(id: string): smarthome.ProxyInfo {
+    //TODO(cjdaly) implementation
     throw new Error('Method not implemented.');
   }
 

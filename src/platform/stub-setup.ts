@@ -9,7 +9,9 @@ import {DeviceManagerStub} from './device-manager';
 export const smarthomeStub: {
   App: typeof smarthome.App;
   Intents: {[key in keyof typeof smarthome.Intents]: string};
-  DataFlow: typeof smarthome.DataFlow;
+  DataFlow: {
+    UdpRequestData: typeof smarthome.DataFlow.UdpRequestData;
+  };
   Constants: {
     Protocol: {[key in keyof typeof smarthome.Constants.Protocol]: string};
   };
@@ -22,25 +24,6 @@ export const smarthomeStub: {
     REACHABLE_DEVICES: 'action.devices.REACHABLE_DEVICES',
   },
   DataFlow: {
-    HttpRequestData: class {
-      data!: string;
-      requestId!: string;
-      deviceId!: string;
-      protocol: smarthome.Constants.Protocol =
-        smarthome.Constants.Protocol.HTTP;
-      dataType!: string;
-      headers!: string;
-      method!: any;
-      path!: string;
-    },
-    TcpRequestData: class {
-      data!: string;
-      requestId!: string;
-      deviceId!: string;
-      protocol: smarthome.Constants.Protocol = smarthome.Constants.Protocol.TCP;
-      port!: number;
-      operation: any;
-    },
     UdpRequestData: class {
       data!: string;
       requestId!: string;
