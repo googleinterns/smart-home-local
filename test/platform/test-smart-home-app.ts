@@ -22,20 +22,30 @@ const IDENTIFY_HANDLER: smarthome.IntentFlow.IdentifyHandler = () => {
 // Cannot call listen without setting both required handlers
 test('listen-with-undefined-identify-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
-  await t.throwsAsync(app.listen(), {
-    instanceOf: Error,
-    message: ERROR_LISTEN_WITHOUT_IDENTIFY_HANDLER,
-  });
+  await t.throwsAsync(
+    async () => {
+      await app.listen();
+    },
+    {
+      instanceOf: Error,
+      message: ERROR_LISTEN_WITHOUT_IDENTIFY_HANDLER,
+    }
+  );
 });
 
 // Cannot call listen without setting both required handlers
 test('listen-with-undefined-execute-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
   app.onIdentify(IDENTIFY_HANDLER);
-  await t.throwsAsync(app.listen(), {
-    instanceOf: Error,
-    message: ERROR_LISTEN_WITHOUT_EXECUTE_HANDLER,
-  });
+  await t.throwsAsync(
+    async () => {
+      await app.listen();
+    },
+    {
+      instanceOf: Error,
+      message: ERROR_LISTEN_WITHOUT_EXECUTE_HANDLER,
+    }
+  );
 });
 
 // A call to `listen()` with both handlers should not throw any error
