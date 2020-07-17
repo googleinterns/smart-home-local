@@ -15,7 +15,7 @@ export const ERROR_NO_LOCAL_DEVICE_ID_FOUND: string =
 
 // TODO(cjdaly): add other radio scan support
 export class MockLocalHomePlatform {
-  private deviceManager: smarthome.DeviceManager = new DeviceManagerStub();
+  private deviceManager: DeviceManagerStub = new DeviceManagerStub();
   private app: AppStub;
   private localDeviceIds: Map<string, string> = new Map<string, string>();
 
@@ -27,7 +27,7 @@ export class MockLocalHomePlatform {
     this.app = app;
   }
 
-  public getDeviceManager(): smarthome.DeviceManager {
+  public getDeviceManager(): DeviceManagerStub {
     return this.deviceManager;
   }
 
@@ -47,7 +47,10 @@ export class MockLocalHomePlatform {
    * @param discoveryBuffer  The buffer to be included in the `IdentifyRequest` scan data
    * @returns  The next localDeviceId registered to the Local Home Platform
    */
-  public async triggerIdentify(discoveryBuffer: Buffer): Promise<string> {
+  public async triggerIdentify(
+    requestId: string,
+    discoveryBuffer: Buffer
+  ): Promise<string> {
     console.debug('Received discovery payload:', discoveryBuffer);
 
     // Cannot start processing until all handlers have been set on the `App`
@@ -56,7 +59,7 @@ export class MockLocalHomePlatform {
     }
 
     const identifyRequest: smarthome.IntentFlow.IdentifyRequest = {
-      requestId: 'request-id',
+      requestId: requestId,
       inputs: [
         {
           intent: smarthome.Intents.IDENTIFY,
@@ -88,20 +91,22 @@ export class MockLocalHomePlatform {
   }
 
   public async triggerExecute(
-    command: string, //smarthome.DataFlow.command
-    params: object,
-    deviceId: string
-  ): Promise<boolean> {
+    requestId: string,
+    deviceId: string,
+    command: string,
+    params: object
+  ): Promise<smarthome.IntentFlow.ExecuteStatus> {
     if (!this.localDeviceIds.has(deviceId)) {
       return Promise.reject("deviceId didn't match");
     }
 
     const executeRequest: smarthome.IntentFlow.ExecuteRequest = {
-      requestId: 'request-id',
+      requestId: requestId,
       inputs: [
         {
           intent: smarthome.Intents.EXECUTE,
           payload: {
+            //TODO(cjdaly) allow multiple commands
             commands: [
               {
                 execution: [
@@ -113,11 +118,6 @@ export class MockLocalHomePlatform {
                 devices: [
                   {
                     id: deviceId,
-                    customData: {
-                      channel: 1,
-                      leds: 8,
-                      control_protocol: 'TCP',
-                    },
                   },
                 ],
               },
@@ -127,11 +127,21 @@ export class MockLocalHomePlatform {
         },
       ],
     };
-    const response = await this.app.executeHandler!(executeRequest);
 
-    if (response.payload.commands[0].status == 'SUCCESS') {
-      return Promise.resolve(true);
+    if (this.app.executeHandler === undefined) {
+      return Promise.reject(new Error('Undefined Execute Handler'));
     }
-    return Promise.reject(new Error(response.payload.commands[0].status));
+
+    const response = await this.app.executeHandler(executeRequest);
+
+    if (response.payload.commands.length != 1) {
+      return Promise.reject(new Error('Expected 1 command in ExecuteResponse'));
+    }
+
+    if (response.payload.commands[0].status != 'ERROR') {
+      return Promise.resolve('SUCCESS');
+    }
+
+    return Promise.reject('ERROR');
   }
 }

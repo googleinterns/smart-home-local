@@ -4,16 +4,31 @@
  **/
 /// <reference types="@google/local-home-sdk" />
 
+export enum Protocol{
+  UDP = 'UDP',
+  HTTP = 'HTTP',
+  TCP = 'TCP',
+}
+
+export class UdpResponseData implements smarthome.DataFlow.UdpResponseData {
+  constructor(requestId: string, deviceId: string) {
+    this.requestId = requestId;
+    this.deviceId = deviceId;
+  }
+  requestId: string;
+  deviceId: string;
+  protocol: Protocol = Protocol.UDP;
+}
+
 export class DeviceManagerStub implements smarthome.DeviceManager {
-  // Map of expected requests to responses
   private expectedCommandToResponse: Map<
-    smarthome.DataFlow.TcpRequestData,
-    smarthome.DataFlow.TcpResponseData
+    smarthome.DataFlow.Command,
+    smarthome.DataFlow.CommandBase
   > = new Map();
 
-  public addExpectedRequest(
-    expectedCommand: smarthome.DataFlow.TcpRequestData,
-    response: smarthome.DataFlow.TcpResponseData
+  public addExpectedCommand(
+    expectedCommand: smarthome.DataFlow.Command,
+    response: smarthome.DataFlow.CommandBase
   ): void {
     this.expectedCommandToResponse.set(expectedCommand, response);
   }
@@ -39,13 +54,9 @@ export class DeviceManagerStub implements smarthome.DeviceManager {
   }
 }
 
-export enum ControlKind {
-  UDP = 'UDP',
-}
-
-export function makeSendCommand(protocol: ControlKind, buf: Buffer) {
+export function makeSendCommand(protocol: Protocol, buf: Buffer) {
   switch (protocol) {
-    case ControlKind.UDP:
+    case Protocol.UDP:
       return makeUdpSend(buf);
     default:
       throw Error(`Unsupported protocol for send: ${protocol}`);

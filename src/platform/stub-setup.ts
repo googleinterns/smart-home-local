@@ -4,6 +4,7 @@
  */
 import {AppStub} from './smart-home-app';
 import {MockLocalHomePlatform} from './mock-local-home-platform';
+import {Protocol} from './device-manager';
 
 export const smarthomeStub: {
   App: typeof smarthome.App;
@@ -22,7 +23,7 @@ export const smarthomeStub: {
       data!: string;
       requestId!: string;
       deviceId!: string;
-      protocol: any;
+      protocol: Protocol = Protocol.HTTP;
       dataType!: string;
       headers!: string;
       method!: any;
@@ -32,7 +33,7 @@ export const smarthomeStub: {
       data!: string;
       requestId!: string;
       deviceId!: string;
-      protocol: any;
+      protocol: Protocol = Protocol.HTTP;
       port!: number;
       operation: any;
     },
@@ -40,7 +41,7 @@ export const smarthomeStub: {
       data!: string;
       requestId!: string;
       deviceId!: string;
-      protocol: any;
+      protocol: Protocol = Protocol.UDP;
       port!: number;
     },
   },
@@ -85,7 +86,7 @@ export const smarthomeStub: {
   },
 };
 
-// Promotes App to AppStub
+// Promotes App to AppStub and returns member platform
 export function extractMockLocalHomePlatform(
   app: smarthome.App
 ): MockLocalHomePlatform {

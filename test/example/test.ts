@@ -69,7 +69,10 @@ test('identify-handler-registers-local-id', async t => {
   await t.notThrowsAsync(async () => {
     t.is(
       // This call will return the local device id
-      await mockLocalHomePlatform.triggerIdentify(discoveryBuffer),
+      await mockLocalHomePlatform.triggerIdentify(
+        'identify-request-id',
+        discoveryBuffer
+      ),
       LOCAL_DEVICE_ID
     );
   });
@@ -78,3 +81,5 @@ test('identify-handler-registers-local-id', async t => {
   t.is(mockLocalHomePlatform.isDeviceIdRegistered(DEVICE_ID), true);
   t.is(mockLocalHomePlatform.getLocalDeviceId(DEVICE_ID), LOCAL_DEVICE_ID);
 });
+
+

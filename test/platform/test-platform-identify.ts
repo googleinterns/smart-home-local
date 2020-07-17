@@ -9,6 +9,7 @@ import {
 const DISCOVERY_BUFFER: Buffer = Buffer.from('discovery buffer 123');
 const APP_VERSION: string = '0.0.1';
 const DEVICE_ID: string = 'device-id-123';
+const IDENTIFY_REQUEST_ID = 'identify-request-id';
 const EXECUTE_HANDLER: smarthome.IntentFlow.ExecuteHandler = () => {
   return {
     requestId: 'request-id',
@@ -68,10 +69,16 @@ test('trigger-identify-with-undefined-verificationId-throws', async t => {
   };
   app.onIdentify(invalidIdentifyHandler).onExecute(EXECUTE_HANDLER).listen();
   const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
-  await t.throwsAsync(mockLocalHomePlatform.triggerIdentify(DISCOVERY_BUFFER), {
-    instanceOf: Error,
-    message: ERROR_UNDEFINED_VERIFICATIONID,
-  });
+  await t.throwsAsync(
+    mockLocalHomePlatform.triggerIdentify(
+      IDENTIFY_REQUEST_ID,
+      DISCOVERY_BUFFER
+    ),
+    {
+      instanceOf: Error,
+      message: ERROR_UNDEFINED_VERIFICATIONID,
+    }
+  );
 });
 
 /**
@@ -97,6 +104,7 @@ test('trigger-identify-with-valid-state', async t => {
   const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
   await t.notThrowsAsync(async () => {
     const verificationId = await mockLocalHomePlatform.triggerIdentify(
+      IDENTIFY_REQUEST_ID,
       discoveryBuffer
     );
     t.is(verificationId, localDeviceId);
