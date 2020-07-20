@@ -4,7 +4,7 @@ This is a mock Local Home Platform that depends on the Local Home SDK and a comp
 
 ## Usage
 
-- See example usage in `test/example/test.ts`
+See example usage in `test/example/test.ts`
 
 ## References & Issues
 
