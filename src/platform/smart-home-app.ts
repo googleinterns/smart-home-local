@@ -46,11 +46,9 @@ export class AppStub implements smarthome.App {
 
   listen(): Promise<void> {
     if (this.identifyHandler === undefined) {
-      this.allHandlersSet = false;
       throw new Error(ERROR_LISTEN_WITHOUT_IDENTIFY_HANDLER);
     }
     if (this.executeHandler === undefined) {
-      this.allHandlersSet = false;
       throw new Error(ERROR_LISTEN_WITHOUT_EXECUTE_HANDLER);
     }
     this.allHandlersSet = true;

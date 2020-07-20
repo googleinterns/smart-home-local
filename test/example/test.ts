@@ -81,5 +81,3 @@ test('identify-handler-registers-local-id', async t => {
   t.is(mockLocalHomePlatform.isDeviceIdRegistered(DEVICE_ID), true);
   t.is(mockLocalHomePlatform.getLocalDeviceId(DEVICE_ID), LOCAL_DEVICE_ID);
 });
-
-

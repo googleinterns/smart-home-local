@@ -55,7 +55,7 @@ export class MockLocalHomePlatform {
 
     // Cannot start processing until all handlers have been set on the `App`
     if (!this.app.identifyHandler) {
-      return Promise.reject(new Error(ERROR_UNDEFINED_IDENTIFY_HANDLER));
+      throw new Error(ERROR_UNDEFINED_IDENTIFY_HANDLER);
     }
 
     const identifyRequest: smarthome.IntentFlow.IdentifyRequest = {
@@ -83,11 +83,11 @@ export class MockLocalHomePlatform {
 
     // The handler returned an `IdentifyResponse` that was missing a local device id
     if (device.verificationId == null) {
-      return Promise.reject(new Error(ERROR_UNDEFINED_VERIFICATIONID));
+      throw new Error(ERROR_UNDEFINED_VERIFICATIONID);
     }
     console.debug('Registering localDeviceId: ' + device.verificationId);
     this.localDeviceIds.set(device.id, device.verificationId);
-    return Promise.resolve(device.verificationId);
+    return device.verificationId;
   }
 
   public async triggerExecute(
@@ -97,7 +97,7 @@ export class MockLocalHomePlatform {
     params: object
   ): Promise<smarthome.IntentFlow.ExecuteStatus> {
     if (!this.localDeviceIds.has(deviceId)) {
-      return Promise.reject("deviceId didn't match");
+      throw new Error("deviceId didn't match")
     }
 
     const executeRequest: smarthome.IntentFlow.ExecuteRequest = {
