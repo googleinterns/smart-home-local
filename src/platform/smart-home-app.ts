@@ -5,6 +5,13 @@
 
 import {MockLocalHomePlatform} from './mock-local-home-platform';
 
+export const ERROR_LISTEN_WITHOUT_IDENTIFY_HANDLER: string =
+  'Identify handler must be set before listen() can be called';
+export const ERROR_LISTEN_WITHOUT_EXECUTE_HANDLER: string =
+  'Execute handler must be set before listen() can be called';
+export const ERROR_HANDLERS_NOT_SET: string =
+  'All handlers must be set and listen() must be called before accessing the Platform';
+
 export class AppStub implements smarthome.App {
   private version: string;
   public identifyHandler: smarthome.IntentFlow.IdentifyHandler | undefined;
@@ -12,19 +19,39 @@ export class AppStub implements smarthome.App {
   public reachableDevicesHandler:
     | smarthome.IntentFlow.ReachableDevicesHandler
     | undefined;
+  private allHandlersSet: boolean = false;
+  private mockLocalHomePlatform: MockLocalHomePlatform;
 
+  /**
+   * Constructs a new AppStub, which implements the smarthome.App interface
+   * Creates a member instance of `MockLocalHomePlatform`
+   * @param version  The app version, in accordance with the smarthome.app type
+   */
   constructor(version: string) {
     this.version = version;
-    //  Allows Local Home Platform to access handlers
-    MockLocalHomePlatform.getInstance().setApp(this);
+    this.mockLocalHomePlatform = new MockLocalHomePlatform(this);
+  }
+
+  public getLocalHomePlatform(): MockLocalHomePlatform {
+    if (this.allHandlersSet) {
+      return this.mockLocalHomePlatform;
+    } else {
+      throw new Error(ERROR_HANDLERS_NOT_SET);
+    }
   }
 
   getDeviceManager(): smarthome.DeviceManager {
-    return MockLocalHomePlatform.getInstance().getDeviceManager();
+    return this.mockLocalHomePlatform.getDeviceManager();
   }
 
   listen(): Promise<void> {
-    MockLocalHomePlatform.getInstance().notifyHomeAppReady();
+    if (this.identifyHandler === undefined) {
+      throw new Error(ERROR_LISTEN_WITHOUT_IDENTIFY_HANDLER);
+    }
+    if (this.executeHandler === undefined) {
+      throw new Error(ERROR_LISTEN_WITHOUT_EXECUTE_HANDLER);
+    }
+    this.allHandlersSet = true;
     return Promise.resolve();
   }
 

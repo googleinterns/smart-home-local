@@ -2,9 +2,9 @@
 
 This is a mock Local Home Platform that depends on the Local Home SDK and a compiled [Local Fulfillment App](https://github.com/actions-on-google/smart-home-local)
 
-## Usage
+# Usage
 
-See example usage in `test/example/test.ts`
+- See example tests in `test/example/` directory
 
 ## References & Issues
 

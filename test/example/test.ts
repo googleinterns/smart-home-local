@@ -4,94 +4,77 @@
 /// <reference types="@google/local-home-sdk" />
 /// <reference types="@types/node" />
 import test from 'ava';
-import cbor from 'cbor';
-import {
-  UDPDevice,
-  MockNetwork,
-  RemoteAddressInfo,
-} from '../../src/platform/mock-radio';
-import {
-  MockLocalHomePlatform,
-  UDPScanConfig,
-  ScanState,
-} from '../../src/platform/mock-local-home-platform';
-import {injectSmarthomeStubs} from '../../src/platform/stub-setup';
+import {extractMockLocalHomePlatform, AppStub} from '../../src';
 
-// Tests a UDP identify flow end-to-end
-test('udp-device-connects', async t => {
-  // First, create a scan configuration
-  const scanConfig = new UDPScanConfig(
-    ScanState.Unprovisioned,
-    '255.255.255.255',
-    3311,
-    3312,
-    'A5A5A5A5'
-  );
+const DEVICE_ID = 'device-id-123';
+const LOCAL_DEVICE_ID = 'local-device-id-123';
 
-  // Mock a UDP Network
-  const mockNetwork = new MockNetwork();
-
-  // Mock the Local Home Platform
-  const mockLocalHomePlatform = MockLocalHomePlatform.getInstance();
-
-  mockLocalHomePlatform.initializeRadio(mockNetwork, [scanConfig]);
-
-  // Mock a UDP Device
-  const mockDevice = new UDPDevice();
-
-  const deviceId = 'test-device-id';
-  // Device data that mock device sends back
-
-  const discoveryPort = 12345;
-  const discoveryData = {
-    id: deviceId,
-    model: '2',
-    hw_rev: '0.0.1',
-    fw_rev: '1.2.3',
-    channels: [discoveryPort],
+// Sample Identify handler that is tested against
+const identifyHandler: smarthome.IntentFlow.IdentifyHandler = (
+  identifyRequest: smarthome.IntentFlow.IdentifyRequest
+) => {
+  return {
+    requestId: identifyRequest.requestId,
+    intent: smarthome.Intents.IDENTIFY,
+    payload: {
+      device: {
+        id: DEVICE_ID,
+        verificationId: LOCAL_DEVICE_ID,
+      },
+    },
   };
+};
 
-  // Sample device response
-  mockDevice.setUDPMessageAction((msg: Buffer, rinfo: RemoteAddressInfo) => {
-    const packetBuffer = Buffer.from(scanConfig.discoveryPacket, 'hex');
-    if (msg.compare(packetBuffer) !== 0) {
-      console.warn('UDP received unknown payload:', msg, 'from:', rinfo);
-      return;
-    }
-    console.debug('UDP received discovery payload:', msg, 'from:', rinfo);
+// Sample Execute handler that is tested against
+const executeHandler: smarthome.IntentFlow.ExecuteHandler = (
+  executeRequest: smarthome.IntentFlow.ExecuteRequest
+) => {
+  return {
+    requestId: executeRequest.requestId,
+    intent: smarthome.Intents.IDENTIFY,
+    payload: {
+      commands: [
+        {
+          ids: ['123'],
+          status: 'SUCCESS',
+          states: {
+            on: true,
+            online: true,
+          },
+        },
+        {
+          ids: ['456'],
+          status: 'ERROR',
+          errorCode: 'deviceTurnedOff',
+        },
+      ],
+    },
+  };
+};
 
-    const discoveryBuffer = cbor.encode(discoveryData);
+// Tests an identify flow end-to-end
+test('identify-handler-registers-local-id', async t => {
+  // Create the App to test against
+  const app: smarthome.App = new smarthome.App('0.0.1');
 
-    // TODO(cjdaly) Add error path
-    mockNetwork.sendUDPMessage(
-      discoveryBuffer,
-      rinfo.port,
-      rinfo.address,
-      discoveryPort,
-      scanConfig.broadcastAddress
+  // Set intent fulfillment handlers
+  await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();
+
+  // Obtain the Mock Local Home Platform from the App stub
+  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
+
+  const discoveryBuffer = Buffer.from('sample-buffer');
+
+  // Trigger an Identify intent from the platformn
+  await t.notThrowsAsync(async () => {
+    t.is(
+      // This call will return the local device id
+      await mockLocalHomePlatform.triggerIdentify(discoveryBuffer),
+      LOCAL_DEVICE_ID
     );
   });
 
-  //Mock network needs to listen for device response
-  mockNetwork.registerUDPListener(
-    mockDevice,
-    scanConfig.broadcastPort,
-    scanConfig.broadcastAddress
-  );
-
-  injectSmarthomeStubs();
-
-  t.is(mockLocalHomePlatform.isHomeAppReady(), true);
-
-  const connectedDeviceId = mockLocalHomePlatform.getNextDeviceIdRegistered();
-
-  // Start scanning
-  mockLocalHomePlatform.triggerScan();
-
-  t.is(await connectedDeviceId, deviceId);
-  t.is(mockLocalHomePlatform.getLocalDeviceIdMap().size, 1);
-  t.is(
-    mockLocalHomePlatform.getLocalDeviceIdMap().values().next().value,
-    deviceId
-  );
+  // Double check our Identify handler did its job and returned the local device id
+  t.is(mockLocalHomePlatform.isDeviceIdRegistered(DEVICE_ID), true);
+  t.is(mockLocalHomePlatform.getLocalDeviceId(DEVICE_ID), LOCAL_DEVICE_ID);
 });

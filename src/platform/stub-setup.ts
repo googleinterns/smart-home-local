@@ -3,8 +3,9 @@
  * Bundled HomeApp cannot be loaded until this global is set.
  */
 import {AppStub} from './smart-home-app';
+import {MockLocalHomePlatform} from './mock-local-home-platform';
 
-const smarthomeStub: {
+export const smarthomeStub: {
   App: typeof smarthome.App;
   Intents: {[key in keyof typeof smarthome.Intents]: string};
 } = {
@@ -16,6 +17,12 @@ const smarthomeStub: {
   },
 };
 
-export function injectSmarthomeStubs() {
-  (global as any).smarthome = smarthomeStub;
+// Promotes App to AppStub
+export function extractMockLocalHomePlatform(
+  app: smarthome.App
+): MockLocalHomePlatform{
+  if (app instanceof AppStub) {
+    return app.getLocalHomePlatform();
+  }
+  throw new Error("Couldn't downcast App to AppStub");
 }

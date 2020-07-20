@@ -1,144 +1,59 @@
 /*
  * Mock Local Home Platform class
- * - Interacts with bundled HomeApp
- * - Accepts scan config
- * - Interacts with virtual network
  */
 
 /// <reference types="@google/local-home-sdk" />
-import {MockNetwork, MockUDPListener, RemoteAddressInfo} from './mock-radio';
-import {DeviceManagerStub} from './device-manager';
 import {AppStub} from './smart-home-app';
+import {DeviceManagerStub} from './device-manager';
 
-export enum ScanState {
-  Unprovisioned,
-  Provisioned,
-}
-
-interface ScanConfig {
-  state: ScanState;
-}
-
-export class UDPScanConfig implements ScanConfig {
-  state: ScanState;
-  broadcastAddress: string;
-  listenPort: number;
-  broadcastPort: number;
-  discoveryPacket: string;
-  constructor(
-    state: ScanState,
-    broadcastAddress: string,
-    listenport: number,
-    broadcastPort: number,
-    discoveryPacket: string
-  ) {
-    this.state = state;
-    this.broadcastAddress = broadcastAddress;
-    this.broadcastPort = broadcastPort;
-    this.listenPort = listenport;
-    this.discoveryPacket = discoveryPacket;
-  }
-}
+export const ERROR_UNDEFINED_VERIFICATIONID: string =
+  'The handler returned an IdentifyResponse with an undefined verificationId';
+export const ERROR_UNDEFINED_IDENTIFY_HANDLER: string =
+  "Couldn't trigger an IdentifyRequest: The App identifyHandler was undefined.";
+export const ERROR_NO_LOCAL_DEVICE_ID_FOUND: string =
+  'Cannot get localDeviceId of unregistered deviceId';
 
 // TODO(cjdaly): add other radio scan support
-export class MockLocalHomePlatform implements MockUDPListener {
-  //  Singleton instance
-  private static instance: MockLocalHomePlatform;
-
-  private udpScanConfigs: UDPScanConfig[] = [];
-  private mockNetwork: MockNetwork | undefined;
+export class MockLocalHomePlatform {
   private deviceManager: smarthome.DeviceManager = new DeviceManagerStub();
-  private app: AppStub | undefined;
+  private app: AppStub;
   private localDeviceIds: Map<string, string> = new Map<string, string>();
-  private newDeviceRegisteredActions: ((localDeviceId: string) => void)[] = [];
-  private homeAppReady: boolean = false;
 
-  private constructor() {}
-
-  public initializeRadio(
-    mockNetwork: MockNetwork,
-    udpScanConfigs: UDPScanConfig[]
-  ) {
-    this.mockNetwork = mockNetwork;
-    this.udpScanConfigs = udpScanConfigs;
-    this.setupUDP();
-  }
-
-  public setApp(app: AppStub) {
+  /**
+   * Constructs a new MockLocalHomePlatform instance using an App instance
+   * @param app the AppStub that acts as an interface for intent handlers
+   */
+  public constructor(app: AppStub) {
     this.app = app;
-  }
-
-  private onNewDeviceIdRegistered(localDeviceId: string) {
-    this.newDeviceRegisteredActions.forEach(newDeviceRegisteredAction => {
-      newDeviceRegisteredAction(localDeviceId);
-    });
-  }
-
-  public async getNextDeviceIdRegistered(): Promise<string> {
-    return new Promise(resolve => {
-      this.newDeviceRegisteredActions.push(localDeviceId => {
-        resolve(localDeviceId);
-      });
-    });
-  }
-
-  public isHomeAppReady(): boolean {
-    return this.homeAppReady;
-  }
-
-  public notifyHomeAppReady(): void {
-    this.homeAppReady = true;
-  }
-
-  //  Singleton getter
-  public static getInstance(): MockLocalHomePlatform {
-    if (!MockLocalHomePlatform.instance) {
-      MockLocalHomePlatform.instance = new MockLocalHomePlatform();
-    }
-    return MockLocalHomePlatform.instance;
   }
 
   public getDeviceManager(): smarthome.DeviceManager {
     return this.deviceManager;
   }
 
-  public getLocalDeviceIdMap(): Map<string, string> {
-    return this.localDeviceIds;
+  public isDeviceIdRegistered(deviceId: string): boolean {
+    return this.localDeviceIds.has(deviceId);
   }
 
-  private setupUDP() {
-    this.udpScanConfigs.forEach(udpScanConfig => {
-      this.mockNetwork!.registerUDPListener(
-        this,
-        udpScanConfig.listenPort,
-        udpScanConfig.broadcastAddress
-      );
-    });
-  }
-
-  private sendUDPBroadcast(scanConfig: UDPScanConfig) {
-    const packetBuffer = Buffer.from(scanConfig.discoveryPacket, 'hex');
-    this.mockNetwork!.sendUDPMessage(
-      packetBuffer,
-      scanConfig.broadcastPort,
-      scanConfig.broadcastAddress,
-      scanConfig.listenPort,
-      scanConfig.broadcastAddress
-    );
-  }
-
-  // Establish fulfillment path using app code
-  async onUDPMessage(msg: Buffer, rinfo: RemoteAddressInfo): Promise<void> {
-    if (this.app === undefined) {
-      throw new Error('Cannot trigger IdentifyRequest: App was undefined');
+  public getLocalDeviceId(deviceId: string): string {
+    if (!this.isDeviceIdRegistered(deviceId)) {
+      throw new Error(ERROR_NO_LOCAL_DEVICE_ID_FOUND);
     }
-    if (!this.isHomeAppReady()) {
-      throw new Error(
-        'Cannot trigger IdentifyRequest: listen() was not called'
-      );
-    }
+    return this.localDeviceIds.get(deviceId)!;
+  }
 
-    console.log('received discovery payload:', msg, 'from:', rinfo);
+  /**
+   * Takes a `discoveryBuffer` and passes it to the fulfillment app in an `IdentifyRequest`
+   * @param discoveryBuffer  The buffer to be included in the `IdentifyRequest` scan data
+   * @returns  The next localDeviceId registered to the Local Home Platform
+   */
+  public async triggerIdentify(discoveryBuffer: Buffer): Promise<string> {
+    console.debug('Received discovery payload:', discoveryBuffer);
+
+    // Cannot start processing until all handlers have been set on the `App`
+    if (!this.app.identifyHandler) {
+      throw new Error(ERROR_UNDEFINED_IDENTIFY_HANDLER);
+    }
 
     const identifyRequest: smarthome.IntentFlow.IdentifyRequest = {
       requestId: 'request-id',
@@ -148,7 +63,7 @@ export class MockLocalHomePlatform implements MockUDPListener {
           payload: {
             device: {
               radioTypes: [],
-              udpScanData: {data: msg.toString('hex')},
+              udpScanData: {data: discoveryBuffer.toString('hex')},
             },
             structureData: {},
             params: {},
@@ -158,34 +73,17 @@ export class MockLocalHomePlatform implements MockUDPListener {
       devices: [],
     };
 
-    if (this.app.identifyHandler === undefined) {
-      throw new Error(
-        'identifyHandler has not been set by the fulfillment HomeApp'
-      );
-    }
-    const identifyResponse: smarthome.IntentFlow.IdentifyResponse = await this.app.identifyHandler(
-      identifyRequest
-    );
+    const identifyResponse: smarthome.IntentFlow.IdentifyResponse = await this
+      .app.identifyHandler!(identifyRequest);
 
     const device = identifyResponse.payload.device;
+
+    // The handler returned an `IdentifyResponse` that was missing a local device id
     if (device.verificationId == null) {
-      throw new Error(
-        'Cannot register a localDeviceId: verficationId from IdentifyResponse was undefined'
-      );
+      throw new Error(ERROR_UNDEFINED_VERIFICATIONID);
     }
-    console.log('Registering localDeviceId: ' + device.verificationId);
+    console.debug('Registering localDeviceId: ' + device.verificationId);
     this.localDeviceIds.set(device.id, device.verificationId);
-    this.onNewDeviceIdRegistered(device.verificationId);
-  }
-
-  public addUDPScanConfig(scanConfig: UDPScanConfig) {
-    this.udpScanConfigs.push(scanConfig);
-  }
-
-  public triggerScan() {
-    this.udpScanConfigs.forEach(udpScanConfig => {
-      this.sendUDPBroadcast(udpScanConfig);
-    });
-    // TODO(cjdaly) other scans
+    return device.verificationId;
   }
 }
