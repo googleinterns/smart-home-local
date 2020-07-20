@@ -19,7 +19,9 @@ const IDENTIFY_HANDLER: smarthome.IntentFlow.IdentifyHandler = () => {
   };
 };
 
-// Cannot call listen without setting both required handlers
+/**
+ * Tests that a call to `listen()` without setting any required handlers fails
+ */
 test('listen-with-undefined-identify-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
   await t.throwsAsync(
@@ -33,7 +35,9 @@ test('listen-with-undefined-identify-throws', async t => {
   );
 });
 
-// Cannot call listen without setting both required handlers
+/**
+ * Tests that a call to `listen()` having only set the identify handler fails
+ */
 test('listen-with-undefined-execute-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
   app.onIdentify(IDENTIFY_HANDLER);
@@ -48,7 +52,10 @@ test('listen-with-undefined-execute-throws', async t => {
   );
 });
 
-// A call to `listen()` with both handlers should not throw any error
+/**
+ * Tests that a call to `listen()` with Identify and Execute handlers
+ * finishes without error
+ */
 test('listen-with-valid-handlers', async t => {
   const executeHandler: smarthome.IntentFlow.ExecuteHandler = (
     executeRequest: smarthome.IntentFlow.ExecuteRequest

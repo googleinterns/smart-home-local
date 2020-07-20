@@ -82,7 +82,11 @@ export const smarthomeStub: {
   },
 };
 
-// Promotes App to AppStub and returns member platform
+/**
+ * Module-level function to source a `MockLocalHomePlatform` from an `App`.
+ * @param app  The app to promote and extract the `MockLocalHomePlatform` from.
+ * @returns  The `MockLocalHomePlatform` member.
+ */
 export function extractMockLocalHomePlatform(
   app: smarthome.App
 ): MockLocalHomePlatform {
@@ -91,7 +95,11 @@ export function extractMockLocalHomePlatform(
   }
   throw new Error("Couldn't downcast App to AppStub");
 }
-
+/**
+ * Module-level function to source a `DeviceManagerStub` from an `App`.
+ * @param app  The app to promote and extract the `DeviceManagerStub` from.
+ * @returns  The `DeviceManagerStub` member.
+ */
 export function extractDeviceManagerStub(
   app: smarthome.App
 ): DeviceManagerStub {

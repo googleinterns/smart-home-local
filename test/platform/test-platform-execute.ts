@@ -19,6 +19,9 @@ const DEVICE_PORT = 12345;
 const LOCAL_DEVICE_ID = 'local-device-id-123';
 const EXECUTE_REQUEST_ID = 'request-id-123';
 
+/**
+ * Tests that a valid execute request and handler pair will result in a `SUCCESS`
+ */
 test('execute-handler-command-success', async t => {
   // Create the App and source Device Manager
   const app: smarthome.App = new smarthome.App('0.0.1');
@@ -70,7 +73,10 @@ test('execute-handler-command-success', async t => {
   });
 });
 
-test('execute-handler-sends-wrong-buffer-throws', async t => {
+/**
+ * Tests that sending a non-matching command will result in an `ERROR`
+ */
+test('execute-handler-sends-wrong-buffer', async t => {
   // Create the App and source Device Manager
   const app: smarthome.App = new smarthome.App('0.0.1');
   const deviceManagerStub: DeviceManagerStub = extractDeviceManagerStub(app);
@@ -111,16 +117,15 @@ test('execute-handler-sends-wrong-buffer-throws', async t => {
   );
 
   // Trigger an Execute intent that fails
-  await t.throwsAsync(
-    mockLocalHomePlatform.triggerExecute(
-      EXECUTE_REQUEST_ID,
-      DEVICE_ID,
-      'action.devices.commands.OnOff',
-      {}
-    ),
-    {
-      instanceOf: Error,
-      message: 'ERROR',
-    }
-  );
+  await t.notThrowsAsync(async () => {
+    t.is(
+      await mockLocalHomePlatform.triggerExecute(
+        EXECUTE_REQUEST_ID,
+        DEVICE_ID,
+        'action.devices.commands.OnOff',
+        {}
+      ),
+      'ERROR'
+    );
+  });
 });

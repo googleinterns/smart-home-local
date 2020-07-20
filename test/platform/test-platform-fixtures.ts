@@ -1,3 +1,6 @@
+/**
+ * Fixtures used across internal tests
+ */
 export function makeSendCommand(
   protocol: smarthome.Constants.Protocol,
   buf: Buffer
