@@ -50,11 +50,13 @@ export class MockLocalHomePlatform {
    * Takes a `discoveryBuffer` and passes it to the fulfillment app in an `IdentifyRequest`
    * @param requestId  The requestId to set on the `IdentifyRequest`
    * @param discoveryBuffer  The buffer to be included in the `IdentifyRequest` scan data
+   * @param deviceId  The device ID to link with the localDeviceId returned from fulfillment
    * @returns  The next localDeviceId registered to the Local Home Platform
    */
   public async triggerIdentify(
     requestId: string,
-    discoveryBuffer: Buffer
+    discoveryBuffer: Buffer,
+    deviceId?: string | undefined
   ): Promise<string> {
     console.debug('Received discovery payload:', discoveryBuffer);
 
@@ -70,6 +72,7 @@ export class MockLocalHomePlatform {
           intent: smarthome.Intents.IDENTIFY,
           payload: {
             device: {
+              id: deviceId,
               radioTypes: [],
               udpScanData: {data: discoveryBuffer.toString('hex')},
             },
@@ -90,6 +93,7 @@ export class MockLocalHomePlatform {
     if (device.verificationId == null) {
       throw new Error(ERROR_UNDEFINED_VERIFICATIONID);
     }
+
     console.debug('Registering localDeviceId: ' + device.verificationId);
     this.localDeviceIds.set(device.id, device.verificationId);
     return device.verificationId;

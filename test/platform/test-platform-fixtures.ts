@@ -45,7 +45,7 @@ export function createDeviceCommand(
 
 export function createIdentifyHandler(
   deviceId: string,
-  veriicationId: string
+  verificationId: string
 ): smarthome.IntentFlow.IdentifyHandler {
   return async (identifyRequest: smarthome.IntentFlow.IdentifyRequest) => {
     return {
@@ -54,7 +54,7 @@ export function createIdentifyHandler(
       payload: {
         device: {
           id: deviceId,
-          verificationId: veriicationId,
+          verificationId: verificationId,
         },
       },
     };

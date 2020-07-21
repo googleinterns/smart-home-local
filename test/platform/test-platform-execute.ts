@@ -113,7 +113,8 @@ test('execute-handler-sends-wrong-buffer', async t => {
   );
   await mockLocalHomePlatform.triggerIdentify(
     'sample-request-id',
-    Buffer.from('sample-buffer')
+    Buffer.from('sample-buffer'),
+    DEVICE_ID
   );
 
   // Trigger an Execute intent that fails
