@@ -1,7 +1,7 @@
 /// <reference types="@google/local-home-sdk" />
 
 /**
- * Sample Identify handler that is tested against
+ * Sample Identify handler that is tested against in example tests
  * @param identifyRequest   The `IdentifyRequest` sent by the Local Home Platform
  */
 export function identifyHandler(
@@ -31,7 +31,7 @@ export function identifyHandler(
 }
 
 /**
- * Sample Execute handler that is tested against
+ * Sample Execute handler that is tested against in example tests
  * @param executeRequest  The `ExecuteRequest` sent by the Local Home Platform
  */
 export function executeHandler(
@@ -46,6 +46,14 @@ export function executeHandler(
     .build();
 }
 
+/**
+ * Helper to create a DeviceCommand for Execute functionality
+ * @param protocol 
+ * @param buffer 
+ * @param requestId 
+ * @param deviceId 
+ * @param port 
+ */
 export function createDeviceCommand(
   protocol: smarthome.Constants.Protocol,
   buffer: Buffer,
@@ -60,9 +68,6 @@ export function createDeviceCommand(
   return deviceCommand;
 }
 
-/**
- * Fixtures used across internal tests
- */
 export function makeSendCommand(
   protocol: smarthome.Constants.Protocol,
   buf: Buffer

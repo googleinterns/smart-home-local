@@ -15,8 +15,6 @@ export const ERROR_NO_LOCAL_DEVICE_ID_FOUND: string =
   'Cannot get localDeviceId of unregistered deviceId';
 export const ERROR_DEVICE_ID_NOT_REGISTERED: string =
   'Cannot trigger an ExecuteRequest: The provided deviceId was not registered to the platform';
-export const ERROR_EXECUTE_RESPONSE_COMMAND_LENGTH: string =
-  'The fulfillment returned an amount of commands other than 1';
 
 export class MockLocalHomePlatform {
   private deviceManager: DeviceManagerStub = new DeviceManagerStub();
@@ -100,22 +98,23 @@ export class MockLocalHomePlatform {
   }
 
   /**
-   * Forms an `ExecuteRequest` with the given parameters and passes it to the fulfillment app
+   * Forms an `ExecuteRequest` with the given commands and passes it to the fulfillment app.
    * @param requestId  The request id to set in the `ExecuteRequest`
-   * @param deviceId  The device id to set in the `ExecuteRequest`
-   * @param command  The command string to set as the single command in the `ExecuteRequest`
-   * @param params  The execution parameters to set in the single command in the `ExecuteRequest`
+   * @param commands  The `ExecuteRequestCommands` to forward to the Execute handler.
+   * @param returns The list of `ExecuteResponseCommands` that the fulfillment returned.
    */
   public async triggerExecute(
     requestId: string,
-    deviceId: string,
-    command: string,
-    params: object
-  ): Promise<smarthome.IntentFlow.ExecuteStatus> {
-    // Cannot send a `ExecuteRequest` to a device not registered
-    if (!this.localDeviceIds.has(deviceId)) {
-      throw new Error(ERROR_DEVICE_ID_NOT_REGISTERED);
-    }
+    commands: smarthome.IntentFlow.ExecuteRequestCommands[]
+  ): Promise<smarthome.IntentFlow.ExecuteResponseCommands[]> {
+    commands.forEach(command => {
+      command.devices.forEach(device => {
+        // Cannot send a `ExecuteRequest` to a device not registered
+        if (!this.localDeviceIds.has(device.id)) {
+          throw new Error(ERROR_DEVICE_ID_NOT_REGISTERED);
+        }
+      });
+    });
 
     // No executeHandler found
     if (this.app.executeHandler === undefined) {
@@ -123,26 +122,12 @@ export class MockLocalHomePlatform {
     }
 
     const executeRequest: smarthome.IntentFlow.ExecuteRequest = {
-      requestId: requestId,
+      requestId,
       inputs: [
         {
           intent: smarthome.Intents.EXECUTE,
           payload: {
-            commands: [
-              {
-                execution: [
-                  {
-                    command,
-                    params,
-                  },
-                ],
-                devices: [
-                  {
-                    id: deviceId,
-                  },
-                ],
-              },
-            ],
+            commands,
             structureData: {},
           },
         },
@@ -151,10 +136,6 @@ export class MockLocalHomePlatform {
 
     const response = await this.app.executeHandler(executeRequest);
 
-    // Only valid command length supported is 1
-    if (response.payload.commands.length != 1) {
-      throw new Error(ERROR_EXECUTE_RESPONSE_COMMAND_LENGTH);
-    }
-    return response.payload.commands[0].status;
+    return response.payload.commands;
   }
 }

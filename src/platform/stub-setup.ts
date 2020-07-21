@@ -5,9 +5,11 @@
 import {AppStub} from './smart-home-app';
 import {MockLocalHomePlatform} from './mock-local-home-platform';
 import {DeviceManagerStub} from './device-manager';
+import {ExecuteStub} from './execute';
 
 export const smarthomeStub: {
   App: typeof smarthome.App;
+  Execute: typeof smarthome.Execute;
   Intents: {[key in keyof typeof smarthome.Intents]: string};
   DataFlow: {
     UdpRequestData: typeof smarthome.DataFlow.UdpRequestData;
@@ -15,9 +17,9 @@ export const smarthomeStub: {
   Constants: {
     Protocol: {[key in keyof typeof smarthome.Constants.Protocol]: string};
   };
-  Execute: typeof smarthome.Execute;
 } = {
   App: AppStub,
+  Execute: ExecuteStub,
   Intents: {
     EXECUTE: 'action.devices.EXECUTE',
     IDENTIFY: 'action.devices.IDENTIFY',
@@ -25,11 +27,11 @@ export const smarthomeStub: {
   },
   DataFlow: {
     UdpRequestData: class {
-      data!: string;
-      requestId!: string;
-      deviceId!: string;
+      data: string = '';
+      requestId: string = '';
+      deviceId: string = '';
       protocol: smarthome.Constants.Protocol = smarthome.Constants.Protocol.UDP;
-      port!: number;
+      port: number = 0;
     },
   },
   Constants: {
@@ -39,45 +41,6 @@ export const smarthomeStub: {
       TCP: 'TCP',
       UDP: 'UDP',
       BLE_MESH: 'BLE_MESH',
-    },
-  },
-  Execute: {
-    Response: {
-      Builder: class {
-        private requestId: string = '';
-        private commands: smarthome.IntentFlow.ExecuteResponseCommands[] = [];
-        public setRequestId(requestId: string): this {
-          this.requestId = requestId;
-          return this;
-        }
-        public setSuccessState(deviceId: string, state: unknown): this {
-          this.commands.push({
-            ids: [deviceId],
-            status: 'SUCCESS',
-            states: state,
-          });
-          return this;
-        }
-        public setErrorState(
-          deviceId: string,
-          errorCode: smarthome.IntentFlow.ExecuteErrors
-        ): this {
-          this.commands.push({
-            ids: [deviceId],
-            status: 'ERROR',
-            errorCode,
-          });
-          return this;
-        }
-        public build() {
-          return {
-            requestId: this.requestId,
-            payload: {
-              commands: this.commands,
-            },
-          };
-        }
-      },
     },
   },
 };

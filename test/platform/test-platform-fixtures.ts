@@ -69,11 +69,12 @@ export function createExecuteHandler(
     const command = executeRequest.inputs[0].payload.commands[0];
     const device = command.devices[0];
 
-    // Create execution response command success/failure.
+    // Create the Execute response to send back to platform
     const executeResponse = new smarthome.Execute.Response.Builder().setRequestId(
       executeRequest.requestId
     );
 
+    // Perform required DeviceManager actions and update response
     try {
       const result = await deviceManager.send(deviceCommand);
       executeResponse.setSuccessState(result.deviceId, {});

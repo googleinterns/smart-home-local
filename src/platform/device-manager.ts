@@ -30,7 +30,7 @@ export class DeviceManagerStub implements smarthome.DeviceManager {
   }
 
   /**
-   * Registers a command that will be checked on `send()` anCommd a corresponding
+   * Registers a command that will be checked against on `send()`, and a corresponding
    * response that will be returned from `send()` on a successful match.
    * @param expectedCommand  The command to check against incoming commands.
    * @param response  The response to send when an incoming command matches.
