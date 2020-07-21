@@ -1,8 +1,7 @@
-/// <reference types="@google/local-home-sdk" />
-
 /**
  * Fixtures used across internal tests
  */
+/// <reference types="@google/local-home-sdk" />
 
 /**
  * Implementation of smarthome.DataFlow.UpdResponseData for testing DeviceManager
