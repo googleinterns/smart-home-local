@@ -15,7 +15,6 @@ import {
   createDeviceCommand,
   UdpResponseData,
 } from '../platform/test-platform-fixtures';
-import {App} from '@google/local-home-sdk';
 
 const DEVICE_ID = 'device-id-123';
 const DEVICE_PORT = 12345;
