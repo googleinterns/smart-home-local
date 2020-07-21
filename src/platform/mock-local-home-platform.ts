@@ -101,7 +101,7 @@ export class MockLocalHomePlatform {
    * Forms an `ExecuteRequest` with the given commands and passes it to the fulfillment app.
    * @param requestId  The request id to set in the `ExecuteRequest`
    * @param commands  The `ExecuteRequestCommands` to forward to the Execute handler.
-   * @param returns The list of `ExecuteResponseCommands` that the fulfillment returned.
+   * @returns The list of `ExecuteResponseCommands` that the fulfillment returned.
    */
   public async triggerExecute(
     requestId: string,
