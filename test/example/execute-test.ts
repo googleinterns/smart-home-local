@@ -10,11 +10,12 @@ import {
   extractDeviceManagerStub,
   MockLocalHomePlatform,
 } from '../../src';
-import {identifyHandler, executeHandler} from './fixtures';
 import {
-  createDeviceCommand,
-  UdpResponseData,
-} from '../platform/test-platform-fixtures';
+  identifyHandler,
+  executeHandler,
+  createUdpDeviceCommand,
+} from './fixtures';
+import {UdpResponseData} from '../platform/test-platform-fixtures';
 
 const DEVICE_ID = 'device-id-123';
 const DEVICE_PORT = 12345;
@@ -64,8 +65,7 @@ test('test-valid-execute-request', async t => {
   );
 
   // Create a valid request for the Execute call
-  const expectedCommand: smarthome.DataFlow.UdpRequestData = createDeviceCommand(
-    smarthome.Constants.Protocol.UDP,
+  const expectedCommand: smarthome.DataFlow.UdpRequestData = createUdpDeviceCommand(
     Buffer.from('test-execute-buffer'),
     EXECUTE_REQUEST_ID,
     DEVICE_ID,

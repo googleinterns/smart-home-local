@@ -46,34 +46,23 @@ export function executeHandler(
     .build();
 }
 
-export function createDeviceCommand(
-  protocol: smarthome.Constants.Protocol,
+/**
+ * Creates a 'UdpRequestData' to use for testing `DeviceManager` functionality
+ * @param buffer  The `Buffer` to include in the returned request data
+ * @param requestId  The request id to set in the request data
+ * @param deviceId  The device id to set in the request data
+ * @param port  The port to set in the request data
+ */
+export function createUdpDeviceCommand(
   buffer: Buffer,
   requestId: string,
   deviceId: string,
   port: number
-) {
-  const deviceCommand = makeSendCommand(protocol, buffer);
+): smarthome.DataFlow.UdpRequestData {
+  const deviceCommand = new smarthome.DataFlow.UdpRequestData();
+  deviceCommand.data = buffer.toString('hex');
   deviceCommand.requestId = requestId;
   deviceCommand.deviceId = deviceId;
   deviceCommand.port = port;
   return deviceCommand;
-}
-
-export function makeSendCommand(
-  protocol: smarthome.Constants.Protocol,
-  buf: Buffer
-) {
-  switch (protocol) {
-    case smarthome.Constants.Protocol.UDP:
-      return makeUdpSend(buf);
-    default:
-      throw Error(`Unsupported protocol for send: ${protocol}`);
-  }
-}
-
-function makeUdpSend(buf: Buffer) {
-  const command = new smarthome.DataFlow.UdpRequestData();
-  command.data = buf.toString('hex');
-  return command;
 }

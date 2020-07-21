@@ -9,9 +9,9 @@ import {
 import {
   createExecuteHandler,
   createIdentifyHandler,
-  createDeviceCommand,
   UdpResponseData,
 } from './test-platform-fixtures';
+import {createUdpDeviceCommand} from '../example/fixtures';
 
 const DEVICE_ID = 'device-id-123';
 const DEVICE_PORT = 12345;
@@ -56,8 +56,7 @@ test('execute-handler-command-success', async t => {
   const deviceManagerStub: DeviceManagerStub = extractDeviceManagerStub(app);
 
   // Create a valid request for the Execute call
-  const validCommand: smarthome.DataFlow.UdpRequestData = createDeviceCommand(
-    smarthome.Constants.Protocol.UDP,
+  const validCommand: smarthome.DataFlow.UdpRequestData = createUdpDeviceCommand(
     Buffer.from('test-execute-buffer'),
     EXECUTE_REQUEST_ID,
     DEVICE_ID,
@@ -98,6 +97,7 @@ test('execute-handler-command-success', async t => {
 /**
  * Tests that sending a non-matching command will result in an `ERROR`
  */
+
 test('execute-handler-sends-wrong-buffer', async t => {
   // Create the App and source Device Manager
   const app: smarthome.App = new smarthome.App('0.0.1');
@@ -105,8 +105,7 @@ test('execute-handler-sends-wrong-buffer', async t => {
 
   // Prepare the stub to expect a command
   deviceManagerStub.addExpectedCommand(
-    createDeviceCommand(
-      smarthome.Constants.Protocol.UDP,
+    createUdpDeviceCommand(
       Buffer.from('test-execute-buffer'),
       EXECUTE_REQUEST_ID,
       DEVICE_ID,
@@ -117,8 +116,7 @@ test('execute-handler-sends-wrong-buffer', async t => {
 
   // Trigger an Execute intent with an incorrect buffer
   const executeHandler = createExecuteHandler(
-    createDeviceCommand(
-      smarthome.Constants.Protocol.UDP,
+    createUdpDeviceCommand(
       Buffer.from('incorrect-buffer'),
       EXECUTE_REQUEST_ID,
       DEVICE_ID,

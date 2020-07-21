@@ -1,24 +1,12 @@
+/// <reference types="@google/local-home-sdk" />
+
 /**
  * Fixtures used across internal tests
  */
-export function makeSendCommand(
-  protocol: smarthome.Constants.Protocol,
-  buf: Buffer
-) {
-  switch (protocol) {
-    case smarthome.Constants.Protocol.UDP:
-      return makeUdpSend(buf);
-    default:
-      throw Error(`Unsupported protocol for send: ${protocol}`);
-  }
-}
 
-function makeUdpSend(buf: Buffer) {
-  const command = new smarthome.DataFlow.UdpRequestData();
-  command.data = buf.toString('hex');
-  return command;
-}
-
+/**
+ * Implementation of smarthome.DataFlow.UpdResponseData for testing DeviceManager
+ */
 export class UdpResponseData implements smarthome.DataFlow.UdpResponseData {
   constructor(requestId: string, deviceId: string) {
     this.requestId = requestId;
@@ -29,20 +17,11 @@ export class UdpResponseData implements smarthome.DataFlow.UdpResponseData {
   protocol: smarthome.Constants.Protocol = smarthome.Constants.Protocol.UDP;
 }
 
-export function createDeviceCommand(
-  protocol: smarthome.Constants.Protocol,
-  buffer: Buffer,
-  requestId: string,
-  deviceId: string,
-  port: number
-) {
-  const deviceCommand = makeSendCommand(protocol, buffer);
-  deviceCommand.requestId = requestId;
-  deviceCommand.deviceId = deviceId;
-  deviceCommand.port = port;
-  return deviceCommand;
-}
-
+/**
+ * Creates a basic Identify handler that returns the specified id and verificationId.
+ * @param deviceId  The `id` to include in the `IdentifyResponse` in the handler.
+ * @param verificationId  The `verificationId` to include in the `IdentifyResponse` in the handler.
+ */
 export function createIdentifyHandler(
   deviceId: string,
   verificationId: string
@@ -61,6 +40,12 @@ export function createIdentifyHandler(
   };
 }
 
+/**
+ * Created a basic Execute handler that forwards a specified `CommandRequest`
+ * to a referenced `DeviceManager.
+ * @param deviceCommand  The single command to send to the referenced `DeviceManager`.
+ * @param deviceManager  The `DeviceManager` to forward the `CommandRequest` to.
+ */
 export function createExecuteHandler(
   deviceCommand: smarthome.DataFlow.CommandRequest,
   deviceManager: smarthome.DeviceManager

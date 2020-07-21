@@ -35,7 +35,7 @@ function createExecuteRequest(command: string) {
 }
 
 /**
- * Tests `markPending()` matches two identical requests
+ * Tests that `markPending()` matches two identical requests
  */
 test('device-manager-expected-mark-pending', async t => {
   const deviceManager = new DeviceManagerStub();
@@ -48,7 +48,7 @@ test('device-manager-expected-mark-pending', async t => {
 });
 
 /**
- * Tests `markPending()` differentiates two different requests
+ * Tests that `markPending()` differentiates two different requests
  */
 test('device-manager-unexpected-mark-pending', async t => {
   const deviceManager = new DeviceManagerStub();

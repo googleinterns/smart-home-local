@@ -8,8 +8,8 @@ import {
 import {
   createExecuteHandler,
   createIdentifyHandler,
-  createDeviceCommand,
 } from './test-platform-fixtures';
+import { createUdpDeviceCommand } from '../example/fixtures';
 
 const DISCOVERY_BUFFER: Buffer = Buffer.from('discovery buffer 123');
 const APP_VERSION: string = '0.0.1';
@@ -86,8 +86,7 @@ test('trigger-identify-with-valid-state', async t => {
   const deviceManager = app.getDeviceManager();
   const validIdentifyHandler = createIdentifyHandler(DEVICE_ID, localDeviceId);
   const validExecuteHandler = createExecuteHandler(
-    createDeviceCommand(
-      smarthome.Constants.Protocol.UDP,
+    createUdpDeviceCommand(
       Buffer.from('execute-buffer'),
       'execute-request-id',
       DEVICE_ID,
