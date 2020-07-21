@@ -46,14 +46,6 @@ export function executeHandler(
     .build();
 }
 
-/**
- * Helper to create a DeviceCommand for Execute functionality
- * @param protocol 
- * @param buffer 
- * @param requestId 
- * @param deviceId 
- * @param port 
- */
 export function createDeviceCommand(
   protocol: smarthome.Constants.Protocol,
   buffer: Buffer,
