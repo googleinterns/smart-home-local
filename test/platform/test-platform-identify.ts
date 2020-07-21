@@ -9,7 +9,7 @@ import {
   createExecuteHandler,
   createIdentifyHandler,
 } from './test-platform-fixtures';
-import { createUdpDeviceCommand } from '../example/fixtures';
+import {createUdpDeviceCommand} from '../example/fixtures';
 
 const DISCOVERY_BUFFER: Buffer = Buffer.from('discovery buffer 123');
 const APP_VERSION: string = '0.0.1';
@@ -38,9 +38,8 @@ test('trigger-identify-without-listen-throws', async t => {
 test('trigger-identify-with-undefined-verificationId-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
   const deviceManager = app.getDeviceManager();
-  const validExecuteHandler = createExecuteHandler(
-    createDeviceCommand(
-      smarthome.Constants.Protocol.UDP,
+  const executeHandler = createExecuteHandler(
+    createUdpDeviceCommand(
       Buffer.from('execute-buffer'),
       'execute-request-id',
       DEVICE_ID,
@@ -61,7 +60,7 @@ test('trigger-identify-with-undefined-verificationId-throws', async t => {
   };
   app
     .onIdentify(invalidIdentifyHandler)
-    .onExecute(validExecuteHandler)
+    .onExecute(executeHandler)
     .listen();
   const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
   await t.throwsAsync(

@@ -1,5 +1,6 @@
 import test from 'ava';
-import {DeviceManagerStub} from '../../src';
+import {DeviceManagerStub, ERROR_UNEXPECTED_COMMAND_REQUEST} from '../../src';
+import {createUdpDeviceCommand} from '../example/fixtures';
 
 /**
  * Returns a simple execute request used for testing
@@ -61,4 +62,27 @@ test('device-manager-unexpected-mark-pending', async t => {
   );
   deviceManager.markPending(differentExecuteRequest);
   t.is(await doesNextPendingRequestMatch, false);
+});
+
+/**
+ * Tests that an unexpected Execute request throws a `HandlerError`
+ */
+test('test-unexpected-command-request', async t => {
+  const executeRequestId = 'execute-request-id';
+  const deviceManager = new DeviceManagerStub();
+  const commandRequest = createUdpDeviceCommand(
+    Buffer.from('test-execute-buffer'),
+    executeRequestId,
+    'test-device-id',
+    12345
+  );
+  await t.throwsAsync(
+    async () => {
+      await deviceManager.send(commandRequest);
+    },
+    {
+      instanceOf: smarthome.IntentFlow.HandlerError,
+      message: ERROR_UNEXPECTED_COMMAND_REQUEST,
+    }
+  );
 });

@@ -14,6 +14,9 @@ export const smarthomeStub: {
   DataFlow: {
     UdpRequestData: typeof smarthome.DataFlow.UdpRequestData;
   };
+  IntentFlow: {
+    HandlerError: typeof smarthome.IntentFlow.HandlerError;
+  };
   Constants: {
     Protocol: {[key in keyof typeof smarthome.Constants.Protocol]: string};
   };
@@ -24,6 +27,19 @@ export const smarthomeStub: {
     EXECUTE: 'action.devices.EXECUTE',
     IDENTIFY: 'action.devices.IDENTIFY',
     REACHABLE_DEVICES: 'action.devices.REACHABLE_DEVICES',
+  },
+  IntentFlow: {
+    HandlerError: class extends Error {
+      constructor(requestId: string, errorCode?: string, debugString?: string) {
+        super(errorCode);
+        this.requestId = requestId;
+        this.errorCode = errorCode || ' ';
+        this.debugString = debugString;
+      }
+      requestId: string;
+      errorCode: string;
+      debugString?: string;
+    },
   },
   DataFlow: {
     UdpRequestData: class {

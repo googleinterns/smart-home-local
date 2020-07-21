@@ -3,6 +3,8 @@
  * TODO(cjdaly) integrate with Mock Local Home Platform and Mock Network
  **/
 /// <reference types="@google/local-home-sdk" />
+export const ERROR_UNEXPECTED_COMMAND_REQUEST =
+  'Unable to process unexpected CommandRequest';
 export class DeviceManagerStub implements smarthome.DeviceManager {
   /** Action to call when an `IntentRequest` is marked with `markPending()` */
   private markPendingAction:
@@ -72,6 +74,10 @@ export class DeviceManagerStub implements smarthome.DeviceManager {
     if (this.expectedCommandToResponse.has(command)) {
       return Promise.resolve(this.expectedCommandToResponse.get(command)!);
     }
-    throw new smarthome.IntentFlow.HandlerError(command.requestId);
+    // If `DeviceManager` was not expecting this command, throw a `HandlerError`
+    throw new smarthome.IntentFlow.HandlerError(
+      command.requestId,
+      ERROR_UNEXPECTED_COMMAND_REQUEST
+    );
   }
 }

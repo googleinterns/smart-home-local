@@ -78,7 +78,6 @@ test('execute-handler-command-success', async t => {
   );
 
   const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
-
   const executeCommands = createSimpleExecuteCommands(
     DEVICE_ID,
     'action.devices.commands.OnOff'
@@ -97,7 +96,6 @@ test('execute-handler-command-success', async t => {
 /**
  * Tests that sending a non-matching command will result in an `ERROR`
  */
-
 test('execute-handler-sends-wrong-buffer', async t => {
   // Create the App and source Device Manager
   const app: smarthome.App = new smarthome.App('0.0.1');
