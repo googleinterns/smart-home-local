@@ -2,20 +2,6 @@
  * Fixtures used across internal tests
  */
 /// <reference types="@google/local-home-sdk" />
-
-/**
- * Implementation of smarthome.DataFlow.UpdResponseData for testing DeviceManager
- */
-export class UdpResponseData implements smarthome.DataFlow.UdpResponseData {
-  constructor(requestId: string, deviceId: string) {
-    this.requestId = requestId;
-    this.deviceId = deviceId;
-  }
-  requestId: string;
-  deviceId: string;
-  protocol: smarthome.Constants.Protocol = smarthome.Constants.Protocol.UDP;
-}
-
 /**
  * Creates a basic Identify handler that returns the specified id and verificationId.
  * @param deviceId  The `id` to include in the `IdentifyResponse` in the handler.

@@ -9,31 +9,20 @@ import {
   DeviceManagerStub,
   extractDeviceManagerStub,
   MockLocalHomePlatform,
+  UdpResponseData,
+  createSimpleExecuteCommands
 } from '../../src';
 import {
   identifyHandler,
   executeHandler,
   createUdpDeviceCommand,
 } from './fixtures';
-import {UdpResponseData} from '../platform/test-platform-fixtures';
 
 const DEVICE_ID = 'device-id-123';
 const DEVICE_PORT = 12345;
 const LOCAL_DEVICE_ID = 'local-device-id-123';
 const EXECUTE_REQUEST_ID = 'request-id-123';
 const app: smarthome.App = new smarthome.App('0.0.1');
-
-function createSimpleExecuteCommands(
-  deviceId: string,
-  command: string,
-  params: object
-): smarthome.IntentFlow.ExecuteRequestCommands {
-  return {
-    devices: [{id: deviceId}],
-    execution: [{command, params}],
-  };
-}
-
 /**
  * Registers DEVICE_ID and LOCAL_DEVICE_ID to the Local Home Platform with Identify
  * Registers the handlers to the platform

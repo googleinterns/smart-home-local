@@ -5,11 +5,11 @@ import {
   extractMockLocalHomePlatform,
   DeviceManagerStub,
   extractDeviceManagerStub,
+  UdpResponseData,
 } from '../../src';
 import {
   createExecuteHandler,
   createIdentifyHandler,
-  UdpResponseData,
 } from './test-platform-fixtures';
 import {createUdpDeviceCommand} from '../example/fixtures';
 
