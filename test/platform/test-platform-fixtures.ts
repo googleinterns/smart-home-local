@@ -30,6 +30,7 @@ export function createIdentifyHandler(
  * to a referenced `DeviceManager.
  * @param deviceCommand  The single command to send to the referenced `DeviceManager`.
  * @param deviceManager  The `DeviceManager` to forward the `CommandRequest` to.
+ * @returns  An Execute handler that sends given command to the given `DeviceManager`.
  */
 export function createExecuteHandler(
   deviceCommand: smarthome.DataFlow.CommandRequest,

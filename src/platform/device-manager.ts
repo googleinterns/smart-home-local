@@ -5,6 +5,8 @@
 /// <reference types="@google/local-home-sdk" />
 export const ERROR_UNEXPECTED_COMMAND_REQUEST =
   'Unable to process unexpected CommandRequest';
+export const ERROR_PENDING_REQUEST_MISMATCH =
+  'The pending request did not match the expected value';
 export class DeviceManagerStub implements smarthome.DeviceManager {
   /** Action to call when an `IntentRequest` is marked with `markPending()` */
   private markPendingAction:
@@ -24,9 +26,12 @@ export class DeviceManagerStub implements smarthome.DeviceManager {
   public doesNextPendingRequestMatch(
     requestToMatch: smarthome.IntentRequest
   ): Promise<boolean> {
-    return new Promise<boolean>(resolve => {
+    return new Promise<boolean>((resolve, reject) => {
       this.markPendingAction = (pendingRequest: smarthome.IntentRequest) => {
-        resolve(pendingRequest === requestToMatch);
+        if (pendingRequest === requestToMatch) {
+          return true;
+        }
+        throw new Error(ERROR_PENDING_REQUEST_MISMATCH);
       };
     });
   }

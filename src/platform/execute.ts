@@ -49,6 +49,7 @@ export const ExecuteStub: typeof smarthome.Execute = {
  * @param deviceId  The id of the single device to send the command
  * @param command  The single command to send to the device
  * @param params  Parmeters for the command
+ * @returns  An `ExecuteRequestCommands` with the specified arguments
  */
 export function createSimpleExecuteCommands(
   deviceId: string,
