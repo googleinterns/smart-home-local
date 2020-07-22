@@ -31,19 +31,34 @@ export function identifyHandler(
 }
 
 /**
- * Sample Execute handler that is tested against in example tests
- * @param executeRequest  The `ExecuteRequest` sent by the Local Home Platform
+ * Created a basic Execute handler that forwards a specified `CommandRequest`
+ * to a referenced `DeviceManager.
+ * @param deviceCommand  The single command to send to the referenced `DeviceManager`.
+ * @param deviceManager  The `DeviceManager` to forward the `CommandRequest` to.
+ * @returns  An Execute handler that sends given command to the given `DeviceManager`.
  */
-export function executeHandler(
-  executeRequest: smarthome.IntentFlow.ExecuteRequest
+export function createExecuteHandler(
+  deviceCommand: smarthome.DataFlow.CommandRequest,
+  deviceManager: smarthome.DeviceManager
 ) {
-  return new smarthome.Execute.Response.Builder()
-    .setRequestId(executeRequest.requestId)
-    .setSuccessState(
-      executeRequest.inputs[0].payload.commands[0].devices[0].id,
-      {}
-    )
-    .build();
+  return async (executeRequest: smarthome.IntentFlow.ExecuteRequest) => {
+    const command = executeRequest.inputs[0].payload.commands[0];
+    const device = command.devices[0];
+
+    // Create the Execute response to send back to platform
+    const executeResponse = new smarthome.Execute.Response.Builder().setRequestId(
+      executeRequest.requestId
+    );
+
+    // Perform required DeviceManager actions and update response
+    try {
+      const result = await deviceManager.send(deviceCommand);
+      executeResponse.setSuccessState(result.deviceId, {});
+    } catch (e) {
+      executeResponse.setErrorState(device.id, e.errorCode);
+    }
+    return executeResponse.build();
+  };
 }
 
 /**

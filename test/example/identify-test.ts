@@ -5,7 +5,7 @@
 /// <reference types="@types/node" />
 import test from 'ava';
 import {extractStubs} from '../../src';
-import {identifyHandler, executeHandler} from './fixtures';
+import {identifyHandler} from './fixtures';
 
 const DEVICE_ID = 'device-id-123';
 const LOCAL_DEVICE_ID = 'local-device-id-123';
@@ -16,6 +16,14 @@ const LOCAL_DEVICE_ID = 'local-device-id-123';
 test('identify-handler-registers-local-id', async t => {
   // Create the App to test against
   const app: smarthome.App = new smarthome.App('0.0.1');
+
+  const executeHandler = (
+    executeRequest: smarthome.IntentFlow.ExecuteRequest
+  ) => {
+    return new smarthome.Execute.Response.Builder()
+      .setRequestId(executeRequest.requestId)
+      .setSuccessState(DEVICE_ID, {}).build();
+  };
 
   // Set intent fulfillment handlers
   await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();

@@ -11,7 +11,7 @@ import {
 } from '../../src';
 import {
   identifyHandler,
-  executeHandler,
+  createExecuteHandler,
   createUdpDeviceCommand,
 } from './fixtures';
 
@@ -19,12 +19,26 @@ const DEVICE_ID = 'device-id-123';
 const DEVICE_PORT = 12345;
 const LOCAL_DEVICE_ID = 'local-device-id-123';
 const EXECUTE_REQUEST_ID = 'request-id-123';
-const app: smarthome.App = new smarthome.App('0.0.1');
+
+// Create a valid request for the Execute call
+const expectedCommand: smarthome.DataFlow.UdpRequestData = createUdpDeviceCommand(
+  Buffer.from('test-execute-buffer'),
+  EXECUTE_REQUEST_ID,
+  DEVICE_ID,
+  DEVICE_PORT
+);
+
 /**
- * Registers DEVICE_ID and LOCAL_DEVICE_ID to the Local Home Platform with Identify
- * Registers the handlers to the platform
+ * Tests that valid Execute request resolves with a 'SUCCESS'
  */
-test.before(async t => {
+test('test-valid-execute-request', async t => {
+  const app: smarthome.App = new smarthome.App('0.0.1');
+  const executeHandler = createExecuteHandler(
+    expectedCommand,
+    app.getDeviceManager()
+  );
+
+  // Registers DEVICE_ID and LOCAL_DEVICE_ID to the Local Home Platform with Identify
   await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();
   const discoveryBuffer = Buffer.from(
     JSON.stringify({
@@ -37,34 +51,22 @@ test.before(async t => {
     DEVICE_ID
   ),
     LOCAL_DEVICE_ID;
-});
 
-/**
- * Tests that valid Execute request resolves with a 'SUCCESS'
- */
-test('test-valid-execute-request', async t => {
-  // Create the App and source Device Manager
+  // Source stubs
   const stubs = extractStubs(app);
 
-  // Create a valid request for the Execute call
-  const expectedCommand: smarthome.DataFlow.UdpRequestData = createUdpDeviceCommand(
-    Buffer.from('test-execute-buffer'),
-    EXECUTE_REQUEST_ID,
+  // Create a valid `ExecuteRequestCommands`
+  const executeCommands = createSimpleExecuteCommands(
     DEVICE_ID,
-    DEVICE_PORT
+    'actions.devices.commands.OnOff',
+    {on: true},
+    {color: 'red'}
   );
 
   // Prepare the stub to expect the command
   stubs.deviceManagerStub.addExpectedCommand(
     expectedCommand,
     new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID)
-  );
-
-  const executeCommands = createSimpleExecuteCommands(
-    DEVICE_ID,
-    'actions.devices.commands.OnOff',
-    {on: true},
-    {color: 'red'}
   );
 
   // Trigger an Execute intent and confirm a CommandSuccess
@@ -75,4 +77,6 @@ test('test-valid-execute-request', async t => {
     );
     t.is(executeResponseCommands[0].status, 'SUCCESS');
   });
+
+  t.is(stubs.deviceManagerStub.wasCommandSent(expectedCommand), true);
 });

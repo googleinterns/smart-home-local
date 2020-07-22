@@ -15,6 +15,8 @@ export const ERROR_NO_LOCAL_DEVICE_ID_FOUND: string =
   'Cannot get localDeviceId of unregistered deviceId';
 export const ERROR_DEVICE_ID_NOT_REGISTERED: string =
   'Cannot trigger an ExecuteRequest: The provided deviceId was not registered to the platform';
+export const ERROR_EXECUTE_RESPONSE_ERROR_STATUS: string =
+  "One or more ExecuteResponseCommands returned with an 'ERROR' status";
 
 export class MockLocalHomePlatform {
   private deviceManager: DeviceManagerStub = new DeviceManagerStub();
@@ -134,8 +136,19 @@ export class MockLocalHomePlatform {
       ],
     };
 
-    const response = await this.app.executeHandler(executeRequest);
+    // Reset the buffer of commands sent
+    this.getDeviceManager().clearCommandsSent();
 
-    return response.payload.commands;
+    const responseCommands = (await this.app.executeHandler(executeRequest))
+      .payload.commands;
+
+    return new Promise((resolve, reject) => {
+      responseCommands.forEach(command => {
+        if (command.status == 'ERROR') {
+          reject(new Error(ERROR_EXECUTE_RESPONSE_ERROR_STATUS));
+        }
+      });
+      resolve(responseCommands);
+    });
   }
 }

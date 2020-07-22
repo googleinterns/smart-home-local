@@ -17,6 +17,23 @@ export class DeviceManagerStub implements smarthome.DeviceManager {
     smarthome.DataFlow.CommandRequest,
     smarthome.DataFlow.CommandBase
   > = new Map();
+  private commandRequestsSent: Set<
+    smarthome.DataFlow.CommandRequest
+  > = new Set();
+
+  public getCommandsSent(): Set<smarthome.DataFlow.CommandRequest> {
+    return this.commandRequestsSent;
+  }
+
+  public clearCommandsSent(): void {
+    this.commandRequestsSent.clear();
+  }
+
+  public wasCommandSent(
+    commandRequest: smarthome.DataFlow.CommandRequest
+  ): boolean {
+    return this.commandRequestsSent.has(commandRequest);
+  }
 
   /**
    * Checks if the next request marked pending matches a given request.
@@ -76,6 +93,7 @@ export class DeviceManagerStub implements smarthome.DeviceManager {
   public send(
     command: smarthome.DataFlow.CommandRequest
   ): Promise<smarthome.DataFlow.CommandBase> {
+    this.commandRequestsSent.add(command);
     if (this.expectedCommandToResponse.has(command)) {
       return Promise.resolve(this.expectedCommandToResponse.get(command)!);
     }

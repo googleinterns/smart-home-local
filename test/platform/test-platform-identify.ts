@@ -6,10 +6,9 @@ import {
   extractStubs,
 } from '../../src';
 import {
-  createExecuteHandler,
   createIdentifyHandler,
 } from './test-platform-fixtures';
-import {createUdpDeviceCommand} from '../example/fixtures';
+import {createUdpDeviceCommand, createExecuteHandler} from '../example/fixtures';
 
 const DISCOVERY_BUFFER: Buffer = Buffer.from('discovery buffer 123');
 const APP_VERSION: string = '0.0.1';
