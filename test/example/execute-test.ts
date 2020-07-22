@@ -10,7 +10,7 @@ import {
   extractDeviceManagerStub,
   MockLocalHomePlatform,
   UdpResponseData,
-  createSimpleExecuteCommands
+  createSimpleExecuteCommands,
 } from '../../src';
 import {
   identifyHandler,
@@ -70,7 +70,7 @@ test('test-valid-execute-request', async t => {
   const executeCommands = createSimpleExecuteCommands(
     DEVICE_ID,
     'actions.devices.commands.OnOff',
-    {}
+    {on: true}
   );
   // Trigger an Execute intent and confirm a CommandSuccess
   await t.notThrowsAsync(async () => {

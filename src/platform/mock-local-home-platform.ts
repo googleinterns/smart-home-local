@@ -54,7 +54,7 @@ export class MockLocalHomePlatform {
   public async triggerIdentify(
     requestId: string,
     discoveryBuffer: Buffer,
-    deviceId?: string | undefined
+    deviceId?: string
   ): Promise<string> {
     console.debug('Received discovery payload:', discoveryBuffer);
 
