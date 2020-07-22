@@ -4,7 +4,7 @@
 /// <reference types="@google/local-home-sdk" />
 /// <reference types="@types/node" />
 import test from 'ava';
-import {extractMockLocalHomePlatform} from '../../src';
+import {extractStubs} from '../../src';
 import {identifyHandler, executeHandler} from './fixtures';
 
 const DEVICE_ID = 'device-id-123';
@@ -21,7 +21,7 @@ test('identify-handler-registers-local-id', async t => {
   await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();
 
   // Obtain the Mock Local Home Platform from the App stub
-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
+  const mockLocalHomePlatform = extractStubs(app).mockLocalHomePlatform;
 
   // The scan data that a local device sends to the Nest device
   const discoveryBuffer = Buffer.from(

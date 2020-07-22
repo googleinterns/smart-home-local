@@ -5,12 +5,11 @@
 /// <reference types="@types/node" />
 import test from 'ava';
 import {
-  extractMockLocalHomePlatform,
   DeviceManagerStub,
-  extractDeviceManagerStub,
   MockLocalHomePlatform,
   UdpResponseData,
   createSimpleExecuteCommands,
+  extractStubs,
 } from '../../src';
 import {
   identifyHandler,
@@ -29,13 +28,12 @@ const app: smarthome.App = new smarthome.App('0.0.1');
  */
 test.before(async t => {
   await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();
-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
   const discoveryBuffer = Buffer.from(
     JSON.stringify({
       localDeviceId: LOCAL_DEVICE_ID,
     })
   );
-  await mockLocalHomePlatform.triggerIdentify(
+  await extractStubs(app).mockLocalHomePlatform.triggerIdentify(
     'identify-request-id',
     discoveryBuffer,
     DEVICE_ID
@@ -48,10 +46,7 @@ test.before(async t => {
  */
 test('test-valid-execute-request', async t => {
   // Create the App and source Device Manager
-  const deviceManagerStub: DeviceManagerStub = extractDeviceManagerStub(app);
-  const mockLocalHomePlatform: MockLocalHomePlatform = extractMockLocalHomePlatform(
-    app
-  );
+  const stubs = extractStubs(app);
 
   // Create a valid request for the Execute call
   const expectedCommand: smarthome.DataFlow.UdpRequestData = createUdpDeviceCommand(
@@ -62,7 +57,7 @@ test('test-valid-execute-request', async t => {
   );
 
   // Prepare the stub to expect the command
-  deviceManagerStub.addExpectedCommand(
+  stubs.deviceManagerStub.addExpectedCommand(
     expectedCommand,
     new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID)
   );
@@ -74,7 +69,7 @@ test('test-valid-execute-request', async t => {
   );
   // Trigger an Execute intent and confirm a CommandSuccess
   await t.notThrowsAsync(async () => {
-    const executeResponseCommands = await mockLocalHomePlatform.triggerExecute(
+    const executeResponseCommands = await stubs.mockLocalHomePlatform.triggerExecute(
       EXECUTE_REQUEST_ID,
       [executeCommands]
     );

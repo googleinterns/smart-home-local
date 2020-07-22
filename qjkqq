@@ -1,0 +1,298 @@
+[1mdiff --git a/src/platform/stub-setup.ts b/src/platform/stub-setup.ts[m
+[1mindex 8867076..31d14e8 100644[m
+[1m--- a/src/platform/stub-setup.ts[m
+[1m+++ b/src/platform/stub-setup.ts[m
+[36m@@ -6,6 +6,7 @@[m [mimport {AppStub} from './smart-home-app';[m
+ import {MockLocalHomePlatform} from './mock-local-home-platform';[m
+ import {DeviceManagerStub} from './device-manager';[m
+ import {ExecuteStub} from './execute';[m
+[32m+[m[32mimport {AssertionError} from 'assert';[m
+ [m
+ export const smarthomeStub: {[m
+   App: typeof smarthome.App;[m
+[36m@@ -61,30 +62,23 @@[m [mexport const smarthomeStub: {[m
+   },[m
+ };[m
+ [m
+[32m+[m[32mexport interface ExtractedStubs {[m
+[32m+[m[32m  mockLocalHomePlatform: MockLocalHomePlatform;[m
+[32m+[m[32m  deviceManagerStub: DeviceManagerStub;[m
+[32m+[m[32m}[m
+[32m+[m
+ /**[m
+[31m- * Module-level function to source a `MockLocalHomePlatform` from an `App`.[m
+[31m- * @param app  The app to promote and extract the `MockLocalHomePlatform` from.[m
+[31m- * @returns  The `MockLocalHomePlatform` member.[m
+[32m+[m[32m * Module-level function to source `MockLocalHomePlatform`[m
+[32m+[m[32m * and `DeviceManagerStub` from an `App`.[m
+[32m+[m[32m * @param app  The app to promote and extract the stubs from.[m
+[32m+[m[32m * @returns  The extracted stubs[m
+  */[m
+[31m-export function extractMockLocalHomePlatform([m
+[31m-  app: smarthome.App[m
+[31m-): MockLocalHomePlatform {[m
+[32m+[m[32mexport function extractStubs(app: smarthome.App): ExtractedStubs {[m
+   if (app instanceof AppStub) {[m
+[31m-    return app.getLocalHomePlatform();[m
+[32m+[m[32m    return {[m
+[32m+[m[32m      mockLocalHomePlatform: app.getLocalHomePlatform(),[m
+[32m+[m[32m      deviceManagerStub: app.getLocalHomePlatform().getDeviceManager(),[m
+[32m+[m[32m    };[m
+   }[m
+   throw new Error("Couldn't downcast App to AppStub");[m
+ }[m
+[31m-/**[m
+[31m- * Module-level function to source a `DeviceManagerStub` from an `App`.[m
+[31m- * @param app  The app to promote and extract the `DeviceManagerStub` from.[m
+[31m- * @returns  The `DeviceManagerStub` member.[m
+[31m- */[m
+[31m-export function extractDeviceManagerStub([m
+[31m-  app: smarthome.App[m
+[31m-): DeviceManagerStub {[m
+[31m-  const deviceManager = app.getDeviceManager();[m
+[31m-  if (deviceManager instanceof DeviceManagerStub) {[m
+[31m-    return deviceManager;[m
+[31m-  }[m
+[31m-  throw new Error('DeviceManagerStub not found');[m
+[31m-}[m
+[1mdiff --git a/test/example/execute-test.ts b/test/example/execute-test.ts[m
+[1mindex d7c3117..91ca0fd 100644[m
+[1m--- a/test/example/execute-test.ts[m
+[1m+++ b/test/example/execute-test.ts[m
+[36m@@ -5,12 +5,11 @@[m
+ /// <reference types="@types/node" />[m
+ import test from 'ava';[m
+ import {[m
+[31m-  extractMockLocalHomePlatform,[m
+   DeviceManagerStub,[m
+[31m-  extractDeviceManagerStub,[m
+   MockLocalHomePlatform,[m
+   UdpResponseData,[m
+   createSimpleExecuteCommands,[m
+[32m+[m[32m  extractStubs,[m
+ } from '../../src';[m
+ import {[m
+   identifyHandler,[m
+[36m@@ -29,13 +28,12 @@[m [mconst app: smarthome.App = new smarthome.App('0.0.1');[m
+  */[m
+ test.before(async t => {[m
+   await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();[m
+[31m-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);[m
+   const discoveryBuffer = Buffer.from([m
+     JSON.stringify({[m
+       localDeviceId: LOCAL_DEVICE_ID,[m
+     })[m
+   );[m
+[31m-  await mockLocalHomePlatform.triggerIdentify([m
+[32m+[m[32m  await extractStubs(app).mockLocalHomePlatform.triggerIdentify([m
+     'identify-request-id',[m
+     discoveryBuffer,[m
+     DEVICE_ID[m
+[36m@@ -48,10 +46,7 @@[m [mtest.before(async t => {[m
+  */[m
+ test('test-valid-execute-request', async t => {[m
+   // Create the App and source Device Manager[m
+[31m-  const deviceManagerStub: DeviceManagerStub = extractDeviceManagerStub(app);[m
+[31m-  const mockLocalHomePlatform: MockLocalHomePlatform = extractMockLocalHomePlatform([m
+[31m-    app[m
+[31m-  );[m
+[32m+[m[32m  const stubs = extractStubs(app);[m
+ [m
+   // Create a valid request for the Execute call[m
+   const expectedCommand: smarthome.DataFlow.UdpRequestData = createUdpDeviceCommand([m
+[36m@@ -62,7 +57,7 @@[m [mtest('test-valid-execute-request', async t => {[m
+   );[m
+ [m
+   // Prepare the stub to expect the command[m
+[31m-  deviceManagerStub.addExpectedCommand([m
+[32m+[m[32m  stubs.deviceManagerStub.addExpectedCommand([m
+     expectedCommand,[m
+     new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID)[m
+   );[m
+[36m@@ -74,7 +69,7 @@[m [mtest('test-valid-execute-request', async t => {[m
+   );[m
+   // Trigger an Execute intent and confirm a CommandSuccess[m
+   await t.notThrowsAsync(async () => {[m
+[31m-    const executeResponseCommands = await mockLocalHomePlatform.triggerExecute([m
+[32m+[m[32m    const executeResponseCommands = await stubs.mockLocalHomePlatform.triggerExecute([m
+       EXECUTE_REQUEST_ID,[m
+       [executeCommands][m
+     );[m
+[1mdiff --git a/test/example/identify-test.ts b/test/example/identify-test.ts[m
+[1mindex ba826cb..bb85613 100644[m
+[1m--- a/test/example/identify-test.ts[m
+[1m+++ b/test/example/identify-test.ts[m
+[36m@@ -4,7 +4,7 @@[m
+ /// <reference types="@google/local-home-sdk" />[m
+ /// <reference types="@types/node" />[m
+ import test from 'ava';[m
+[31m-import {extractMockLocalHomePlatform} from '../../src';[m
+[32m+[m[32mimport {extractStubs} from '../../src';[m
+ import {identifyHandler, executeHandler} from './fixtures';[m
+ [m
+ const DEVICE_ID = 'device-id-123';[m
+[36m@@ -21,7 +21,7 @@[m [mtest('identify-handler-registers-local-id', async t => {[m
+   await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();[m
+ [m
+   // Obtain the Mock Local Home Platform from the App stub[m
+[31m-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);[m
+[32m+[m[32m  const mockLocalHomePlatform = extractStubs(app).mockLocalHomePlatform;[m
+ [m
+   // The scan data that a local device sends to the Nest device[m
+   const discoveryBuffer = Buffer.from([m
+[1mdiff --git a/test/platform/test-platform-execute.ts b/test/platform/test-platform-execute.ts[m
+[1mindex 2c060e6..d0f0770 100644[m
+[1m--- a/test/platform/test-platform-execute.ts[m
+[1m+++ b/test/platform/test-platform-execute.ts[m
+[36m@@ -1,12 +1,7 @@[m
+ /// <reference types="@google/local-home-sdk" />[m
+ /// <reference types="@types/node" />[m
+ import test from 'ava';[m
+[31m-import {[m
+[31m-  extractMockLocalHomePlatform,[m
+[31m-  DeviceManagerStub,[m
+[31m-  extractDeviceManagerStub,[m
+[31m-  UdpResponseData,[m
+[31m-} from '../../src';[m
+[32m+[m[32mimport {extractStubs, UdpResponseData} from '../../src';[m
+ import {[m
+   createExecuteHandler,[m
+   createIdentifyHandler,[m
+[36m@@ -26,8 +21,7 @@[m [masync function registerDevice([m
+ ): Promise<void> {[m
+   const identifyHandler = createIdentifyHandler(deviceId, localDeviceId);[m
+   await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();[m
+[31m-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);[m
+[31m-  await mockLocalHomePlatform.triggerIdentify([m
+[32m+[m[32m  await extractStubs(app).mockLocalHomePlatform.triggerIdentify([m
+     'identify-request-id',[m
+     Buffer.from('test-buffer'),[m
+     deviceId[m
+[36m@@ -53,7 +47,6 @@[m [mfunction createSimpleExecuteCommands([m
+ test('execute-handler-command-success', async t => {[m
+   // Create the App and source Device Manager[m
+   const app = new smarthome.App('0.0.1');[m
+[31m-  const deviceManagerStub: DeviceManagerStub = extractDeviceManagerStub(app);[m
+ [m
+   // Create a valid request for the Execute call[m
+   const validCommand: smarthome.DataFlow.UdpRequestData = createUdpDeviceCommand([m
+[36m@@ -70,14 +63,14 @@[m [mtest('execute-handler-command-success', async t => {[m
+   );[m
+ [m
+   await registerDevice(app, executeHandler, DEVICE_ID, LOCAL_DEVICE_ID);[m
+[32m+[m[32m  const stubs = extractStubs(app);[m
+ [m
+   // Prepare the stub to expect the command[m
+[31m-  deviceManagerStub.addExpectedCommand([m
+[32m+[m[32m  stubs.deviceManagerStub.addExpectedCommand([m
+     validCommand,[m
+     new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID)[m
+   );[m
+ [m
+[31m-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);[m
+   const executeCommands = createSimpleExecuteCommands([m
+     DEVICE_ID,[m
+     'action.devices.commands.OnOff'[m
+[36m@@ -85,7 +78,7 @@[m [mtest('execute-handler-command-success', async t => {[m
+ [m
+   // Trigger an Execute intent and confirm a `CommandSuccess`[m
+   await t.notThrowsAsync(async () => {[m
+[31m-    const executeResponseCommands = await mockLocalHomePlatform.triggerExecute([m
+[32m+[m[32m    const executeResponseCommands = await stubs.mockLocalHomePlatform.triggerExecute([m
+       EXECUTE_REQUEST_ID,[m
+       [executeCommands][m
+     );[m
+[36m@@ -99,18 +92,6 @@[m [mtest('execute-handler-command-success', async t => {[m
+ test('execute-handler-sends-wrong-buffer', async t => {[m
+   // Create the App and source Device Manager[m
+   const app: smarthome.App = new smarthome.App('0.0.1');[m
+[31m-  const deviceManagerStub: DeviceManagerStub = extractDeviceManagerStub(app);[m
+[31m-[m
+[31m-  // Prepare the stub to expect a command[m
+[31m-  deviceManagerStub.addExpectedCommand([m
+[31m-    createUdpDeviceCommand([m
+[31m-      Buffer.from('test-execute-buffer'),[m
+[31m-      EXECUTE_REQUEST_ID,[m
+[31m-      DEVICE_ID,[m
+[31m-      DEVICE_PORT[m
+[31m-    ),[m
+[31m-    new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID)[m
+[31m-  );[m
+ [m
+   // Trigger an Execute intent with an incorrect buffer[m
+   const executeHandler = createExecuteHandler([m
+[36m@@ -125,7 +106,18 @@[m [mtest('execute-handler-sends-wrong-buffer', async t => {[m
+ [m
+   // Register the device with Identify[m
+   await registerDevice(app, executeHandler, DEVICE_ID, LOCAL_DEVICE_ID);[m
+[31m-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);[m
+[32m+[m
+[32m+[m[32m  const stubs = extractStubs(app);[m
+[32m+[m[32m  // Prepare the stub to expect a command[m
+[32m+[m[32m  stubs.deviceManagerStub.addExpectedCommand([m
+[32m+[m[32m    createUdpDeviceCommand([m
+[32m+[m[32m      Buffer.from('test-execute-buffer'),[m
+[32m+[m[32m      EXECUTE_REQUEST_ID,[m
+[32m+[m[32m      DEVICE_ID,[m
+[32m+[m[32m      DEVICE_PORT[m
+[32m+[m[32m    ),[m
+[32m+[m[32m    new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID)[m
+[32m+[m[32m  );[m
+ [m
+   // Valid execute command to trigger executeHandler[m
+   const executeCommands = createSimpleExecuteCommands([m
+[36m@@ -135,7 +127,7 @@[m [mtest('execute-handler-sends-wrong-buffer', async t => {[m
+ [m
+   // Trigger an Execute intent and confirm a `CommandSuccess`[m
+   await t.notThrowsAsync(async () => {[m
+[31m-    const executeResponseCommands = await mockLocalHomePlatform.triggerExecute([m
+[32m+[m[32m    const executeResponseCommands = await stubs.mockLocalHomePlatform.triggerExecute([m
+       EXECUTE_REQUEST_ID,[m
+       [executeCommands][m
+     );[m
+[1mdiff --git a/test/platform/test-platform-identify.ts b/test/platform/test-platform-identify.ts[m
+[1mindex c2d19fa..de45494 100644[m
+[1m--- a/test/platform/test-platform-identify.ts[m
+[1m+++ b/test/platform/test-platform-identify.ts[m
+[36m@@ -2,8 +2,8 @@[m
+ import test from 'ava';[m
+ import {[m
+   ERROR_UNDEFINED_VERIFICATIONID,[m
+[31m-  extractMockLocalHomePlatform,[m
+   ERROR_HANDLERS_NOT_SET,[m
+[32m+[m[32m  extractStubs,[m
+ } from '../../src';[m
+ import {[m
+   createExecuteHandler,[m
+[36m@@ -23,7 +23,7 @@[m [mtest('trigger-identify-without-listen-throws', async t => {[m
+   const app: smarthome.App = new smarthome.App(APP_VERSION);[m
+   await t.throws([m
+     () => {[m
+[31m-      extractMockLocalHomePlatform(app);[m
+[32m+[m[32m      extractStubs(app);[m
+     },[m
+     {[m
+       instanceOf: Error,[m
+[36m@@ -58,11 +58,8 @@[m [mtest('trigger-identify-with-undefined-verificationId-throws', async t => {[m
+       },[m
+     };[m
+   };[m
+[31m-  app[m
+[31m-    .onIdentify(invalidIdentifyHandler)[m
+[31m-    .onExecute(executeHandler)[m
+[31m-    .listen();[m
+[31m-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);[m
+[32m+[m[32m  app.onIdentify(invalidIdentifyHandler).onExecute(executeHandler).listen();[m
+[32m+[m[32m  const mockLocalHomePlatform = extractStubs(app).mockLocalHomePlatform;[m
+   await t.throwsAsync([m
+     mockLocalHomePlatform.triggerIdentify([m
+       IDENTIFY_REQUEST_ID,[m
+[36m@@ -94,7 +91,7 @@[m [mtest('trigger-identify-with-valid-state', async t => {[m
+     deviceManager[m
+   );[m
+   app.onIdentify(validIdentifyHandler).onExecute(validExecuteHandler).listen();[m
+[31m-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);[m
+[32m+[m[32m  const mockLocalHomePlatform = extractStubs(app).mockLocalHomePlatform;[m
+   await t.notThrowsAsync(async () => {[m
+     const verificationId = await mockLocalHomePlatform.triggerIdentify([m
+       IDENTIFY_REQUEST_ID,[m

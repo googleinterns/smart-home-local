@@ -6,6 +6,7 @@ import {AppStub} from './smart-home-app';
 import {MockLocalHomePlatform} from './mock-local-home-platform';
 import {DeviceManagerStub} from './device-manager';
 import {ExecuteStub} from './execute';
+import {AssertionError} from 'assert';
 
 export const smarthomeStub: {
   App: typeof smarthome.App;
@@ -61,30 +62,23 @@ export const smarthomeStub: {
   },
 };
 
+export interface ExtractedStubs {
+  mockLocalHomePlatform: MockLocalHomePlatform;
+  deviceManagerStub: DeviceManagerStub;
+}
+
 /**
- * Module-level function to source a `MockLocalHomePlatform` from an `App`.
- * @param app  The app to promote and extract the `MockLocalHomePlatform` from.
- * @returns  The `MockLocalHomePlatform` member.
+ * Module-level function to source `MockLocalHomePlatform`
+ * and `DeviceManagerStub` from an `App`.
+ * @param app  The app to promote and extract the stubs from.
+ * @returns  The extracted stubs
  */
-export function extractMockLocalHomePlatform(
-  app: smarthome.App
-): MockLocalHomePlatform {
+export function extractStubs(app: smarthome.App): ExtractedStubs {
   if (app instanceof AppStub) {
-    return app.getLocalHomePlatform();
+    return {
+      mockLocalHomePlatform: app.getLocalHomePlatform(),
+      deviceManagerStub: app.getLocalHomePlatform().getDeviceManager(),
+    };
   }
   throw new Error("Couldn't downcast App to AppStub");
-}
-/**
- * Module-level function to source a `DeviceManagerStub` from an `App`.
- * @param app  The app to promote and extract the `DeviceManagerStub` from.
- * @returns  The `DeviceManagerStub` member.
- */
-export function extractDeviceManagerStub(
-  app: smarthome.App
-): DeviceManagerStub {
-  const deviceManager = app.getDeviceManager();
-  if (deviceManager instanceof DeviceManagerStub) {
-    return deviceManager;
-  }
-  throw new Error('DeviceManagerStub not found');
 }

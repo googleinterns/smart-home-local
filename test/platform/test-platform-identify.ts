@@ -2,8 +2,8 @@
 import test from 'ava';
 import {
   ERROR_UNDEFINED_VERIFICATIONID,
-  extractMockLocalHomePlatform,
   ERROR_HANDLERS_NOT_SET,
+  extractStubs,
 } from '../../src';
 import {
   createExecuteHandler,
@@ -23,7 +23,7 @@ test('trigger-identify-without-listen-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
   await t.throws(
     () => {
-      extractMockLocalHomePlatform(app);
+      extractStubs(app);
     },
     {
       instanceOf: Error,
@@ -58,11 +58,8 @@ test('trigger-identify-with-undefined-verificationId-throws', async t => {
       },
     };
   };
-  app
-    .onIdentify(invalidIdentifyHandler)
-    .onExecute(executeHandler)
-    .listen();
-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
+  app.onIdentify(invalidIdentifyHandler).onExecute(executeHandler).listen();
+  const mockLocalHomePlatform = extractStubs(app).mockLocalHomePlatform;
   await t.throwsAsync(
     mockLocalHomePlatform.triggerIdentify(
       IDENTIFY_REQUEST_ID,
@@ -94,7 +91,7 @@ test('trigger-identify-with-valid-state', async t => {
     deviceManager
   );
   app.onIdentify(validIdentifyHandler).onExecute(validExecuteHandler).listen();
-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
+  const mockLocalHomePlatform = extractStubs(app).mockLocalHomePlatform;
   await t.notThrowsAsync(async () => {
     const verificationId = await mockLocalHomePlatform.triggerIdentify(
       IDENTIFY_REQUEST_ID,

@@ -1,12 +1,7 @@
 /// <reference types="@google/local-home-sdk" />
 /// <reference types="@types/node" />
 import test from 'ava';
-import {
-  extractMockLocalHomePlatform,
-  DeviceManagerStub,
-  extractDeviceManagerStub,
-  UdpResponseData,
-} from '../../src';
+import {extractStubs, UdpResponseData} from '../../src';
 import {
   createExecuteHandler,
   createIdentifyHandler,
@@ -26,8 +21,7 @@ async function registerDevice(
 ): Promise<void> {
   const identifyHandler = createIdentifyHandler(deviceId, localDeviceId);
   await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();
-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
-  await mockLocalHomePlatform.triggerIdentify(
+  await extractStubs(app).mockLocalHomePlatform.triggerIdentify(
     'identify-request-id',
     Buffer.from('test-buffer'),
     deviceId
@@ -53,7 +47,6 @@ function createSimpleExecuteCommands(
 test('execute-handler-command-success', async t => {
   // Create the App and source Device Manager
   const app = new smarthome.App('0.0.1');
-  const deviceManagerStub: DeviceManagerStub = extractDeviceManagerStub(app);
 
   // Create a valid request for the Execute call
   const validCommand: smarthome.DataFlow.UdpRequestData = createUdpDeviceCommand(
@@ -70,14 +63,14 @@ test('execute-handler-command-success', async t => {
   );
 
   await registerDevice(app, executeHandler, DEVICE_ID, LOCAL_DEVICE_ID);
+  const stubs = extractStubs(app);
 
   // Prepare the stub to expect the command
-  deviceManagerStub.addExpectedCommand(
+  stubs.deviceManagerStub.addExpectedCommand(
     validCommand,
     new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID)
   );
 
-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
   const executeCommands = createSimpleExecuteCommands(
     DEVICE_ID,
     'action.devices.commands.OnOff'
@@ -85,7 +78,7 @@ test('execute-handler-command-success', async t => {
 
   // Trigger an Execute intent and confirm a `CommandSuccess`
   await t.notThrowsAsync(async () => {
-    const executeResponseCommands = await mockLocalHomePlatform.triggerExecute(
+    const executeResponseCommands = await stubs.mockLocalHomePlatform.triggerExecute(
       EXECUTE_REQUEST_ID,
       [executeCommands]
     );
@@ -99,18 +92,6 @@ test('execute-handler-command-success', async t => {
 test('execute-handler-sends-wrong-buffer', async t => {
   // Create the App and source Device Manager
   const app: smarthome.App = new smarthome.App('0.0.1');
-  const deviceManagerStub: DeviceManagerStub = extractDeviceManagerStub(app);
-
-  // Prepare the stub to expect a command
-  deviceManagerStub.addExpectedCommand(
-    createUdpDeviceCommand(
-      Buffer.from('test-execute-buffer'),
-      EXECUTE_REQUEST_ID,
-      DEVICE_ID,
-      DEVICE_PORT
-    ),
-    new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID)
-  );
 
   // Trigger an Execute intent with an incorrect buffer
   const executeHandler = createExecuteHandler(
@@ -125,7 +106,18 @@ test('execute-handler-sends-wrong-buffer', async t => {
 
   // Register the device with Identify
   await registerDevice(app, executeHandler, DEVICE_ID, LOCAL_DEVICE_ID);
-  const mockLocalHomePlatform = extractMockLocalHomePlatform(app);
+
+  const stubs = extractStubs(app);
+  // Prepare the stub to expect a command
+  stubs.deviceManagerStub.addExpectedCommand(
+    createUdpDeviceCommand(
+      Buffer.from('test-execute-buffer'),
+      EXECUTE_REQUEST_ID,
+      DEVICE_ID,
+      DEVICE_PORT
+    ),
+    new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID)
+  );
 
   // Valid execute command to trigger executeHandler
   const executeCommands = createSimpleExecuteCommands(
@@ -135,7 +127,7 @@ test('execute-handler-sends-wrong-buffer', async t => {
 
   // Trigger an Execute intent and confirm a `CommandSuccess`
   await t.notThrowsAsync(async () => {
-    const executeResponseCommands = await mockLocalHomePlatform.triggerExecute(
+    const executeResponseCommands = await stubs.mockLocalHomePlatform.triggerExecute(
       EXECUTE_REQUEST_ID,
       [executeCommands]
     );
