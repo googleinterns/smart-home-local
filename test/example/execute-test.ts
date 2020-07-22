@@ -63,8 +63,10 @@ test('test-valid-execute-request', async t => {
   const executeCommands = createSimpleExecuteCommands(
     DEVICE_ID,
     'actions.devices.commands.OnOff',
-    {on: true}
+    {on: true},
+    {color: 'red'}
   );
+
   // Trigger an Execute intent and confirm a CommandSuccess
   await t.notThrowsAsync(async () => {
     const executeResponseCommands = await stubs.mockLocalHomePlatform.triggerExecute(

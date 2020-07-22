@@ -54,10 +54,11 @@ export const ExecuteStub: typeof smarthome.Execute = {
 export function createSimpleExecuteCommands(
   deviceId: string,
   command: string,
-  params: object
+  params: object,
+  customData: object
 ): smarthome.IntentFlow.ExecuteRequestCommands {
   return {
-    devices: [{id: deviceId}],
+    devices: [{id: deviceId, customData}],
     execution: [{command, params}],
   };
 }
