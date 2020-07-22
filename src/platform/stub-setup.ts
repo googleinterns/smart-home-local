@@ -71,7 +71,7 @@ export interface ExtractedStubs {
  * Module-level function to source `MockLocalHomePlatform`
  * and `DeviceManagerStub` from an `App`.
  * @param app  The app to promote and extract the stubs from.
- * @returns  The extracted stubs
+ * @returns  The extracted stubs.
  */
 export function extractStubs(app: smarthome.App): ExtractedStubs {
   if (app instanceof AppStub) {

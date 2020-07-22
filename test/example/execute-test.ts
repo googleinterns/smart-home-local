@@ -5,8 +5,6 @@
 /// <reference types="@types/node" />
 import test from 'ava';
 import {
-  DeviceManagerStub,
-  MockLocalHomePlatform,
   UdpResponseData,
   createSimpleExecuteCommands,
   extractStubs,

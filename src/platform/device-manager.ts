@@ -29,9 +29,9 @@ export class DeviceManagerStub implements smarthome.DeviceManager {
     return new Promise<boolean>((resolve, reject) => {
       this.markPendingAction = (pendingRequest: smarthome.IntentRequest) => {
         if (pendingRequest === requestToMatch) {
-          return true;
+          resolve(true);
         }
-        throw new Error(ERROR_PENDING_REQUEST_MISMATCH);
+        reject(new Error(ERROR_PENDING_REQUEST_MISMATCH));
       };
     });
   }

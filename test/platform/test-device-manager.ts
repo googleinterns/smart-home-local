@@ -1,5 +1,9 @@
 import test from 'ava';
-import {DeviceManagerStub, ERROR_UNEXPECTED_COMMAND_REQUEST} from '../../src';
+import {
+  DeviceManagerStub,
+  ERROR_UNEXPECTED_COMMAND_REQUEST,
+  ERROR_PENDING_REQUEST_MISMATCH,
+} from '../../src';
 import {createUdpDeviceCommand} from '../example/fixtures';
 
 /**
@@ -61,7 +65,15 @@ test('device-manager-unexpected-mark-pending', async t => {
     executeReqeust
   );
   deviceManager.markPending(differentExecuteRequest);
-  t.is(await doesNextPendingRequestMatch, false);
+  await t.throwsAsync(
+    async () => {
+      t.is(await doesNextPendingRequestMatch, false);
+    },
+    {
+      instanceOf: Error,
+      message: ERROR_PENDING_REQUEST_MISMATCH,
+    }
+  );
 });
 
 /**
