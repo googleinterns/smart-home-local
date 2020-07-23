@@ -20,7 +20,7 @@ const COMMAND_REQUEST = createUdpDeviceCommand(
  * Returns a simple execute request used for testing
  * @param command A command to set in the sample request
  */
-function createExecuteRequest(command: string) {
+function createExecuteRequest(command: string, params: object) {
   return {
     requestId: EXECUTE_REQUEST_ID,
     inputs: [
@@ -32,7 +32,7 @@ function createExecuteRequest(command: string) {
               execution: [
                 {
                   command,
-                  params: {},
+                  params,
                 },
               ],
               devices: [
@@ -54,11 +54,13 @@ function createExecuteRequest(command: string) {
  */
 test('device-manager-expected-mark-pending', async t => {
   const deviceManager = new DeviceManagerStub();
-  const executeReqeust = createExecuteRequest('action.devices.commands.OnOff');
+  const executeRequest = createExecuteRequest('action.devices.commands.OnOff', {
+    on: true,
+  });
   const doesNextPendingRequestMatch = deviceManager.doesNextPendingRequestMatch(
-    executeReqeust
+    executeRequest
   );
-  deviceManager.markPending(executeReqeust);
+  deviceManager.markPending(executeRequest);
   t.is(await doesNextPendingRequestMatch, true);
 });
 
@@ -67,12 +69,15 @@ test('device-manager-expected-mark-pending', async t => {
  */
 test('device-manager-unexpected-mark-pending', async t => {
   const deviceManager = new DeviceManagerStub();
-  const executeReqeust = createExecuteRequest('action.devices.commands.OnOff');
+  const executeRequest = createExecuteRequest('action.devices.commands.OnOff', {
+    on: true,
+  });
   const differentExecuteRequest = createExecuteRequest(
-    'action.devices.commands.OpenClose'
+    'action.devices.commands.OnOff',
+    {on: true}
   );
   const doesNextPendingRequestMatch = deviceManager.doesNextPendingRequestMatch(
-    executeReqeust
+    executeRequest
   );
   deviceManager.markPending(differentExecuteRequest);
   await t.throwsAsync(

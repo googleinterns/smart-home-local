@@ -5,10 +5,11 @@ import {
   ERROR_HANDLERS_NOT_SET,
   extractStubs,
 } from '../../src';
+import {createIdentifyHandler} from './test-platform-fixtures';
 import {
-  createIdentifyHandler,
-} from './test-platform-fixtures';
-import {createUdpDeviceCommand, createExecuteHandler} from '../example/fixtures';
+  createUdpDeviceCommand,
+  createExecuteHandler,
+} from '../example/fixtures';
 
 const DISCOVERY_BUFFER: Buffer = Buffer.from('discovery buffer 123');
 const APP_VERSION: string = '0.0.1';
@@ -58,7 +59,7 @@ test('trigger-identify-with-undefined-verificationId-throws', async t => {
     };
   };
   app.onIdentify(invalidIdentifyHandler).onExecute(executeHandler).listen();
-  const mockLocalHomePlatform = extractStubs(app).mockLocalHomePlatform;
+  const {mockLocalHomePlatform} = extractStubs(app);
   await t.throwsAsync(
     mockLocalHomePlatform.triggerIdentify(
       IDENTIFY_REQUEST_ID,
@@ -90,7 +91,7 @@ test('trigger-identify-with-valid-state', async t => {
     deviceManager
   );
   app.onIdentify(validIdentifyHandler).onExecute(validExecuteHandler).listen();
-  const mockLocalHomePlatform = extractStubs(app).mockLocalHomePlatform;
+  const {mockLocalHomePlatform} = extractStubs(app);
   await t.notThrowsAsync(async () => {
     const verificationId = await mockLocalHomePlatform.triggerIdentify(
       IDENTIFY_REQUEST_ID,

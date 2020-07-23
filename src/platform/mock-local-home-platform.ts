@@ -90,7 +90,7 @@ export class MockLocalHomePlatform {
     const device = identifyResponse.payload.device;
 
     // The handler returned an `IdentifyResponse` that was missing a local device id
-    if (device.verificationId == null) {
+    if (device.verificationId === undefined) {
       throw new Error(ERROR_UNDEFINED_VERIFICATIONID);
     }
 
@@ -144,7 +144,7 @@ export class MockLocalHomePlatform {
 
     return new Promise((resolve, reject) => {
       responseCommands.forEach(command => {
-        if (command.status == 'ERROR') {
+        if (command.status === 'ERROR') {
           reject(new Error(ERROR_EXECUTE_RESPONSE_ERROR_STATUS));
         }
       });

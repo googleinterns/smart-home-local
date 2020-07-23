@@ -6,7 +6,6 @@ import {AppStub} from './smart-home-app';
 import {MockLocalHomePlatform} from './mock-local-home-platform';
 import {DeviceManagerStub} from './device-manager';
 import {ExecuteStub} from './execute';
-import {AssertionError} from 'assert';
 
 export const smarthomeStub: {
   App: typeof smarthome.App;
@@ -34,7 +33,7 @@ export const smarthomeStub: {
       constructor(requestId: string, errorCode?: string, debugString?: string) {
         super(errorCode);
         this.requestId = requestId;
-        this.errorCode = errorCode || ' ';
+        this.errorCode = errorCode || '';
         this.debugString = debugString;
       }
       requestId: string;

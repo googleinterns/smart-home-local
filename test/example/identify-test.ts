@@ -22,14 +22,15 @@ test('identify-handler-registers-local-id', async t => {
   ) => {
     return new smarthome.Execute.Response.Builder()
       .setRequestId(executeRequest.requestId)
-      .setSuccessState(DEVICE_ID, {}).build();
+      .setSuccessState(DEVICE_ID, {})
+      .build();
   };
 
   // Set intent fulfillment handlers
   await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();
 
   // Obtain the Mock Local Home Platform from the App stub
-  const mockLocalHomePlatform = extractStubs(app).mockLocalHomePlatform;
+  const {mockLocalHomePlatform} = extractStubs(app);
 
   // The scan data that a local device sends to the Nest device
   const discoveryBuffer = Buffer.from(

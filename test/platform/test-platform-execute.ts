@@ -29,8 +29,7 @@ async function registerDevice(
     'identify-request-id',
     Buffer.from('test-buffer'),
     deviceId
-  ),
-    localDeviceId;
+  );
   Promise.resolve();
 }
 

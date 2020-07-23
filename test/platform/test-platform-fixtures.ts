@@ -18,7 +18,7 @@ export function createIdentifyHandler(
       payload: {
         device: {
           id: deviceId,
-          verificationId: verificationId,
+          verificationId,
         },
       },
     };
