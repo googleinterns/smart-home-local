@@ -12,8 +12,8 @@ import {
 } from '../example/fixtures';
 
 const DISCOVERY_BUFFER: Buffer = Buffer.from('discovery buffer 123');
-const APP_VERSION: string = '0.0.1';
-const DEVICE_ID: string = 'device-id-123';
+const APP_VERSION = '0.0.1';
+const DEVICE_ID = 'device-id-123';
 const IDENTIFY_REQUEST_ID = 'identify-request-id';
 /**
  * Tests that `listen()` was called on the created App.

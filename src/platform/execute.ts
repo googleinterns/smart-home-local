@@ -6,7 +6,7 @@
 export const ExecuteStub: typeof smarthome.Execute = {
   Response: {
     Builder: class {
-      private requestId: string = '';
+      private requestId = '';
       private commands: smarthome.IntentFlow.ExecuteResponseCommands[] = [];
       public setRequestId(requestId: string): this {
         this.requestId = requestId;
@@ -54,8 +54,8 @@ export const ExecuteStub: typeof smarthome.Execute = {
 export function createSimpleExecuteCommands(
   deviceId: string,
   command: string,
-  params: object,
-  customData: object
+  params: Record<string, unknown>,
+  customData: Record<string, unknown>
 ): smarthome.IntentFlow.ExecuteRequestCommands {
   return {
     devices: [{id: deviceId, customData}],

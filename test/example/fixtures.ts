@@ -6,7 +6,7 @@
  */
 export function identifyHandler(
   identifyRequest: smarthome.IntentFlow.IdentifyRequest
-) {
+): smarthome.IntentFlow.IdentifyResponse {
   const device = identifyRequest.inputs[0].payload.device;
   if (device.udpScanData === undefined) {
     throw Error('Missing discovery response');
@@ -41,7 +41,9 @@ export function createExecuteHandler(
   deviceCommand: smarthome.DataFlow.CommandRequest,
   deviceManager: smarthome.DeviceManager
 ) {
-  return async (executeRequest: smarthome.IntentFlow.ExecuteRequest) => {
+  return async (
+    executeRequest: smarthome.IntentFlow.ExecuteRequest
+  ): Promise<smarthome.IntentFlow.ExecuteResponse> => {
     const command = executeRequest.inputs[0].payload.commands[0];
     const device = command.devices[0];
 
