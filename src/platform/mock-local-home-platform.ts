@@ -5,17 +5,17 @@
 import {AppStub} from './smart-home-app';
 import {DeviceManagerStub} from './device-manager';
 
-export const ERROR_UNDEFINED_VERIFICATIONID: string =
+export const ERROR_UNDEFINED_VERIFICATIONID =
   'The handler returned an IdentifyResponse with an undefined verificationId';
-export const ERROR_UNDEFINED_IDENTIFY_HANDLER: string =
+export const ERROR_UNDEFINED_IDENTIFY_HANDLER =
   "Couldn't trigger an IdentifyRequest: The App identifyHandler was undefined.";
-export const ERROR_UNDEFINED_EXECUTE_HANDLER: string =
+export const ERROR_UNDEFINED_EXECUTE_HANDLER =
   "Couldn't trigger an ExecuteRequest: The App executeHandler was undefined.";
-export const ERROR_NO_LOCAL_DEVICE_ID_FOUND: string =
+export const ERROR_NO_LOCAL_DEVICE_ID_FOUND =
   'Cannot get localDeviceId of unregistered deviceId';
-export const ERROR_DEVICE_ID_NOT_REGISTERED: string =
+export const ERROR_DEVICE_ID_NOT_REGISTERED =
   'Cannot trigger an ExecuteRequest: The provided deviceId was not registered to the platform';
-export const ERROR_EXECUTE_RESPONSE_ERROR_STATUS: string =
+export const ERROR_EXECUTE_RESPONSE_ERROR_STATUS =
   "One or more ExecuteResponseCommands returned with an 'ERROR' status";
 
 export class MockLocalHomePlatform {

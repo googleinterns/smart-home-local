@@ -36,7 +36,7 @@ async function registerDevice(
 function createSimpleExecuteCommands(
   deviceId: string,
   command: string,
-  params: object = {}
+  params: Record<string, unknown> = {}
 ): smarthome.IntentFlow.ExecuteRequestCommands {
   return {
     devices: [{id: deviceId}],

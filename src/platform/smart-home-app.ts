@@ -5,11 +5,11 @@
 
 import {MockLocalHomePlatform} from './mock-local-home-platform';
 
-export const ERROR_LISTEN_WITHOUT_IDENTIFY_HANDLER: string =
+export const ERROR_LISTEN_WITHOUT_IDENTIFY_HANDLER =
   'Identify handler must be set before listen() can be called';
-export const ERROR_LISTEN_WITHOUT_EXECUTE_HANDLER: string =
+export const ERROR_LISTEN_WITHOUT_EXECUTE_HANDLER =
   'Execute handler must be set before listen() can be called';
-export const ERROR_HANDLERS_NOT_SET: string =
+export const ERROR_HANDLERS_NOT_SET =
   'All handlers must be set and listen() must be called before accessing the Platform';
 
 export class AppStub implements smarthome.App {
@@ -19,7 +19,7 @@ export class AppStub implements smarthome.App {
   public reachableDevicesHandler:
     | smarthome.IntentFlow.ReachableDevicesHandler
     | undefined;
-  private allHandlersSet: boolean = false;
+  private allHandlersSet = false;
   private mockLocalHomePlatform: MockLocalHomePlatform;
 
   /**

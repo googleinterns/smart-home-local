@@ -43,11 +43,11 @@ export const smarthomeStub: {
   },
   DataFlow: {
     UdpRequestData: class {
-      data: string = '';
-      requestId: string = '';
-      deviceId: string = '';
+      data = '';
+      requestId = '';
+      deviceId = '';
       protocol: smarthome.Constants.Protocol = smarthome.Constants.Protocol.UDP;
-      port: number = 0;
+      port = 0;
     },
   },
   Constants: {
