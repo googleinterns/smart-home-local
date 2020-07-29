@@ -14,7 +14,8 @@ export const ERROR_UNDEFINED_EXECUTE_HANDLER =
 export const ERROR_NO_LOCAL_DEVICE_ID_FOUND =
   'Cannot get localDeviceId of unregistered deviceId';
 export const ERROR_DEVICE_ID_NOT_REGISTERED =
-  'Cannot trigger an ExecuteRequest: The provided deviceId was not registered to the platform';
+  'Cannot trigger an ExecuteRequest: The provided deviceId was not registered' +
+  'to the platform';
 export const ERROR_EXECUTE_RESPONSE_ERROR_STATUS =
   "One or more ExecuteResponseCommands returned with an 'ERROR' status";
 
@@ -47,11 +48,12 @@ export class MockLocalHomePlatform {
   }
 
   /**
-   * Takes a `discoveryBuffer` and passes it to the fulfillment app in an `IdentifyRequest`
+   * Takes a `discoveryBuffer` and passes it to the fulfillment app
+   * in an `IdentifyRequest`.
    * @param requestId  The requestId to set on the `IdentifyRequest`
-   * @param discoveryBuffer  The buffer to be included in the `IdentifyRequest` scan data
-   * @param deviceId  The device ID to link with the localDeviceId returned from fulfillment
-   * @returns  The next localDeviceId registered to the Local Home Platform
+   * @param discoveryBuffer  The buffer in the `IdentifyRequest` scan data.
+   * @param deviceId  The deviceId to register with the recieved localDeviceId.
+   * @returns  The next localDeviceId registered to the Local Home Platform.
    */
   public async triggerIdentify(
     requestId: string,
@@ -89,7 +91,7 @@ export class MockLocalHomePlatform {
 
     const device = identifyResponse.payload.device;
 
-    // The handler returned an `IdentifyResponse` that was missing a local device id
+    // The returned `IdentifyResponse` was missing a local device id
     if (device.verificationId === undefined) {
       throw new Error(ERROR_UNDEFINED_VERIFICATIONID);
     }
@@ -100,10 +102,11 @@ export class MockLocalHomePlatform {
   }
 
   /**
-   * Forms an `ExecuteRequest` with the given commands and passes it to the fulfillment app.
+   * Forms an `ExecuteRequest` with the given commands.
+   * Passes it to the fulfillment app.
    * @param requestId  The request id to set in the `ExecuteRequest`
-   * @param commands  The `ExecuteRequestCommands` to forward to the Execute handler.
-   * @returns The list of `ExecuteResponseCommands` that the fulfillment returned.
+   * @param commands  The `ExecuteRequestCommands` to pass to executeHandler.
+   * @returns The list of `ExecuteResponseCommands` the fulfillment returned.
    */
   public async triggerExecute(
     requestId: string,

@@ -2,7 +2,7 @@
 
 /**
  * Sample Identify handler that is tested against in example tests
- * @param identifyRequest   The `IdentifyRequest` sent by the Local Home Platform
+ * @param identifyRequest  The `IdentifyRequest` to send to `identifyHandler`
  */
 export function identifyHandler(
   identifyRequest: smarthome.IntentFlow.IdentifyRequest
@@ -33,9 +33,11 @@ export function identifyHandler(
 /**
  * Created a basic Execute handler that forwards a specified `CommandRequest`
  * to a referenced `DeviceManager.
- * @param deviceCommand  The single command to send to the referenced `DeviceManager`.
+ * @param deviceCommand  The command to send to the given `DeviceManager`.
  * @param deviceManager  The `DeviceManager` to forward the `CommandRequest` to.
- * @returns  An Execute handler that sends given command to the given `DeviceManager`.
+ * @returns  An Execute handler that sends the given command to the
+ *     given `DeviceManager`.
+ *
  */
 export function createExecuteHandler(
   deviceCommand: smarthome.DataFlow.CommandRequest,

@@ -45,7 +45,8 @@ function createSimpleExecuteCommands(
 }
 
 /**
- * Tests that a valid Execute request and handler pair will result in a `SUCCESS`
+ * Tests that a valid Execute request and handler pair
+ * will result in a `SUCCESS`.
  */
 test('execute-handler-command-success', async t => {
   // Create the App and source Device Manager

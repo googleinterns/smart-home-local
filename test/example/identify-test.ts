@@ -11,7 +11,8 @@ const DEVICE_ID = 'device-id-123';
 const LOCAL_DEVICE_ID = 'local-device-id-123';
 
 /**
- * Tests that the identify handler correctly registers the device ID and local device ID
+ * Tests that the identify handler correctly registers
+ * the device ID and local device ID.
  */
 test('identify-handler-registers-local-id', async t => {
   // Create the App to test against
@@ -52,7 +53,10 @@ test('identify-handler-registers-local-id', async t => {
     );
   });
 
-  // Assert that our identify handler returned the localDeviceId and registered correctly in the platform
+  /**
+   * Assert that our identify handler returned the localDeviceId
+   * and registered correctly in the platform.
+   */
   t.is(mockLocalHomePlatform.isDeviceIdRegistered(DEVICE_ID), true);
   t.is(mockLocalHomePlatform.getLocalDeviceId(DEVICE_ID), LOCAL_DEVICE_ID);
 });

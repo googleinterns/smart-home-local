@@ -20,7 +20,10 @@ const COMMAND_REQUEST = createUdpDeviceCommand(
  * Returns a simple execute request used for testing
  * @param command A command to set in the sample request
  */
-function createExecuteRequest(command: string, params: object) {
+function createExecuteRequest(
+  command: string,
+  params: Record<string, unknown>
+) {
   return {
     requestId: EXECUTE_REQUEST_ID,
     inputs: [

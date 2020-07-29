@@ -3,9 +3,10 @@
  */
 /// <reference types="@google/local-home-sdk" />
 /**
- * Creates a basic Identify handler that returns the specified id and verificationId.
- * @param deviceId  The `id` to include in the `IdentifyResponse` in the handler.
- * @param verificationId  The `verificationId` to include in the `IdentifyResponse` in the handler.
+ * Creates a basic Identify handler that returns the specified
+ * deviceId and verificationId.
+ * @param deviceId  The `id` to include in the `IdentifyResponse`.
+ * @param verificationId  The `verificationId` to return in the `IdentifyResponse`.
  */
 export function createIdentifyHandler(
   deviceId: string,

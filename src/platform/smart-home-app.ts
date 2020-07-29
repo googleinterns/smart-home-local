@@ -10,7 +10,8 @@ export const ERROR_LISTEN_WITHOUT_IDENTIFY_HANDLER =
 export const ERROR_LISTEN_WITHOUT_EXECUTE_HANDLER =
   'Execute handler must be set before listen() can be called';
 export const ERROR_HANDLERS_NOT_SET =
-  'All handlers must be set and listen() must be called before accessing the Platform';
+  'All handlers must be set and listen() must be called before ' +
+  'accessing the Platform';
 
 export class AppStub implements smarthome.App {
   private version: string;
@@ -23,9 +24,9 @@ export class AppStub implements smarthome.App {
   private mockLocalHomePlatform: MockLocalHomePlatform;
 
   /**
-   * Constructs a new AppStub, which implements the smarthome.App interface
-   * Creates a member instance of `MockLocalHomePlatform`
-   * @param version  The app version, in accordance with the smarthome.app type
+   * Constructs a new AppStub, which implements the smarthome.App interface.
+   * Creates a member instance of `MockLocalHomePlatform`.
+   * @param version  The app version, in accordance with the smarthome.app type.
    */
   constructor(version: string) {
     this.version = version;
