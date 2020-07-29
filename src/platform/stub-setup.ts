@@ -3,21 +3,26 @@
  */
 import {AppStub} from './smart-home-app';
 import {MockLocalHomePlatform} from './mock-local-home-platform';
-import {DeviceManagerStub} from './device-manager';
+import {MockDeviceManager} from './mock-device-manager';
 import {ExecuteStub} from './execute';
+import {DataFlowStub} from '../radio/dataflow';
 
 export const smarthomeStub: {
   App: typeof smarthome.App;
   Execute: typeof smarthome.Execute;
   Intents: {[key in keyof typeof smarthome.Intents]: string};
-  DataFlow: {
-    UdpRequestData: typeof smarthome.DataFlow.UdpRequestData;
-  };
+  DataFlow: typeof smarthome.DataFlow;
   IntentFlow: {
     HandlerError: typeof smarthome.IntentFlow.HandlerError;
   };
   Constants: {
     Protocol: {[key in keyof typeof smarthome.Constants.Protocol]: string};
+    TcpOperation: {
+      [key in keyof typeof smarthome.Constants.TcpOperation]: string;
+    };
+    HttpOperation: {
+      [key in keyof typeof smarthome.Constants.HttpOperation]: string;
+    };
   };
 } = {
   App: AppStub,
@@ -40,15 +45,7 @@ export const smarthomeStub: {
       debugString?: string;
     },
   },
-  DataFlow: {
-    UdpRequestData: class {
-      data = '';
-      requestId = '';
-      deviceId = '';
-      protocol: smarthome.Constants.Protocol = smarthome.Constants.Protocol.UDP;
-      port = 0;
-    },
-  },
+  DataFlow: DataFlowStub,
   Constants: {
     Protocol: {
       BLE: 'BLE',
@@ -57,12 +54,21 @@ export const smarthomeStub: {
       UDP: 'UDP',
       BLE_MESH: 'BLE_MESH',
     },
+    TcpOperation: {
+      READ: 'READ',
+      WRITE: 'WRITE',
+    },
+    HttpOperation: {
+      GET: 'GET',
+      POST: 'POST',
+      PUT: 'PUT',
+    },
   },
 };
 
 export interface ExtractedStubs {
   mockLocalHomePlatform: MockLocalHomePlatform;
-  deviceManagerStub: DeviceManagerStub;
+  deviceManagerStub: MockDeviceManager;
 }
 
 /**
@@ -75,7 +81,9 @@ export function extractStubs(app: smarthome.App): ExtractedStubs {
   if (app instanceof AppStub) {
     return {
       mockLocalHomePlatform: app.getLocalHomePlatform(),
-      deviceManagerStub: app.getLocalHomePlatform().getDeviceManager(),
+      deviceManagerStub: app
+        .getLocalHomePlatform()
+        .getDeviceManager() as MockDeviceManager,
     };
   }
   throw new Error("Couldn't downcast App to AppStub");

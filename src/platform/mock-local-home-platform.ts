@@ -3,7 +3,7 @@
  */
 /// <reference types="@google/local-home-sdk" />
 import {AppStub} from './smart-home-app';
-import {DeviceManagerStub} from './device-manager';
+import {MockDeviceManager} from './mock-device-manager';
 
 export const ERROR_UNDEFINED_VERIFICATIONID =
   'The handler returned an IdentifyResponse with an undefined verificationId';
@@ -15,13 +15,13 @@ export const ERROR_NO_LOCAL_DEVICE_ID_FOUND =
   'Cannot get localDeviceId of unregistered deviceId';
 export const ERROR_DEVICE_ID_NOT_REGISTERED =
   'Cannot trigger an ExecuteRequest: The provided deviceId was not registered' +
-  'to the platform';
+  ' to the platform';
 export const ERROR_EXECUTE_RESPONSE_ERROR_STATUS =
   "One or more ExecuteResponseCommands returned with an 'ERROR' status";
 
 export class MockLocalHomePlatform {
-  private deviceManager: DeviceManagerStub = new DeviceManagerStub();
   private app: AppStub;
+  private deviceManager: smarthome.DeviceManager = new MockDeviceManager();
   private localDeviceIds: Map<string, string> = new Map<string, string>();
 
   /**
@@ -32,7 +32,11 @@ export class MockLocalHomePlatform {
     this.app = app;
   }
 
-  public getDeviceManager(): DeviceManagerStub {
+  public setDeviceManager(deviceManager: smarthome.DeviceManager): void {
+    this.deviceManager = deviceManager;
+  }
+
+  public getDeviceManager(): smarthome.DeviceManager {
     return this.deviceManager;
   }
 
@@ -66,7 +70,7 @@ export class MockLocalHomePlatform {
     discoveryBuffer: Buffer,
     deviceId?: string
   ): Promise<string> {
-    console.debug('Received discovery payload:', discoveryBuffer);
+    console.log('Received discovery payload:', discoveryBuffer);
 
     // Cannot start processing until all handlers have been set on the `App`.
     if (!this.app.identifyHandler) {
@@ -102,7 +106,7 @@ export class MockLocalHomePlatform {
       throw new Error(ERROR_UNDEFINED_VERIFICATIONID);
     }
 
-    console.debug('Registering localDeviceId: ' + device.verificationId);
+    console.log('Registering localDeviceId: ' + device.verificationId);
     this.localDeviceIds.set(device.id, device.verificationId);
     return device.verificationId;
   }
@@ -144,9 +148,6 @@ export class MockLocalHomePlatform {
         },
       ],
     };
-
-    // Reset the buffer of commands sent.
-    this.getDeviceManager().clearCommandsSent();
 
     const responseCommands = (await this.app.executeHandler(executeRequest))
       .payload.commands;

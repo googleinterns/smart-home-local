@@ -10,10 +10,13 @@
     "compile": "tsc",
     "test": "ava",
     "clean": "gts clean",
+    "cli": "node ./build/src/cli/index.js",
     "lint": "eslint './src/**/*.ts' './test/**/*.ts'"
   },
   "dependencies": {
-    "ava": "^3.10.0"
+    "@types/yargs": "^15.0.5",
+    "ava": "^3.10.0",
+    "yargs": "^15.4.1"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",
@@ -29,6 +32,9 @@
     "gts": "^2.0.2",
     "prettier": "^2.0.5",
     "typescript": "^3.8.3"
+  },
+  "engines": {
+    "node": ">12.11.0"
   },
   "files": [
     "./build/src/**/*.ts",
