@@ -1,6 +1,5 @@
 /*
- * Injects the App stub into the global scope.
- * Bundled HomeApp cannot be loaded until this global is set.
+ * Composes and exports the smarthome namespace containing all stubs.
  */
 import {AppStub} from './smart-home-app';
 import {MockLocalHomePlatform} from './mock-local-home-platform';

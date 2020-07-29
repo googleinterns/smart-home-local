@@ -1,5 +1,5 @@
 /**
- * Fixtures used across internal tests
+ * Fixtures used across internal tests.
  */
 /// <reference types="@google/local-home-sdk" />
 /**

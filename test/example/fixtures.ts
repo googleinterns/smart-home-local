@@ -1,7 +1,7 @@
 /// <reference types="@google/local-home-sdk" />
 
 /**
- * Sample Identify handler that is tested against in example tests
+ * Sample Identify handler that is tested against in example tests.
  * @param identifyRequest  The `IdentifyRequest` to send to `identifyHandler`
  */
 export function identifyHandler(
@@ -31,7 +31,7 @@ export function identifyHandler(
 }
 
 /**
- * Created a basic Execute handler that forwards a specified `CommandRequest`
+ * Creates a basic Execute handler that forwards a specified `CommandRequest`
  * to a referenced `DeviceManager.
  * @param deviceCommand  The command to send to the given `DeviceManager`.
  * @param deviceManager  The `DeviceManager` to forward the `CommandRequest` to.
@@ -49,12 +49,12 @@ export function createExecuteHandler(
     const command = executeRequest.inputs[0].payload.commands[0];
     const device = command.devices[0];
 
-    // Create the Execute response to send back to platform
+    // Create the Execute response to send back to platform.
     const executeResponse = new smarthome.Execute.Response.Builder().setRequestId(
       executeRequest.requestId
     );
 
-    // Perform required DeviceManager actions and update response
+    // Perform required DeviceManager actions and update response.
     try {
       const result = await deviceManager.send(deviceCommand);
       executeResponse.setSuccessState(result.deviceId, {});
@@ -66,11 +66,11 @@ export function createExecuteHandler(
 }
 
 /**
- * Creates a 'UdpRequestData' to use for testing `DeviceManager` functionality
- * @param buffer  The `Buffer` to include in the returned request data
- * @param requestId  The request id to set in the request data
- * @param deviceId  The device id to set in the request data
- * @param port  The port to set in the request data
+ * Creates a 'UdpRequestData' to use for testing `DeviceManager` functionality.
+ * @param buffer  The `Buffer` to include in the returned request data.
+ * @param requestId  The request id to set in the request data.
+ * @param deviceId  The device id to set in the request data.
+ * @param port  The port to set in the request data.
  */
 export function createUdpDeviceCommand(
   buffer: Buffer,

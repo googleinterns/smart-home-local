@@ -1,5 +1,5 @@
 /*
- * Example tests against a fulfillment's identifyHandler
+ * Example tests against a fulfillment's `identifyHandler`.
  */
 /// <reference types="@google/local-home-sdk" />
 /// <reference types="@types/node" />
@@ -15,7 +15,7 @@ const LOCAL_DEVICE_ID = 'local-device-id-123';
  * the device ID and local device ID.
  */
 test('identify-handler-registers-local-id', async t => {
-  // Create the App to test against
+  // Create the App to test against.
   const app: smarthome.App = new smarthome.App('0.0.1');
 
   const executeHandler = (
@@ -27,21 +27,21 @@ test('identify-handler-registers-local-id', async t => {
       .build();
   };
 
-  // Set intent fulfillment handlers
+  // Set the Identify and Execute intent fulfillment handlers.
   await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();
 
-  // Obtain the Mock Local Home Platform from the App stub
+  // Obtain the Mock Local Home Platform from the App stub.
   const {mockLocalHomePlatform} = extractStubs(app);
 
-  // The scan data that a local device sends to the Nest device
+  // The scan data that a local device sends to the Nest device.
   const discoveryBuffer = Buffer.from(
-    // Arbitrary scan data containing the local device ID
+    // Arbitrary scan data containing the local device ID.
     JSON.stringify({
       localDeviceId: LOCAL_DEVICE_ID,
     })
   );
 
-  // Trigger an Identify intent from the platformn
+  // Trigger an Identify intent from the platformn.
   await t.notThrowsAsync(async () => {
     t.is(
       await mockLocalHomePlatform.triggerIdentify(

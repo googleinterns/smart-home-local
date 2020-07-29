@@ -1,3 +1,6 @@
+/**
+ * Internal test for the `DeviceManagerStub` class.
+ */
 import test from 'ava';
 import {
   DeviceManagerStub,
@@ -18,8 +21,10 @@ const COMMAND_REQUEST = createUdpDeviceCommand(
 );
 
 /**
- * Returns a simple execute request used for testing
- * @param command A command to set in the sample request
+ * Creates a simple execute request used for testing.
+ * @param command  A command to set in the sample request.
+ * @param params  The `params` field for the command.
+ * @returns a simple execute request with the supplied parameters.
  */
 function createExecuteRequest(
   command: string,
@@ -54,7 +59,7 @@ function createExecuteRequest(
 }
 
 /**
- * Tests that `markPending()` matches two identical requests
+ * Tests that `markPending()` matches two identical requests.
  */
 test('device-manager-expected-mark-pending', async t => {
   const deviceManager = new DeviceManagerStub();
@@ -69,7 +74,7 @@ test('device-manager-expected-mark-pending', async t => {
 });
 
 /**
- * Tests that `markPending()` differentiates two different requests
+ * Tests that `markPending()` differentiates two different requests.
  */
 test('device-manager-unexpected-mark-pending', async t => {
   const deviceManager = new DeviceManagerStub();
@@ -96,7 +101,7 @@ test('device-manager-unexpected-mark-pending', async t => {
 });
 
 /**
- * Tests that an unexpected Execute request throws a `HandlerError`
+ * Tests that an unexpected Execute request throws a `HandlerError`.
  */
 test('test-unexpected-command-request', async t => {
   const deviceManager = new DeviceManagerStub();
@@ -124,15 +129,15 @@ test('test-sent-requests', async t => {
   );
   deviceManager.addExpectedCommand(COMMAND_REQUEST, commandResponse);
 
-  // Send an expected command
+  // Send an expected command.
   await t.notThrowsAsync(async () => {
     await deviceManager.send(COMMAND_REQUEST);
   });
 
-  // Confirm command was saved
+  // Confirm command was saved.
   t.is(deviceManager.wasCommandSent(COMMAND_REQUEST), true);
 
-  // Confirm command was cleared
+  // Confirm command was cleared.
   deviceManager.clearCommandsSent();
   t.is(deviceManager.wasCommandSent(COMMAND_REQUEST), false);
 });

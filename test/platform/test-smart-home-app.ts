@@ -1,3 +1,6 @@
+/**
+ * Tests the `AppStub` class.
+ */
 /// <reference types="@google/local-home-sdk" />
 import test from 'ava';
 import {
@@ -20,7 +23,7 @@ const IDENTIFY_HANDLER: smarthome.IntentFlow.IdentifyHandler = () => {
 };
 
 /**
- * Tests that a call to `listen()` without setting any required handlers fails
+ * Tests that a call to `listen()` without setting any required handlers fails.
  */
 test('listen-with-undefined-identify-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
@@ -36,7 +39,7 @@ test('listen-with-undefined-identify-throws', async t => {
 });
 
 /**
- * Tests that a call to `listen()` having only set the identify handler fails
+ * Tests that a call to `listen()` having only set the identify handler fails.
  */
 test('listen-with-undefined-execute-throws', async t => {
   const app: smarthome.App = new smarthome.App(APP_VERSION);
@@ -54,7 +57,7 @@ test('listen-with-undefined-execute-throws', async t => {
 
 /**
  * Tests that a call to `listen()` with Identify and Execute handlers
- * finishes without error
+ * finishes without error.
  */
 test('listen-with-valid-handlers', async t => {
   const executeHandler: smarthome.IntentFlow.ExecuteHandler = (

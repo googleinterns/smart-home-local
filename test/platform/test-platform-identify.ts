@@ -1,3 +1,6 @@
+/**
+ * Internal tests for the `MockLocalHomePlatform`'s Identify functionality.
+ */
 /// <reference types="@google/local-home-sdk" />
 import test from 'ava';
 import {
@@ -73,7 +76,7 @@ test('trigger-identify-with-undefined-verificationId-throws', async t => {
 });
 
 /**
- * Tests `triggerIdentify()` when all requirements are met
+ * Tests `triggerIdentify()` when all requirements are met.
  */
 test('trigger-identify-with-valid-state', async t => {
   const discoveryBuffer = Buffer.from('discovery buffer 123');

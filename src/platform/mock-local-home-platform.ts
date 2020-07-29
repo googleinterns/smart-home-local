@@ -1,5 +1,5 @@
 /*
- * Mock Local Home Platform class
+ * An interactive mock implementation of the Local Home Platform.
  */
 /// <reference types="@google/local-home-sdk" />
 import {AppStub} from './smart-home-app';
@@ -25,8 +25,8 @@ export class MockLocalHomePlatform {
   private localDeviceIds: Map<string, string> = new Map<string, string>();
 
   /**
-   * Constructs a new MockLocalHomePlatform instance using an App instance
-   * @param app the AppStub that acts as an interface for intent handlers
+   * Constructs a new MockLocalHomePlatform instance using an App instance.
+   * @param app  The AppStub that acts as an interface for intent handlers.
    */
   public constructor(app: AppStub) {
     this.app = app;
@@ -36,6 +36,12 @@ export class MockLocalHomePlatform {
     return this.deviceManager;
   }
 
+  /**
+   * Returns true if the provided deviceId was registered to the platform.
+   * Otherwise, returns false.
+   * @param deviceId  The deviceId to check.
+   * @returns  A boolean indicating whether or not the deviceId is registered.
+   */
   public isDeviceIdRegistered(deviceId: string): boolean {
     return this.localDeviceIds.has(deviceId);
   }
@@ -50,7 +56,7 @@ export class MockLocalHomePlatform {
   /**
    * Takes a `discoveryBuffer` and passes it to the fulfillment app
    * in an `IdentifyRequest`.
-   * @param requestId  The requestId to set on the `IdentifyRequest`
+   * @param requestId  The requestId to set on the `IdentifyRequest`.
    * @param discoveryBuffer  The buffer in the `IdentifyRequest` scan data.
    * @param deviceId  The deviceId to register with the recieved localDeviceId.
    * @returns  The next localDeviceId registered to the Local Home Platform.
@@ -62,7 +68,7 @@ export class MockLocalHomePlatform {
   ): Promise<string> {
     console.debug('Received discovery payload:', discoveryBuffer);
 
-    // Cannot start processing until all handlers have been set on the `App`
+    // Cannot start processing until all handlers have been set on the `App`.
     if (!this.app.identifyHandler) {
       throw new Error(ERROR_UNDEFINED_IDENTIFY_HANDLER);
     }
@@ -91,7 +97,7 @@ export class MockLocalHomePlatform {
 
     const device = identifyResponse.payload.device;
 
-    // The returned `IdentifyResponse` was missing a local device id
+    // The returned `IdentifyResponse` was missing a local device id.
     if (device.verificationId === undefined) {
       throw new Error(ERROR_UNDEFINED_VERIFICATIONID);
     }
@@ -114,14 +120,14 @@ export class MockLocalHomePlatform {
   ): Promise<smarthome.IntentFlow.ExecuteResponseCommands[]> {
     commands.forEach(command => {
       command.devices.forEach(device => {
-        // Cannot send a `ExecuteRequest` to a device not registered
+        // Cannot send a `ExecuteRequest` to a device not registered.
         if (!this.localDeviceIds.has(device.id)) {
           throw new Error(ERROR_DEVICE_ID_NOT_REGISTERED);
         }
       });
     });
 
-    // No executeHandler found
+    // No executeHandler was found.
     if (this.app.executeHandler === undefined) {
       throw new Error(ERROR_UNDEFINED_EXECUTE_HANDLER);
     }
@@ -139,7 +145,7 @@ export class MockLocalHomePlatform {
       ],
     };
 
-    // Reset the buffer of commands sent
+    // Reset the buffer of commands sent.
     this.getDeviceManager().clearCommandsSent();
 
     const responseCommands = (await this.app.executeHandler(executeRequest))
