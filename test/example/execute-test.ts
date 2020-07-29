@@ -8,6 +8,7 @@ import {
   UdpResponseData,
   createSimpleExecuteCommands,
   extractStubs,
+  UdpResponse,
 } from '../../src';
 import {
   identifyHandler,
@@ -66,7 +67,7 @@ test('test-valid-execute-request', async t => {
   // Prepare the stub to expect the command
   stubs.deviceManagerStub.addExpectedCommand(
     expectedCommand,
-    new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID)
+    new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID, new UdpResponse())
   );
 
   // Trigger an Execute intent and confirm a CommandSuccess

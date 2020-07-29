@@ -4,6 +4,7 @@ import {
   ERROR_UNEXPECTED_COMMAND_REQUEST,
   ERROR_PENDING_REQUEST_MISMATCH,
   UdpResponseData,
+  UdpResponse,
 } from '../../src';
 import {createUdpDeviceCommand} from '../example/fixtures';
 
@@ -116,7 +117,11 @@ test('test-unexpected-command-request', async t => {
  */
 test('test-sent-requests', async t => {
   const deviceManager = new DeviceManagerStub();
-  const commandResponse = new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID);
+  const commandResponse = new UdpResponseData(
+    EXECUTE_REQUEST_ID,
+    DEVICE_ID,
+    new UdpResponse()
+  );
   deviceManager.addExpectedCommand(COMMAND_REQUEST, commandResponse);
 
   // Send an expected command

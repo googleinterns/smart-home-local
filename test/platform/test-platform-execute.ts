@@ -5,6 +5,7 @@ import {
   extractStubs,
   UdpResponseData,
   ERROR_EXECUTE_RESPONSE_ERROR_STATUS,
+  UdpResponse,
 } from '../../src';
 import {createIdentifyHandler} from './test-platform-fixtures';
 import {
@@ -72,7 +73,7 @@ test('execute-handler-command-success', async t => {
   // Prepare the stub to expect the command
   stubs.deviceManagerStub.addExpectedCommand(
     validCommand,
-    new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID)
+    new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID, new UdpResponse())
   );
 
   const executeCommands = createSimpleExecuteCommands(
@@ -123,7 +124,7 @@ test('execute-handler-sends-wrong-buffer', async t => {
   // Prepare the stub to expect a command
   stubs.deviceManagerStub.addExpectedCommand(
     expectedCommand,
-    new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID)
+    new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID, new UdpResponse())
   );
 
   // Create a valid Execute command to trigger executeHandler
