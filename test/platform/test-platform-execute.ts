@@ -81,7 +81,7 @@ test('execute-handler-command-success', async t => {
     DEVICE_ID,
     'actions.devices.commands.OnOff',
     {on: true},
-    {color: 'red'}
+    {fooValue: 74, barvalue: true, bazValue: 'sheepdip'}
   );
 
   // Trigger an Execute intent and confirm a `CommandSuccess`.
@@ -135,7 +135,7 @@ test('execute-handler-sends-wrong-buffer', async t => {
     DEVICE_ID,
     'actions.devices.commands.OnOff',
     {on: true},
-    {color: 'red'}
+    {fooValue: 74, barvalue: true, bazValue: 'sheepdip'}
   );
 
   // Trigger the Execute handler and confirm a `CommandFailure`

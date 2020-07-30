@@ -61,7 +61,7 @@ test('test-valid-execute-request', async t => {
     DEVICE_ID,
     'actions.devices.commands.OnOff',
     {on: true},
-    {color: 'red'}
+    {fooValue: 74, barvalue: true, bazValue: 'sheepdip'}
   );
 
   // Prepare the `DeviceManagerStub` to expect the command to be sent in `executeHandler`.
