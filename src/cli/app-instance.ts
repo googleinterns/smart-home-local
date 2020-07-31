@@ -7,7 +7,6 @@ import {AppStub} from '../platform/smart-home-app';
 import {createSimpleExecuteCommands} from '../platform/execute';
 import {IdentifyMessage, ExecuteMessage, READY_FLAG} from './command-processor';
 import * as fs from 'fs';
-import * as path from 'path';
 
 /**
  * Override the constructor to capture the AppStub instance.
