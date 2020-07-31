@@ -1,3 +1,6 @@
+/**
+ * Internal tests for the `MockLocalHomePlatform`'s Identify functionality.
+ */
 /// <reference types="@google/local-home-sdk" />
 import test from 'ava';
 import {
@@ -12,8 +15,8 @@ import {
 } from '../example/fixtures';
 
 const DISCOVERY_BUFFER: Buffer = Buffer.from('discovery buffer 123');
-const APP_VERSION: string = '0.0.1';
-const DEVICE_ID: string = 'device-id-123';
+const APP_VERSION = '0.0.1';
+const DEVICE_ID = 'device-id-123';
 const IDENTIFY_REQUEST_ID = 'identify-request-id';
 /**
  * Tests that `listen()` was called on the created App.
@@ -73,7 +76,7 @@ test('trigger-identify-with-undefined-verificationId-throws', async t => {
 });
 
 /**
- * Tests `triggerIdentify()` when all requirements are met
+ * Tests `triggerIdentify()` when all requirements are met.
  */
 test('trigger-identify-with-valid-state', async t => {
   const discoveryBuffer = Buffer.from('discovery buffer 123');

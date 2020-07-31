@@ -1,5 +1,5 @@
 /*
- * Example tests against a fulfillment's executeHandler
+ * Example tests against a fulfillment's executeHandler.
  */
 /// <reference types="@google/local-home-sdk" />
 /// <reference types="@types/node" />
@@ -8,6 +8,7 @@ import {
   UdpResponseData,
   createSimpleExecuteCommands,
   extractStubs,
+  UdpResponse,
 } from '../../src';
 import {
   identifyHandler,
@@ -20,7 +21,7 @@ const DEVICE_PORT = 12345;
 const LOCAL_DEVICE_ID = 'local-device-id-123';
 const EXECUTE_REQUEST_ID = 'request-id-123';
 
-// Create a valid request for the Execute call
+// Create a valid request for the Execute call.
 const expectedCommand: smarthome.DataFlow.UdpRequestData = createUdpDeviceCommand(
   Buffer.from('test-execute-buffer'),
   EXECUTE_REQUEST_ID,
@@ -29,7 +30,7 @@ const expectedCommand: smarthome.DataFlow.UdpRequestData = createUdpDeviceComman
 );
 
 /**
- * Tests that valid Execute request resolves with a 'SUCCESS'
+ * Tests that valid Execute request resolves with a 'SUCCESS'.
  */
 test('test-valid-execute-request', async t => {
   const app: smarthome.App = new smarthome.App('0.0.1');
@@ -38,7 +39,7 @@ test('test-valid-execute-request', async t => {
     app.getDeviceManager()
   );
 
-  // Registers DEVICE_ID and LOCAL_DEVICE_ID to the Local Home Platform with Identify
+  // Registers DEVICE_ID and LOCAL_DEVICE_ID to the Local Home Platform with Identify.
   await app.onIdentify(identifyHandler).onExecute(executeHandler).listen();
   const discoveryBuffer = Buffer.from(
     JSON.stringify({
@@ -52,7 +53,7 @@ test('test-valid-execute-request', async t => {
   ),
     LOCAL_DEVICE_ID;
 
-  // Source stubs
+  // Source interactive stubs from the App instance.
   const stubs = extractStubs(app);
 
   // Create a valid `ExecuteRequestCommands`
@@ -60,16 +61,16 @@ test('test-valid-execute-request', async t => {
     DEVICE_ID,
     'actions.devices.commands.OnOff',
     {on: true},
-    {color: 'red'}
+    {fooValue: 74, barvalue: true, bazValue: 'sheepdip'}
   );
 
-  // Prepare the stub to expect the command
+  // Prepare the `DeviceManagerStub` to expect the command to be sent in `executeHandler`.
   stubs.deviceManagerStub.addExpectedCommand(
     expectedCommand,
-    new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID)
+    new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID, new UdpResponse())
   );
 
-  // Trigger an Execute intent and confirm a CommandSuccess
+  // Trigger an Execute intent and confirm a CommandSuccess.
   await t.notThrowsAsync(async () => {
     const executeResponseCommands = await stubs.mockLocalHomePlatform.triggerExecute(
       EXECUTE_REQUEST_ID,
@@ -78,5 +79,6 @@ test('test-valid-execute-request', async t => {
     t.is(executeResponseCommands[0].status, 'SUCCESS');
   });
 
+  // Confirm the expected command was sent.
   t.is(stubs.deviceManagerStub.wasCommandSent(expectedCommand), true);
 });

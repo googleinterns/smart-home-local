@@ -1,9 +1,13 @@
+/**
+ * Internal test for the `DeviceManagerStub` class.
+ */
 import test from 'ava';
 import {
   DeviceManagerStub,
   ERROR_UNEXPECTED_COMMAND_REQUEST,
   ERROR_PENDING_REQUEST_MISMATCH,
   UdpResponseData,
+  UdpResponse,
 } from '../../src';
 import {createUdpDeviceCommand} from '../example/fixtures';
 
@@ -17,10 +21,15 @@ const COMMAND_REQUEST = createUdpDeviceCommand(
 );
 
 /**
- * Returns a simple execute request used for testing
- * @param command A command to set in the sample request
+ * Creates a simple execute request used for testing.
+ * @param command  A command to set in the sample request.
+ * @param params  The `params` field for the command.
+ * @returns a simple execute request with the supplied parameters.
  */
-function createExecuteRequest(command: string, params: object) {
+function createExecuteRequest(
+  command: string,
+  params: Record<string, unknown>
+) {
   return {
     requestId: EXECUTE_REQUEST_ID,
     inputs: [
@@ -50,7 +59,7 @@ function createExecuteRequest(command: string, params: object) {
 }
 
 /**
- * Tests that `markPending()` matches two identical requests
+ * Tests that `markPending()` matches two identical requests.
  */
 test('device-manager-expected-mark-pending', async t => {
   const deviceManager = new DeviceManagerStub();
@@ -65,7 +74,7 @@ test('device-manager-expected-mark-pending', async t => {
 });
 
 /**
- * Tests that `markPending()` differentiates two different requests
+ * Tests that `markPending()` differentiates two different requests.
  */
 test('device-manager-unexpected-mark-pending', async t => {
   const deviceManager = new DeviceManagerStub();
@@ -92,7 +101,7 @@ test('device-manager-unexpected-mark-pending', async t => {
 });
 
 /**
- * Tests that an unexpected Execute request throws a `HandlerError`
+ * Tests that an unexpected Execute request throws a `HandlerError`.
  */
 test('test-unexpected-command-request', async t => {
   const deviceManager = new DeviceManagerStub();
@@ -113,18 +122,22 @@ test('test-unexpected-command-request', async t => {
  */
 test('test-sent-requests', async t => {
   const deviceManager = new DeviceManagerStub();
-  const commandResponse = new UdpResponseData(EXECUTE_REQUEST_ID, DEVICE_ID);
+  const commandResponse = new UdpResponseData(
+    EXECUTE_REQUEST_ID,
+    DEVICE_ID,
+    new UdpResponse()
+  );
   deviceManager.addExpectedCommand(COMMAND_REQUEST, commandResponse);
 
-  // Send an expected command
+  // Send an expected command.
   await t.notThrowsAsync(async () => {
     await deviceManager.send(COMMAND_REQUEST);
   });
 
-  // Confirm command was saved
+  // Confirm command was saved.
   t.is(deviceManager.wasCommandSent(COMMAND_REQUEST), true);
 
-  // Confirm command was cleared
+  // Confirm command was cleared.
   deviceManager.clearCommandsSent();
   t.is(deviceManager.wasCommandSent(COMMAND_REQUEST), false);
 });
