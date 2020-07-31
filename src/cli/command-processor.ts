@@ -78,51 +78,56 @@ export class CommandProcessor {
   }
 
   // Wrapper for argument parsing with yargs.
-  private async parseIntent(userCommand: string): Promise<IntentMessage> {
+  private async parseIntent(
+    userCommand: string
+  ): Promise<IntentMessage | void> {
     const argv = await yargs()
-      .option('intent_type', {
-        describe: 'The Intent type',
-        type: 'string',
-        demandOption: true,
+      .command('identify', 'Trigger an Identify command.', yargs => {
+        return yargs
+          .option('request_id', {
+            describe: 'The request Id',
+            type: 'string',
+            demandOption: true,
+          })
+          .option('discovery_buffer', {
+            describe: 'The IDENTIFY dicovery buffer represented as a string',
+            type: 'string',
+            demandOption: false,
+          })
+          .option('device_id', {
+            describe: 'The device Id',
+            type: 'string',
+            demandOption: false,
+          });
       })
-      .option('request_id', {
-        describe: 'The request Id',
-        type: 'string',
-        demandOption: true,
+      .command('execute', 'Trigger an Execute command.', yargs => {
+        return yargs
+          .option('local_device_id', {
+            describe: 'The local device Id',
+            type: 'string',
+            demandOption: false,
+          })
+          .option('command', {
+            describe: 'The execute command to send to device_id',
+            type: 'string',
+            demandOption: false,
+          })
+          .option('params', {
+            describe:
+              'The params argument for the execute command, in JSON format',
+            type: 'string',
+            default: '{}',
+            demandOption: false,
+          })
+          .option('custom_data', {
+            describe:
+              'The customData argument for the execute command, in JSON format',
+            type: 'string',
+            default: '{}',
+            demandOption: false,
+          });
       })
-      .option('discovery_buffer', {
-        describe: 'The IDENTIFY dicovery buffer represented as a string',
-        type: 'string',
-        demandOption: false,
-      })
-      .option('device_id', {
-        describe: 'The device Id',
-        type: 'string',
-        demandOption: false,
-      })
-      .option('local_device_id', {
-        describe: 'The local device Id',
-        type: 'string',
-        demandOption: false,
-      })
-      .option('command', {
-        describe: 'The execute command to send to device_id',
-        type: 'string',
-        demandOption: false,
-      })
-      .option('params', {
-        describe: 'The params argument for the execute command, in JSON format',
-        type: 'string',
-        default: '{}',
-        demandOption: false,
-      })
-      .option('custom_data', {
-        describe:
-          'The customData argument for the execute command, in JSON format',
-        type: 'string',
-        default: '{}',
-        demandOption: false,
-      })
+      .command('exit', 'Exit the command line interface.')
       .parse(userCommand, {}, (error, argv) => {
         if (error !== null) {
           throw error;
@@ -133,8 +138,10 @@ export class CommandProcessor {
     /**
      * Validate arguments and return an IntentMessage
      */
-    switch (argv.intent_type) {
-      case 'IDENTIFY':
+    switch (argv._[0]) {
+      case 'exit':
+        return Promise.resolve();
+      case 'identify':
         if (argv.discovery_buffer === undefined) {
           throw new Error(
             'discovery_buffer is required to trigger an Identify intent'
@@ -150,7 +157,7 @@ export class CommandProcessor {
           argv.discovery_buffer,
           argv.device_id
         );
-      case 'EXECUTE':
+      case 'execute':
         if (argv.local_device_id === undefined) {
           throw new Error(
             'local_device_id is required to trigger an Execute intent'
@@ -167,7 +174,7 @@ export class CommandProcessor {
           JSON.parse(argv.custom_data)
         );
       default:
-        throw new Error('Unsupported value for intent_type argument.');
+        throw new Error('Unsupported command.');
     }
   }
 
@@ -193,41 +200,18 @@ export class CommandProcessor {
             resolve();
             return;
           }
-
-          //Parse the command.
-          const command = input.split(' ')[0];
-
-          if (input === 'exit') {
-            // Set loop exit flag and return.
-            exit = true;
-            resolve();
-            return;
-          }
-
-          if (command !== 'send-intent') {
-            console.log(
-              'Invalid command: ' +
-                command +
-                '\nValid commands: exit | send-intent'
-            );
-            // Early exit on invalid command.
-            resolve();
-            return;
-          }
-
-          // After validating first command, parse with member.
           try {
-            let argumentString = '';
-            const commandEnd = input.indexOf(' ');
-            if (commandEnd !== -1) {
-              argumentString = input.substring(commandEnd + 1);
+            const intentMessage = await this.parseIntent(input);
+            if (intentMessage === undefined) {
+              exit = true;
+              resolve();
+              return;
             }
-            const intentMessage = await this.parseIntent(argumentString);
             // Post message to worker thread.
             this.worker.postMessage(intentMessage);
           } catch (error) {
             // Print the error message and continue the loop.
-            console.log(error.message);
+            console.error(error.message);
           }
           resolve();
         });
