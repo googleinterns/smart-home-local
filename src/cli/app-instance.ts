@@ -4,10 +4,12 @@
 import {parentPort, workerData} from 'worker_threads';
 import {smarthomeStub, extractStubs} from '../platform/stub-setup';
 import {AppStub} from '../platform/smart-home-app';
+import {READY_FLAG} from './index';
 import {createSimpleExecuteCommands} from '../platform/execute';
 import {IdentifyMessage, ExecuteMessage} from './command-processor';
 import * as fs from 'fs';
 import * as path from 'path';
+console.log('STARTED WORKER');
 
 /**
  * Override the constructor to capture the AppStub instance.
@@ -27,13 +29,10 @@ smarthomeStub.App = CliAppStub;
 (global as any).smarthome = smarthomeStub;
 
 /**
- * Validate the filepath.
+ * Strips the file extension off the filepath and validates it.
  */
-try {
-  // Strips the file extension off the filepath,
-  const modulePath = workerData.substring(0, workerData.lastIndexOf('.'));
-  fs.existsSync(path.relative('./', modulePath));
-} catch (error) {
+const modulePath = workerData.substring(0, workerData.lastIndexOf('.'));
+if (!fs.existsSync(path.relative('./', modulePath))) {
   throw new Error('File at path ' + workerData + ' not found.');
 }
 
@@ -54,7 +53,7 @@ const {mockLocalHomePlatform} = extractStubs(appStubInstance);
 
 if (parentPort !== null) {
   // Signal to the main thread that worker thread has succesfully initialized an app.
-  parentPort.postMessage('ready');
+  parentPort.postMessage(READY_FLAG);
 
   /**
    * Recieve a validated command and forward it to the platform instance.

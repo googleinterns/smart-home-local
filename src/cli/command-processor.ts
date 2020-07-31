@@ -108,12 +108,14 @@ export class CommandProcessor {
       .option('params', {
         describe: 'The params argument for the execute command, in JSON format',
         type: 'string',
+        default: '{}',
         demandOption: false,
       })
       .option('custom_data', {
         describe:
           'The customData argument for the execute command, in JSON format',
         type: 'string',
+        default: '{}',
         demandOption: false,
       })
       .parse(userCommand, {}, (error, argv) => {
@@ -151,14 +153,6 @@ export class CommandProcessor {
         }
         if (argv.command === undefined) {
           throw new Error('command is required to trigger an Execute intent');
-        }
-        if (argv.params === undefined) {
-          throw new Error('paramns is required to trigger an Execute intent');
-        }
-        if (argv.custom_data === undefined) {
-          throw new Error(
-            'custom_data is required to trigger an Execute intent'
-          );
         }
         return new ExecuteMessage(
           argv.request_id,

@@ -10,7 +10,7 @@
     "compile": "tsc",
     "test": "ava",
     "clean": "gts clean",
-    "cli": "node ./build/src/cli/main.js",
+    "cli": "node ./build/src/cli/index.js",
     "lint": "eslint './src/**/*.ts' './test/**/*.ts'"
   },
   "dependencies": {
