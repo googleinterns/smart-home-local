@@ -4,12 +4,10 @@
 import {parentPort, workerData} from 'worker_threads';
 import {smarthomeStub, extractStubs} from '../platform/stub-setup';
 import {AppStub} from '../platform/smart-home-app';
-import {READY_FLAG} from './index';
 import {createSimpleExecuteCommands} from '../platform/execute';
-import {IdentifyMessage, ExecuteMessage} from './command-processor';
+import {IdentifyMessage, ExecuteMessage, READY_FLAG} from './command-processor';
 import * as fs from 'fs';
 import * as path from 'path';
-console.log('STARTED WORKER');
 
 /**
  * Override the constructor to capture the AppStub instance.
@@ -32,12 +30,12 @@ smarthomeStub.App = CliAppStub;
  * Strips the file extension off the filepath and validates it.
  */
 const modulePath = workerData.substring(0, workerData.lastIndexOf('.'));
-if (!fs.existsSync(path.relative('./', modulePath))) {
+if (!fs.existsSync(workerData)) {
   throw new Error('File at path ' + workerData + ' not found.');
 }
 
 // Runs the javascript specified in the app_path command line argument.
-require(workerData);
+require(modulePath);
 
 /**
  * Checks that smarthome.App constructor was called.

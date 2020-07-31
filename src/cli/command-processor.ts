@@ -3,6 +3,11 @@ import yargs from 'yargs/yargs';
 import * as readline from 'readline';
 
 /**
+ * A flag for the worker thread to indicate it's ready to recieve messages.
+ */
+export const READY_FLAG = 'READY';
+
+/**
  * An interface to formalize the message being sent to the worker thread.
  */
 export interface IntentMessage {
