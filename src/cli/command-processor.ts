@@ -92,12 +92,12 @@ export class CommandProcessor {
           .option('discovery_buffer', {
             describe: 'The IDENTIFY dicovery buffer represented as a string',
             type: 'string',
-            demandOption: false,
+            demandOption: true,
           })
           .option('device_id', {
             describe: 'The device Id',
             type: 'string',
-            demandOption: false,
+            demandOption: true,
           });
       })
       .command('execute', 'Trigger an Execute command.', yargs => {
@@ -105,12 +105,12 @@ export class CommandProcessor {
           .option('local_device_id', {
             describe: 'The local device Id',
             type: 'string',
-            demandOption: false,
+            demandOption: true,
           })
           .option('command', {
             describe: 'The execute command to send to device_id',
             type: 'string',
-            demandOption: false,
+            demandOption: true,
           })
           .option('params', {
             describe:
@@ -128,44 +128,26 @@ export class CommandProcessor {
           });
       })
       .command('exit', 'Exit the command line interface.')
-      .parse(userCommand, {}, (error, argv) => {
+      .parse(userCommand, (error: Error) => {
         if (error !== null) {
           throw error;
         }
-        return argv;
       });
 
     /**
-     * Validate arguments and return an IntentMessage
+     * Parse argv based on command and return an IntentMessage
      */
-    switch (argv._[0]) {
+    const command = argv._[0];
+    switch (command) {
       case 'exit':
         return Promise.resolve();
       case 'identify':
-        if (argv.discovery_buffer === undefined) {
-          throw new Error(
-            'discovery_buffer is required to trigger an Identify intent'
-          );
-        }
-        if (argv.device_id === undefined) {
-          throw new Error(
-            'device_id is required to trigger an Identify intent'
-          );
-        }
         return new IdentifyMessage(
           argv.request_id,
           argv.discovery_buffer,
           argv.device_id
         );
       case 'execute':
-        if (argv.local_device_id === undefined) {
-          throw new Error(
-            'local_device_id is required to trigger an Execute intent'
-          );
-        }
-        if (argv.command === undefined) {
-          throw new Error('command is required to trigger an Execute intent');
-        }
         return new ExecuteMessage(
           argv.request_id,
           argv.local_device_id,
@@ -174,7 +156,11 @@ export class CommandProcessor {
           JSON.parse(argv.custom_data)
         );
       default:
-        throw new Error('Unsupported command.');
+        throw new Error(
+          'Unsupported command: ' +
+            command +
+            '\nSupported commands: exit | identify | execute'
+        );
     }
   }
 
