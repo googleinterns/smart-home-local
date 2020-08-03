@@ -128,6 +128,7 @@ export class CommandProcessor {
           });
       })
       .command('exit', 'Exit the command line interface.')
+      .demandCommand(1)
       .parse(userCommand, (error: Error) => {
         if (error !== null) {
           throw error;
@@ -156,11 +157,7 @@ export class CommandProcessor {
           JSON.parse(argv.custom_data)
         );
       default:
-        throw new Error(
-          'Unsupported command: ' +
-            command +
-            '\nSupported commands: exit | identify | execute'
-        );
+        throw new Error('Unsupported command: ' + command);
     }
   }
 
