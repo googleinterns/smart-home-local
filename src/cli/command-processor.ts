@@ -1,75 +1,9 @@
 import {Worker} from 'worker_threads';
 import yargs from 'yargs/yargs';
 import * as readline from 'readline';
-
-/**
- * A flag for the worker thread to indicate it's ready to recieve messages.
- */
-export const READY_FLAG = 'READY';
-
-/**
- * An interface to formalize the message being sent to the worker thread.
- */
-export interface IntentMessage {
-  intentType: string;
-  requestId: string;
-}
-
-/**
- * A class containing all parameters needed to process an Identify command.
- */
-export class IdentifyMessage implements IntentMessage {
-  intentType = 'IDENTIFY';
-  requestId: string;
-  discoveryBuffer: string;
-  deviceId: string;
-
-  /**
-   * @param requestId  The request id for a triggered Identify request.
-   * @param discoveryBuffer  The discovery buffer to send in a triggered Identify request.
-   * @param deviceId  The device id for a triggered Identify request.
-   * @returns  A new IntentMessage instance.
-   */
-  constructor(requestId: string, discoveryBuffer: string, deviceId: string) {
-    this.requestId = requestId;
-    this.discoveryBuffer = discoveryBuffer;
-    this.deviceId = deviceId;
-  }
-}
-
-/**
- * A class containing all parameters needed to process an Identify command.
- */
-export class ExecuteMessage implements IntentMessage {
-  intentType = 'EXECUTE';
-  requestId: string;
-  localDeviceId: string;
-  executeCommand: string;
-  params: Record<string, unknown>;
-  customData: Record<string, unknown>;
-
-  /**
-   * @param requestId  The request id for a triggered Execute request.
-   * @param localDeviceId  The localDeviceId for a triggered Execute request.
-   * @param executeCommand  The single command string to set in the triggered Execute request.
-   * @param params  The params array for the single Execute command.
-   * @param customData  The customData array for the single Execute command.
-   * @returns  A new ExecuteCommand instance.
-   */
-  constructor(
-    requestId: string,
-    localDeviceId: string,
-    executeCommand: string,
-    params: Record<string, unknown>,
-    customData: Record<string, unknown>
-  ) {
-    this.requestId = requestId;
-    this.localDeviceId = localDeviceId;
-    this.executeCommand = executeCommand;
-    this.params = params;
-    this.customData = customData;
-  }
-}
+import {CommandMessage, READY_FOR_MESSAGE, CHECK_READY} from './commands';
+import {ExecuteMessage, IdentifyMessage, ScanMessage} from './commands';
+import {UDPScanConfig} from '../radio/radio-hub';
 
 export class CommandProcessor {
   private worker: Worker;
@@ -80,9 +14,59 @@ export class CommandProcessor {
   // Wrapper for argument parsing with yargs.
   private async parseIntent(
     userCommand: string
-  ): Promise<IntentMessage | void> {
+  ): Promise<CommandMessage | void> {
     const argv = await yargs()
-      .command('identify', 'Trigger an Identify command.', yargs => {
+      .command(
+        'udp-scan',
+        'Scan and identify devices with a given UDP scan configuration.',
+        yargs => {
+          return yargs
+            .option('broadcast_address', {
+              describe: 'Destination IP address foir the UDP broadcast.',
+              type: 'string',
+              demandOption: true,
+            })
+            .option('broadcast_port', {
+              describe: 'The destination port for the UDP discovery broadcast.',
+              type: 'number',
+              demandOption: true,
+            })
+            .option('listen_port', {
+              describe: 'The port to listen for the UDP discvery response.',
+              type: 'number',
+              demandOption: true,
+            })
+            .option('discovery_packet', {
+              describe: 'The payload to send in the UDP broadcast.',
+              type: 'string',
+              demandOption: true,
+            })
+            .option('request_id', {
+              describe: 'An optional request ID for the Identify Request.',
+              type: 'string',
+              default: 'default-request-id',
+              demandOption: false,
+            })
+            .option('device_id', {
+              describe: 'The device ID to include in the Identify Request.',
+              type: 'string',
+              default: 'default-device-id',
+              demandOption: false,
+            });
+        }
+      )
+      .command(
+        'process-sync-response',
+        'Handle a SYNC response and start scanning.',
+        yargs => {
+          return yargs.option('json', {
+            describe: 'The JSON SYNC response.',
+            type: 'string',
+            demandOption: true,
+          });
+        }
+      )
+      .command('simulate-identify', 'Trigger an Identify command.', yargs => {
         return yargs
           .option('request_id', {
             describe: 'The request Id',
@@ -100,7 +84,7 @@ export class CommandProcessor {
             demandOption: true,
           });
       })
-      .command('execute', 'Trigger an Execute command.', yargs => {
+      .command('simulate execute', 'Trigger an Execute command.', yargs => {
         return yargs
           .option('local_device_id', {
             describe: 'The local device Id',
@@ -128,7 +112,7 @@ export class CommandProcessor {
           });
       })
       .command('exit', 'Exit the command line interface.')
-      .demandCommand(1)
+      .demandCommand()
       .parse(userCommand, (error: Error) => {
         if (error !== null) {
           throw error;
@@ -140,8 +124,15 @@ export class CommandProcessor {
      */
     const command = argv._[0];
     switch (command) {
-      case 'exit':
-        return Promise.resolve();
+      case 'udp-scan': {
+        const scanConfig = new UDPScanConfig(
+          argv.broadcast_address,
+          argv.broadcast_port,
+          argv.listen_port,
+          argv.discovery_packet
+        );
+        return new ScanMessage(argv.device_id, argv.request_id, scanConfig);
+      }
       case 'identify':
         return new IdentifyMessage(
           argv.request_id,
@@ -156,6 +147,8 @@ export class CommandProcessor {
           JSON.parse(argv.params),
           JSON.parse(argv.custom_data)
         );
+      case 'exit':
+        return Promise.resolve();
       default:
         throw new Error('Unsupported command: ' + command);
     }
@@ -173,33 +166,35 @@ export class CommandProcessor {
       output: process.stdout,
     });
 
-    // Flag for signaling app exit.
-    let exit = false;
-    while (!exit) {
-      // Wrap the asyncronous question/response sequence in a promise to delay execution.
-      await new Promise(resolve => {
+    await new Promise(resolve => {
+      this.worker.postMessage(CHECK_READY);
+      this.worker.on('message', async message => {
+        if (message !== READY_FOR_MESSAGE) {
+          return;
+        }
         readlineInterface.question('Awaiting input...\n', async input => {
           if (input.length === 0) {
-            resolve();
+            this.worker.postMessage(CHECK_READY);
             return;
           }
           try {
-            const intentMessage = await this.parseIntent(input);
-            if (intentMessage === undefined) {
-              exit = true;
+            const workerMessage = await this.parseIntent(input);
+            if (workerMessage === undefined) {
+              // Exit command recieved. Resolve promise.
+              console.log('Exit command recieved.  Terminating...');
               resolve();
               return;
             }
             // Post message to worker thread.
-            this.worker.postMessage(intentMessage);
+            this.worker.postMessage(workerMessage);
           } catch (error) {
-            // Print the error message and continue the loop.
+            // Catch possible parsing error.
             console.error(error.message);
+            this.worker.postMessage(CHECK_READY);
           }
-          resolve();
         });
       });
-    }
+    });
 
     // Clean up the readline interface.
     readlineInterface.close();

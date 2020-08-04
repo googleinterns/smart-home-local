@@ -1,6 +1,7 @@
 import yargs from 'yargs/yargs';
 import {Worker} from 'worker_threads';
-import {CommandProcessor, READY_FLAG} from './command-processor';
+import {CommandProcessor} from './command-processor';
+import {READY_FOR_MESSAGE} from './commands';
 
 const APP_INSTANCE_PATH = './build/src/cli/app-instance.js';
 
@@ -22,21 +23,16 @@ const argv = yargs()
 async function main() {
   const worker = new Worker(APP_INSTANCE_PATH, {
     workerData: argv.app,
-  })
-    .on('error', error => {
-      console.error(
-        'An error occured while trying to initialize the command line interface:\n' +
-          error.toString()
-      );
-    })
-    .on('message', async message => {
-      if (message === READY_FLAG) {
-        const commandProcessor = new CommandProcessor(worker);
-        await commandProcessor.processUserInput();
-        worker.terminate();
-        console.log('Exiting...');
-      }
-    });
+  }).on('error', error => {
+    console.error(
+      'An error occured while trying to initialize the command line interface:\n' +
+        error.toString()
+    );
+  });
+  const commandProcessor = new CommandProcessor(worker);
+  await commandProcessor.processUserInput();
+  worker.terminate();
+  console.log('Exiting...');
 }
 
 main();

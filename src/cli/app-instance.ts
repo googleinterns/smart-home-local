@@ -2,11 +2,18 @@
  * Worker thread that runs an instance of a mocked local fulfillment app.
  */
 import {parentPort, workerData} from 'worker_threads';
-import {smarthomeStub, extractStubs} from '../platform/stub-setup';
+import {smarthomeStub} from '../platform/stub-setup';
 import {AppStub} from '../platform/smart-home-app';
-import {createSimpleExecuteCommands} from '../platform/execute';
-import {IdentifyMessage, ExecuteMessage, READY_FLAG} from './command-processor';
 import * as fs from 'fs';
+import {AppWorker} from './app-worker';
+import {READY_FOR_MESSAGE, CHECK_READY} from './commands';
+
+/**
+ * Check that this worker thread was started properly
+ */
+if (parentPort === null) {
+  throw new Error("Couldn't start worker thread: parentPort was null");
+}
 
 /**
  * Override the constructor to capture the AppStub instance.
@@ -45,68 +52,14 @@ if (appStubInstance === undefined) {
   );
 }
 
-// Extracts the MockLocalHomePlatform from the AppStub.
-const {mockLocalHomePlatform} = extractStubs(appStubInstance);
+const appWorker = new AppWorker(appStubInstance);
 
-if (parentPort !== null) {
-  // Signal to the main thread that worker thread has succesfully initialized an app.
-  parentPort.postMessage(READY_FLAG);
-
-  /**
-   * Recieve a validated command and forward it to the platform instance.
-   */
-  parentPort.on('message', async intentMessage => {
-    if (intentMessage.intentType === 'IDENTIFY') {
-      try {
-        // Parse as an IdentifyMessage.
-        const identifyMessage = intentMessage as IdentifyMessage;
-
-        // Trigger the Identify intent.
-        const localDeviceId = await mockLocalHomePlatform.triggerIdentify(
-          identifyMessage.requestId,
-          Buffer.from(identifyMessage.discoveryBuffer, 'hex'),
-          identifyMessage.deviceId
-        );
-
-        // Report the registered localDeviceId.
-        console.log(
-          'IDENTIFY handler triggered. localDeviceId: ' +
-            localDeviceId +
-            ' was registered to the platform '
-        );
-      } catch (error) {
-        // Log the full error to the console in case handler fails.
-        console.log(
-          'An error occured when triggering the Identify handler:\n' + error
-        );
-      }
-    } else if (intentMessage.intentType === 'EXECUTE') {
-      try {
-        // Parse as an ExecuteMessage.
-        const executeMessage = intentMessage as ExecuteMessage;
-        const executeCommands = createSimpleExecuteCommands(
-          executeMessage.localDeviceId,
-          executeMessage.executeCommand!,
-          executeMessage.params,
-          executeMessage.customData
-        );
-
-        // Trigger an Execute intent.
-        const executeResponse = await mockLocalHomePlatform.triggerExecute(
-          executeMessage.requestId,
-          [executeCommands]
-        );
-
-        // Report the ExecuteResponse if succesful.
-        console.log(
-          'Execute handler triggered. ExecuteResponse was:\n' +
-            executeResponse.toString()
-        );
-      } catch (error) {
-        console.log(
-          'An error occured when triggering the Execute handler:\n' + error
-        );
-      }
-    }
-  });
-}
+/**
+ * Recieve a validated command and forward it to the platform instance.
+ */
+parentPort.on('message', async message => {
+  if (message !== CHECK_READY) {
+    await appWorker.handleMessage(message);
+  }
+  parentPort!.postMessage(READY_FOR_MESSAGE);
+});

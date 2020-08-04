@@ -4,6 +4,7 @@
 /// <reference types="@google/local-home-sdk" />
 import {AppStub} from './smart-home-app';
 import {DeviceManagerStub} from './device-manager';
+import {SyncResponse} from './scan';
 
 export const ERROR_UNDEFINED_VERIFICATIONID =
   'The handler returned an IdentifyResponse with an undefined verificationId';
@@ -20,9 +21,10 @@ export const ERROR_EXECUTE_RESPONSE_ERROR_STATUS =
   "One or more ExecuteResponseCommands returned with an 'ERROR' status";
 
 export class MockLocalHomePlatform {
-  private deviceManager: DeviceManagerStub = new DeviceManagerStub();
   private app: AppStub;
+  private deviceManager: DeviceManagerStub = new DeviceManagerStub();
   private localDeviceIds: Map<string, string> = new Map<string, string>();
+  private syncDevices: smarthome.IntentFlow.Device[] = [];
 
   /**
    * Constructs a new MockLocalHomePlatform instance using an App instance.
@@ -53,6 +55,10 @@ export class MockLocalHomePlatform {
     return this.localDeviceIds.get(deviceId)!;
   }
 
+  public processSyncResponse(syncResponse: SyncResponse): void {
+    this.syncDevices = syncResponse.payload.devices;
+  }
+
   /**
    * Takes a `discoveryBuffer` and passes it to the fulfillment app
    * in an `IdentifyRequest`.
@@ -66,7 +72,7 @@ export class MockLocalHomePlatform {
     discoveryBuffer: Buffer,
     deviceId?: string
   ): Promise<string> {
-    console.debug('Received discovery payload:', discoveryBuffer);
+    console.log('Received discovery payload:', discoveryBuffer);
 
     // Cannot start processing until all handlers have been set on the `App`.
     if (!this.app.identifyHandler) {
@@ -102,7 +108,7 @@ export class MockLocalHomePlatform {
       throw new Error(ERROR_UNDEFINED_VERIFICATIONID);
     }
 
-    console.debug('Registering localDeviceId: ' + device.verificationId);
+    console.log('Registering localDeviceId: ' + device.verificationId);
     this.localDeviceIds.set(device.id, device.verificationId);
     return device.verificationId;
   }
