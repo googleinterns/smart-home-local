@@ -1,5 +1,5 @@
 import {UDPScanConfig} from '../radio/radio-hub';
-type CommandType = 'SCAN' | 'SYNC' | 'IDENTIFY' | 'EXECUTE';
+type CommandType = 'SCAN' | 'IDENTIFY' | 'EXECUTE';
 
 /**
  * A flag for the worker thread to indicate it's ready to recieve messages.
@@ -76,8 +76,4 @@ export class ScanMessage {
     this.requestId = requestId;
     this.scanConfig = scanConfig;
   }
-}
-
-export class SyncMessage {
-  commandType: CommandType = 'SYNC';
 }

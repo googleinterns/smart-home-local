@@ -1,9 +1,8 @@
 import yargs from 'yargs/yargs';
 import {Worker} from 'worker_threads';
 import {CommandProcessor} from './command-processor';
-import {READY_FOR_MESSAGE} from './commands';
 
-const APP_INSTANCE_PATH = './build/src/cli/app-instance.js';
+const APP_INSTANCE_PATH = './build/src/cli/worker-instance.js';
 
 /**
  * Process initial command-line arguments.

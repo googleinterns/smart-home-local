@@ -55,17 +55,6 @@ export class CommandProcessor {
             });
         }
       )
-      .command(
-        'process-sync-response',
-        'Handle a SYNC response and start scanning.',
-        yargs => {
-          return yargs.option('json', {
-            describe: 'The JSON SYNC response.',
-            type: 'string',
-            demandOption: true,
-          });
-        }
-      )
       .command('simulate-identify', 'Trigger an Identify command.', yargs => {
         return yargs
           .option('request_id', {
@@ -84,7 +73,7 @@ export class CommandProcessor {
             demandOption: true,
           });
       })
-      .command('simulate execute', 'Trigger an Execute command.', yargs => {
+      .command('trigger-execute', 'Trigger an Execute command.', yargs => {
         return yargs
           .option('local_device_id', {
             describe: 'The local device Id',

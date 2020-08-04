@@ -39,14 +39,6 @@ export class AppWorker {
           console.error('UDP scan failed:\n' + error);
         }
         break;
-      case 'SYNC':
-        /**
-        this.mockLocalHomePlatform.processSyncResponse(
-          workerMessage.commandType as SyncResponse
-        );
-        this.mockLocalHomePlatform;
-        */
-        break;
       case 'IDENTIFY':
         break;
       case 'EXECUTE':

@@ -4,7 +4,6 @@
 /// <reference types="@google/local-home-sdk" />
 import {AppStub} from './smart-home-app';
 import {DeviceManagerStub} from './device-manager';
-import {SyncResponse} from './scan';
 
 export const ERROR_UNDEFINED_VERIFICATIONID =
   'The handler returned an IdentifyResponse with an undefined verificationId';
@@ -24,7 +23,6 @@ export class MockLocalHomePlatform {
   private app: AppStub;
   private deviceManager: DeviceManagerStub = new DeviceManagerStub();
   private localDeviceIds: Map<string, string> = new Map<string, string>();
-  private syncDevices: smarthome.IntentFlow.Device[] = [];
 
   /**
    * Constructs a new MockLocalHomePlatform instance using an App instance.
@@ -53,10 +51,6 @@ export class MockLocalHomePlatform {
       throw new Error(ERROR_NO_LOCAL_DEVICE_ID_FOUND);
     }
     return this.localDeviceIds.get(deviceId)!;
-  }
-
-  public processSyncResponse(syncResponse: SyncResponse): void {
-    this.syncDevices = syncResponse.payload.devices;
   }
 
   /**
