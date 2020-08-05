@@ -1,5 +1,5 @@
 import {RadioController} from './radio-controller';
-import {UdpResponseData} from './dataflow';
+import {UdpResponseData, TcpResponseData} from './dataflow';
 
 /**
  * The default port to listen on for radio responses.
@@ -71,6 +71,36 @@ export class RadioDeviceManager implements smarthome.DeviceManager {
   }
 
   /**
+   * Fulfills a TcpRequestData.
+   * @param tcpRequestData  The TcpRequestData to source radio parameters from.
+   * @returns  A promise that resolves to the determined TcpResponseData.
+   */
+  private async processTcpRequestData(
+    tcpRequestData: smarthome.DataFlow.TcpRequestData
+  ): Promise<smarthome.DataFlow.TcpResponseData> {
+    const localAddress = this.deviceIdToAddress.get(tcpRequestData.deviceId);
+    const requestId = tcpRequestData.requestId;
+    const deviceId = tcpRequestData.deviceId;
+    const port = tcpRequestData.port;
+
+    if (tcpRequestData.operation === smarthome.Constants.TcpOperation.READ) {
+      const tcpResponse = await this.radioController.readTcpSocket(
+        localAddress!,
+        port
+      );
+      return new TcpResponseData(requestId, deviceId, tcpResponse);
+    } else {
+      // Otherwise, `smarthome.Constants.TcpOperation.WRITE`
+      const payload = Buffer.from(tcpRequestData.data, 'hex');
+      const tcpResponse = await this.radioController.writeTcpSocket(
+        payload,
+        localAddress!,
+        port
+      );
+      return new TcpResponseData(requestId, deviceId, tcpResponse);
+    }
+  }
+  /**
    * Sends a true radio command based on the contents of a `CommandRequest`
    * @param command  The `CommandRequest` to process.
    * @returns  The determined `CommandBase` response.
@@ -85,6 +115,10 @@ export class RadioDeviceManager implements smarthome.DeviceManager {
     if (command.protocol === 'UDP') {
       return await this.processUdpRequestData(
         command as smarthome.DataFlow.UdpRequestData
+      );
+    } else if (command.protocol === 'TCP') {
+      return await this.processTcpRequestData(
+        command as smarthome.DataFlow.TcpRequestData
       );
     }
     throw new Error('Radio protocol not recognized');
