@@ -37,7 +37,6 @@ export function identifyHandler(
  * @param deviceManager  The `DeviceManager` to forward the `CommandRequest` to.
  * @returns  An Execute handler that sends the given command to the
  *     given `DeviceManager`.
- *
  */
 export function createExecuteHandler(
   deviceCommand: smarthome.DataFlow.CommandRequest,
