@@ -5,7 +5,7 @@ import {parentPort, workerData} from 'worker_threads';
 import {smarthomeStub} from '../platform/stub-setup';
 import {AppStub} from '../platform/smart-home-app';
 import * as fs from 'fs';
-import {AppWorker} from './app-worker';
+import {PlatformWorker} from './platform-worker';
 import {READY_FOR_MESSAGE, CHECK_READY} from './commands';
 
 /**
@@ -52,14 +52,14 @@ if (appStubInstance === undefined) {
   );
 }
 
-const appWorker = new AppWorker(appStubInstance);
+const platformWorker = new PlatformWorker(appStubInstance);
 
 /**
  * Recieve a validated command and forward it to the platform instance.
  */
 parentPort.on('message', async message => {
   if (message !== CHECK_READY) {
-    await appWorker.handleMessage(message);
+    await platformWorker.handleMessage(message);
   }
   parentPort!.postMessage(READY_FOR_MESSAGE);
 });

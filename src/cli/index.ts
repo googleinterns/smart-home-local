@@ -31,7 +31,6 @@ async function main() {
   const commandProcessor = new CommandProcessor(worker);
   await commandProcessor.processUserInput();
   worker.terminate();
-  console.log('Exiting...');
 }
 
 main();

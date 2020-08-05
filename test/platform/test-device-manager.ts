@@ -3,7 +3,7 @@
  */
 import test from 'ava';
 import {
-  DeviceManagerStub,
+  MockDeviceManager,
   ERROR_UNEXPECTED_COMMAND_REQUEST,
   ERROR_PENDING_REQUEST_MISMATCH,
   UdpResponseData,
@@ -62,7 +62,7 @@ function createExecuteRequest(
  * Tests that `markPending()` matches two identical requests.
  */
 test('device-manager-expected-mark-pending', async t => {
-  const deviceManager = new DeviceManagerStub();
+  const deviceManager = new MockDeviceManager();
   const executeRequest = createExecuteRequest('action.devices.commands.OnOff', {
     on: true,
   });
@@ -77,7 +77,7 @@ test('device-manager-expected-mark-pending', async t => {
  * Tests that `markPending()` differentiates two different requests.
  */
 test('device-manager-unexpected-mark-pending', async t => {
-  const deviceManager = new DeviceManagerStub();
+  const deviceManager = new MockDeviceManager();
   const executeRequest = createExecuteRequest('action.devices.commands.OnOff', {
     on: true,
   });
@@ -104,7 +104,7 @@ test('device-manager-unexpected-mark-pending', async t => {
  * Tests that an unexpected Execute request throws a `HandlerError`.
  */
 test('test-unexpected-command-request', async t => {
-  const deviceManager = new DeviceManagerStub();
+  const deviceManager = new MockDeviceManager();
   await t.throwsAsync(
     async () => {
       await deviceManager.send(COMMAND_REQUEST);
@@ -121,7 +121,7 @@ test('test-unexpected-command-request', async t => {
  * and resets them properly.
  */
 test('test-sent-requests', async t => {
-  const deviceManager = new DeviceManagerStub();
+  const deviceManager = new MockDeviceManager();
   const commandResponse = new UdpResponseData(
     EXECUTE_REQUEST_ID,
     DEVICE_ID,

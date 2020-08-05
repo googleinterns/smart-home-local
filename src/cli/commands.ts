@@ -1,12 +1,18 @@
-import {UDPScanConfig} from '../radio/radio-hub';
+import {UDPScanConfig} from '../radio/radio-controller';
 type CommandType = 'SCAN' | 'IDENTIFY' | 'EXECUTE';
 
 /**
  * A flag for the worker thread to indicate it's ready to recieve messages.
  */
 export const READY_FOR_MESSAGE = 'READY_FOR_MESSAGE';
+/**
+ * A flag for the main thread to check if worker is ready to process messages.
+ */
 export const CHECK_READY = 'CHECK_READY';
 
+/**
+ * An interface to differentiate messages on the worker thread.
+ */
 export interface CommandMessage {
   commandType: CommandType;
 }
@@ -66,11 +72,19 @@ export class ExecuteMessage implements CommandMessage {
   }
 }
 
-export class ScanMessage {
+/**
+ * A class containing all parametes needed to process a Scan command.
+ */
+export class ScanMessage implements CommandMessage {
   commandType: CommandType = 'SCAN';
   deviceId: string;
   requestId: string;
   scanConfig: UDPScanConfig;
+  /**
+   * @param deviceId  The deviceId to assign when a device matches.
+   * @param requestId  The requestId to assign to the `IdentifyRequest`.
+   * @param scanConfig  The UDP scan configuration.
+   */
   constructor(deviceId: string, requestId: string, scanConfig: UDPScanConfig) {
     this.deviceId = deviceId;
     this.requestId = requestId;

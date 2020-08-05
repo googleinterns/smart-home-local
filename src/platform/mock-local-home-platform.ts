@@ -3,7 +3,7 @@
  */
 /// <reference types="@google/local-home-sdk" />
 import {AppStub} from './smart-home-app';
-import {DeviceManagerStub} from './device-manager';
+import {MockDeviceManager} from './mock-device-manager';
 
 export const ERROR_UNDEFINED_VERIFICATIONID =
   'The handler returned an IdentifyResponse with an undefined verificationId';
@@ -15,13 +15,13 @@ export const ERROR_NO_LOCAL_DEVICE_ID_FOUND =
   'Cannot get localDeviceId of unregistered deviceId';
 export const ERROR_DEVICE_ID_NOT_REGISTERED =
   'Cannot trigger an ExecuteRequest: The provided deviceId was not registered' +
-  'to the platform';
+  ' to the platform';
 export const ERROR_EXECUTE_RESPONSE_ERROR_STATUS =
   "One or more ExecuteResponseCommands returned with an 'ERROR' status";
 
 export class MockLocalHomePlatform {
   private app: AppStub;
-  private deviceManager: DeviceManagerStub = new DeviceManagerStub();
+  private deviceManager: smarthome.DeviceManager = new MockDeviceManager();
   private localDeviceIds: Map<string, string> = new Map<string, string>();
 
   /**
@@ -32,7 +32,11 @@ export class MockLocalHomePlatform {
     this.app = app;
   }
 
-  public getDeviceManager(): DeviceManagerStub {
+  public setDeviceManager(deviceManager: smarthome.DeviceManager): void {
+    this.deviceManager = deviceManager;
+  }
+
+  public getDeviceManager(): smarthome.DeviceManager {
     return this.deviceManager;
   }
 
@@ -144,9 +148,6 @@ export class MockLocalHomePlatform {
         },
       ],
     };
-
-    // Reset the buffer of commands sent.
-    this.getDeviceManager().clearCommandsSent();
 
     const responseCommands = (await this.app.executeHandler(executeRequest))
       .payload.commands;

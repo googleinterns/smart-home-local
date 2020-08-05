@@ -3,15 +3,23 @@ import yargs from 'yargs/yargs';
 import * as readline from 'readline';
 import {CommandMessage, READY_FOR_MESSAGE, CHECK_READY} from './commands';
 import {ExecuteMessage, IdentifyMessage, ScanMessage} from './commands';
-import {UDPScanConfig} from '../radio/radio-hub';
+import {UDPScanConfig} from '../radio/radio-controller';
 
+/**
+ * Class to parse raw user input from stdin.
+ */
 export class CommandProcessor {
   private worker: Worker;
   constructor(worker: Worker) {
     this.worker = worker;
   }
 
-  // Wrapper for argument parsing with yargs.
+  /**
+   * Parses a string and returns a CommandMessage, if valid.
+   * @param userCommand  A string to parse.
+   * @returns  A promise that resolves to a valid `CommandMessage`,
+   *   or void if an `exit` command was detected
+   */
   private async parseIntent(
     userCommand: string
   ): Promise<CommandMessage | void> {
@@ -55,24 +63,28 @@ export class CommandProcessor {
             });
         }
       )
-      .command('simulate-identify', 'Trigger an Identify command.', yargs => {
-        return yargs
-          .option('request_id', {
-            describe: 'The request Id',
-            type: 'string',
-            demandOption: true,
-          })
-          .option('discovery_buffer', {
-            describe: 'The IDENTIFY dicovery buffer represented as a string',
-            type: 'string',
-            demandOption: true,
-          })
-          .option('device_id', {
-            describe: 'The device Id',
-            type: 'string',
-            demandOption: true,
-          });
-      })
+      .command(
+        'simulate-identify',
+        'Manually trigger an Identify response.',
+        yargs => {
+          return yargs
+            .option('request_id', {
+              describe: 'The request Id',
+              type: 'string',
+              demandOption: true,
+            })
+            .option('discovery_buffer', {
+              describe: 'The IDENTIFY dicovery buffer represented as a string',
+              type: 'string',
+              demandOption: true,
+            })
+            .option('device_id', {
+              describe: 'The device Id',
+              type: 'string',
+              demandOption: true,
+            });
+        }
+      )
       .command('trigger-execute', 'Trigger an Execute command.', yargs => {
         return yargs
           .option('local_device_id', {
@@ -101,7 +113,8 @@ export class CommandProcessor {
           });
       })
       .command('exit', 'Exit the command line interface.')
-      .demandCommand()
+      .demandCommand(1, 'Must provide a valid command')
+      .help()
       .parse(userCommand, (error: Error) => {
         if (error !== null) {
           throw error;
@@ -109,7 +122,7 @@ export class CommandProcessor {
       });
 
     /**
-     * Parse argv based on command and return an IntentMessage
+     * Parse argv based on command and return a `CommandMessage`
      */
     const command = argv._[0];
     switch (command) {
@@ -122,13 +135,13 @@ export class CommandProcessor {
         );
         return new ScanMessage(argv.device_id, argv.request_id, scanConfig);
       }
-      case 'identify':
+      case 'simulate-identify':
         return new IdentifyMessage(
           argv.request_id,
           argv.discovery_buffer,
           argv.device_id
         );
-      case 'execute':
+      case 'trigger-execute':
         return new ExecuteMessage(
           argv.request_id,
           argv.local_device_id,
@@ -156,29 +169,34 @@ export class CommandProcessor {
     });
 
     await new Promise(resolve => {
+      // Pings the worker thread.
       this.worker.postMessage(CHECK_READY);
+
       this.worker.on('message', async message => {
+        // Waits for worker thread to indicate it's ready to take another message.
         if (message !== READY_FOR_MESSAGE) {
           return;
         }
         readlineInterface.question('Awaiting input...\n', async input => {
           if (input.length === 0) {
+            // Ping worker thread.
             this.worker.postMessage(CHECK_READY);
             return;
           }
           try {
-            const workerMessage = await this.parseIntent(input);
-            if (workerMessage === undefined) {
+            const commandMessage = await this.parseIntent(input);
+            if (commandMessage === undefined) {
               // Exit command recieved. Resolve promise.
               console.log('Exit command recieved.  Terminating...');
               resolve();
               return;
             }
-            // Post message to worker thread.
-            this.worker.postMessage(workerMessage);
+            // Post `CommandMessage` to worker thread.
+            this.worker.postMessage(commandMessage);
           } catch (error) {
             // Catch possible parsing error.
-            console.error(error.message);
+            console.error(error);
+            // Ping worker thread.
             this.worker.postMessage(CHECK_READY);
           }
         });
