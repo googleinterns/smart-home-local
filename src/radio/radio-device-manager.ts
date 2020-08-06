@@ -1,5 +1,5 @@
 import {RadioController} from './radio-controller';
-import {UdpResponseData, TcpResponseData} from './dataflow';
+import {UdpResponseData, HttpResponseData, TcpResponseData} from './dataflow';
 
 /**
  * The default port to listen on for radio responses.
@@ -100,6 +100,48 @@ export class RadioDeviceManager implements smarthome.DeviceManager {
       return new TcpResponseData(requestId, deviceId, tcpResponse);
     }
   }
+
+  /**
+   * Fulfills an `HttpRequestData`.
+   * @param httpRequestData  The `HttpRequestData` to source radio parameters from.
+   * @returns  A promise that resolves to the determined `HttpResponseData`.
+   */
+  private async processHttpResponseData(
+    httpRequestData: smarthome.DataFlow.HttpRequestData
+  ): Promise<smarthome.DataFlow.HttpResponseData> {
+    const address = this.deviceIdToAddress.get(httpRequestData.deviceId)!;
+    let port = 80;
+    if (httpRequestData.port !== undefined) {
+      port = httpRequestData.port;
+    }
+    if (httpRequestData.method === 'GET') {
+      const httpResponse = await this.radioController.sendHttpGet(
+        address,
+        port,
+        httpRequestData.path
+      );
+      return new HttpResponseData(
+        httpRequestData.deviceId,
+        httpResponse,
+        httpRequestData.requestId
+      );
+    } else if (httpRequestData.method === 'POST') {
+      const httpResponse = await this.radioController.sendHttpPost(
+        address,
+        port,
+        httpRequestData.path,
+        httpRequestData.dataType,
+        httpRequestData.data
+      );
+      return new HttpResponseData(
+        httpRequestData.deviceId,
+        httpResponse,
+        httpRequestData.requestId
+      );
+    }
+    throw new Error(`HTTP method ${httpRequestData.method} unsupported.`);
+  }
+
   /**
    * Sends a true radio command based on the contents of a `CommandRequest`
    * @param command  The `CommandRequest` to process.
@@ -119,6 +161,10 @@ export class RadioDeviceManager implements smarthome.DeviceManager {
     } else if (command.protocol === 'TCP') {
       return await this.processTcpRequestData(
         command as smarthome.DataFlow.TcpRequestData
+      );
+    } else if (command.protocol === 'HTTP') {
+      return await this.processHttpResponseData(
+        command as smarthome.DataFlow.HttpRequestData
       );
     }
     throw new Error('Radio protocol not recognized');
