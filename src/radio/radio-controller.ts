@@ -61,6 +61,7 @@ export class RadioController {
   /**
    * Performs a UDP scan according to a `UDPScanConfig`.
    * @param udpScanConfig  A scan configuration containing UDP parameters.
+   * @param timeout  How long in ms to wait before timing out the request.
    * @return  A promise that resolves to the determined `UDPScanResults`
    */
   public async udpScan(
@@ -105,7 +106,7 @@ export class RadioController {
       this.createTimeoutPromise(timeout).then(() => {
         // Close the socket if timed out
         socket.close();
-        throw new Error(`UDP scan timed out after ${RADIO_TIMEOUT}ms.`);
+        throw new Error(`UDP scan timed out after ${timeout}ms.`);
       }),
     ]);
   }
@@ -116,6 +117,7 @@ export class RadioController {
    * @param address  The destination address of the UDP message.
    * @param listenPort  The port to listen on for a response, if execting one.
    * @param expectedResponsePackets  The number of responses to save before resolving.
+   * @param timeout  How long in ms to wait before timing out the request.
    * @returns  A promise that resolves to the determined `UDPResponse`.
    */
   public async sendUdpMessage(
@@ -159,7 +161,7 @@ export class RadioController {
       discoveryBuffer,
       this.createTimeoutPromise(timeout).then(() => {
         socket.close();
-        throw new Error(`UDP send timed out after ${RADIO_TIMEOUT} ms.`);
+        throw new Error(`UDP send timed out after ${timeout} ms.`);
       }),
     ]);
   }
