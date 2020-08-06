@@ -53,19 +53,19 @@ export class PlatformWorker {
         try {
           const scanMessage = workerMessage as ScanMessage;
           // Perform a UDP scan with given config.
-          const scanResults = await this.radioController.udpScan(
+          const scanRemoteInfo = await this.radioController.udpScan(
             scanMessage.scanConfig
           );
           // Trigger the identifyHandler with scan results.
           await this.mockLocalHomePlatform.triggerIdentify(
             scanMessage.requestId,
-            scanResults.buffer,
+            scanRemoteInfo.buffer,
             scanMessage.deviceId
           );
           // Save association between deviceId and local IP address.
           this.radioDeviceManager.addDeviceIdToAddress(
             scanMessage.deviceId,
-            scanResults.address
+            scanRemoteInfo.rinfo.address
           );
         } catch (error) {
           console.error('UDP scan failed:\n' + error);

@@ -37,7 +37,7 @@ smarthomeStub.App = CliAppStub;
  */
 const modulePath = workerData.substring(0, workerData.lastIndexOf('.'));
 if (!fs.existsSync(workerData)) {
-  throw new Error('File at path ' + workerData + ' not found.');
+  throw new Error(`File at path ${workerData} not found.`);
 }
 
 // Runs the javascript specified in the app_path command line argument.

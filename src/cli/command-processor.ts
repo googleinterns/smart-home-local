@@ -187,7 +187,7 @@ export class CommandProcessor {
             const commandMessage = await this.parseIntent(input);
             if (commandMessage === undefined) {
               // Exit command recieved. Resolve promise.
-              console.log('Exit command recieved.  Terminating...');
+              console.log('Exit command received.  Terminating...');
               resolve();
               return;
             }

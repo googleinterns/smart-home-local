@@ -41,7 +41,7 @@ export class UDPScanConfig {
  */
 export interface UDPScanResults {
   buffer: Buffer;
-  address: string;
+  rinfo: dgram.RemoteInfo;
 }
 
 /**
@@ -71,10 +71,10 @@ export class RadioController {
     const socket = dgram.createSocket('udp4');
     const discoveryBuffer = new Promise<UDPScanResults>(resolve => {
       // Resolve promise when a broadcast buffer is recieved.
-      socket.on('message', (msg, rinfo) => {
+      socket.on('message', (buffer, rinfo) => {
         // Close the socket.
         socket.close();
-        resolve({buffer: msg, address: rinfo.address});
+        resolve({buffer, rinfo});
       });
 
       // Enable UDP broadcast.
@@ -90,9 +90,9 @@ export class RadioController {
         udpScanConfig.broadcastPort,
         udpScanConfig.broadcastAddress,
         error => {
-          if (error !== null) {
+          if (error) {
             throw new Error(
-              'Failed to send UDP discovery packet:\n${error.message}'
+              `Failed to send UDP discovery packet:\n${error.message}`
             );
           }
           console.log('Sent UDP discovery packet: ', payload);
@@ -105,9 +105,7 @@ export class RadioController {
       this.createTimeoutPromise(timeout).then(() => {
         // Close the socket if timed out
         socket.close();
-        throw new Error(
-          'UDP scan timed out after ' + RADIO_TIMEOUT.toString() + 'ms.'
-        );
+        throw new Error(`UDP scan timed out after ${RADIO_TIMEOUT}ms.`);
       }),
     ]);
   }
@@ -116,7 +114,7 @@ export class RadioController {
    * Sends a UDP message using the given parameters
    * @param payload  The payload to send in the UDP message.
    * @param address  The destination address of the UDP message.
-   * @param lisenPort  The port to listen on for a response, if execting one.
+   * @param listenPort  The port to listen on for a response, if execting one.
    * @param expectedResponsePackets  The number of responses to save before resolving.
    * @returns  A promise that resolves to the determined `UDPResponse`.
    */
@@ -145,8 +143,8 @@ export class RadioController {
         socket.bind(listenPort);
         // Send the UDP message, forwarding the given parameters.
         socket.send(payload, port, address, error => {
-          if (error !== null) {
-            throw new Error('Failed to send UDP message:' + error.message);
+          if (error) {
+            throw new Error(`Failed to send UDP message: ${error.message}`);
           }
           console.log('Sent UDP message: ', payload);
           if (expectedResponsePackets === 0) {
@@ -161,9 +159,7 @@ export class RadioController {
       discoveryBuffer,
       this.createTimeoutPromise(timeout).then(() => {
         socket.close();
-        throw new Error(
-          'UDP send timed out after ' + RADIO_TIMEOUT.toString() + 'ms.'
-        );
+        throw new Error(`UDP send timed out after ${RADIO_TIMEOUT} ms.`);
       }),
     ]);
   }

@@ -42,7 +42,12 @@ test.serial('udp-scan-finds-server', async t => {
 
   const expectedScanResults = {
     buffer: UDP_DUMMY_BUFFER_1,
-    address: '127.0.0.1',
+    rinfo: {
+      address: '127.0.0.1',
+      family: 'IPv4',
+      port: serverPort,
+      size: 15,
+    },
   };
   const radioController = new RadioController();
   const scanResults = await radioController.udpScan(scanConfig);
