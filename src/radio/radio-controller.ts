@@ -19,19 +19,19 @@ export class UDPScanConfig {
    *
    * @param broadcastAddress  The destination UDP broadcast address.
    * @param broadcastPort  The destination UDP broadcast port.
-   * @param listenport  The listen port for the UDP response.
+   * @param listenPort  The listen port for the UDP response.
    * @param discoveryPacket  The payload to send in the UDP broadcast.
    * @returns  A new `UDPScanConfig` instance.
    */
   constructor(
     broadcastAddress: string,
     broadcastPort: number,
-    listenport: number,
+    listenPort: number,
     discoveryPacket: string
   ) {
     this.broadcastAddress = broadcastAddress;
     this.broadcastPort = broadcastPort;
-    this.listenPort = listenport;
+    this.listenPort = listenPort;
     this.discoveryPacket = discoveryPacket;
   }
 }
@@ -50,11 +50,11 @@ export interface UDPScanResults {
 export class RadioController {
   /**
    * A helper function to create timeout promises.
-   * @returns  A new Promise that resolves after RADIO_TIMEOUS milliseconds.
+   * @returns  A new Promise that resolves after RADIO_TIMEOUT milliseconds.
    */
-  private createTimeoutPromise(): Promise<void> {
+  private createTimeoutPromise(timeout: number): Promise<void> {
     return new Promise(resolve => {
-      setTimeout(resolve, RADIO_TIMEOUT);
+      setTimeout(resolve, timeout);
     });
   }
 
@@ -63,7 +63,10 @@ export class RadioController {
    * @param udpScanConfig  A scan configuration containing UDP parameters.
    * @return  A promise that resolves to the determined `UDPScanResults`
    */
-  public async udpScan(udpScanConfig: UDPScanConfig): Promise<UDPScanResults> {
+  public async udpScan(
+    udpScanConfig: UDPScanConfig,
+    timeout = RADIO_TIMEOUT
+  ): Promise<UDPScanResults> {
     // Open a UDP socket.
     const socket = dgram.createSocket('udp4');
     const discoveryBuffer = new Promise<UDPScanResults>(resolve => {
@@ -89,7 +92,7 @@ export class RadioController {
         error => {
           if (error !== null) {
             throw new Error(
-              'Failed to send UDP discovery packet:' + error.message
+              'Failed to send UDP discovery packet:\n${error.message}'
             );
           }
           console.log('Sent UDP discovery packet: ', payload);
@@ -99,7 +102,7 @@ export class RadioController {
     // Timeout if there hasn't been a response.
     return Promise.race([
       discoveryBuffer,
-      this.createTimeoutPromise().then(() => {
+      this.createTimeoutPromise(timeout).then(() => {
         // Close the socket if timed out
         socket.close();
         throw new Error(
@@ -122,7 +125,8 @@ export class RadioController {
     address: string,
     port: number,
     listenPort: number,
-    expectedResponsePackets = 0
+    expectedResponsePackets = 0,
+    timeout = RADIO_TIMEOUT
   ): Promise<smarthome.DataFlow.UdpResponse> {
     const responsePackets: string[] = [];
     // Open a UDP socket
@@ -155,7 +159,7 @@ export class RadioController {
     // Timeout if still waiting for a response.
     return Promise.race([
       discoveryBuffer,
-      this.createTimeoutPromise().then(() => {
+      this.createTimeoutPromise(timeout).then(() => {
         socket.close();
         throw new Error(
           'UDP send timed out after ' + RADIO_TIMEOUT.toString() + 'ms.'
