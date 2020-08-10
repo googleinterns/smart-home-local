@@ -12,7 +12,7 @@ const DEFAULT_LISTEN_PORT = 3311;
 export class RadioDeviceManager implements smarthome.DeviceManager {
   private radioController: RadioController;
   private listenPort: number;
-  public deviceIdToAddress: Map<string, string> = new Map<string, string>();
+  private deviceIdToAddress: Map<string, string> = new Map<string, string>();
 
   /**
    * @param  radioController  The radio controller used for radio communication.

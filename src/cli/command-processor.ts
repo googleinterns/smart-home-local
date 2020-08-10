@@ -30,7 +30,7 @@ export class CommandProcessor {
         yargs => {
           return yargs
             .option('broadcast_address', {
-              describe: 'Destination IP address foir the UDP broadcast.',
+              describe: 'Destination IP address for the UDP broadcast.',
               type: 'string',
               demandOption: true,
             })
@@ -74,7 +74,7 @@ export class CommandProcessor {
               demandOption: true,
             })
             .option('discovery_buffer', {
-              describe: 'The IDENTIFY dicovery buffer represented as a string',
+              describe: 'The IDENTIFY discovery buffer represented as a string',
               type: 'string',
               demandOption: true,
             })
