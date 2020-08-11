@@ -3,8 +3,9 @@
  */
 import {AppStub} from './smart-home-app';
 import {MockLocalHomePlatform} from './mock-local-home-platform';
-import {DeviceManagerStub} from './device-manager';
+import {MockDeviceManager} from './mock-device-manager';
 import {ExecuteStub} from './execute';
+import {DataFlowStub} from '../radio/dataflow';
 
 export const smarthomeStub: {
   App: typeof smarthome.App;
@@ -40,15 +41,7 @@ export const smarthomeStub: {
       debugString?: string;
     },
   },
-  DataFlow: {
-    UdpRequestData: class {
-      data = '';
-      requestId = '';
-      deviceId = '';
-      protocol: smarthome.Constants.Protocol = smarthome.Constants.Protocol.UDP;
-      port = 0;
-    },
-  },
+  DataFlow: DataFlowStub,
   Constants: {
     Protocol: {
       BLE: 'BLE',
@@ -62,7 +55,7 @@ export const smarthomeStub: {
 
 export interface ExtractedStubs {
   mockLocalHomePlatform: MockLocalHomePlatform;
-  deviceManagerStub: DeviceManagerStub;
+  deviceManagerStub: MockDeviceManager;
 }
 
 /**
@@ -75,7 +68,9 @@ export function extractStubs(app: smarthome.App): ExtractedStubs {
   if (app instanceof AppStub) {
     return {
       mockLocalHomePlatform: app.getLocalHomePlatform(),
-      deviceManagerStub: app.getLocalHomePlatform().getDeviceManager(),
+      deviceManagerStub: app
+        .getLocalHomePlatform()
+        .getDeviceManager() as MockDeviceManager,
     };
   }
   throw new Error("Couldn't downcast App to AppStub");

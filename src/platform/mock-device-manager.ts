@@ -6,7 +6,7 @@ export const ERROR_UNEXPECTED_COMMAND_REQUEST =
   'Unable to process unexpected CommandRequest';
 export const ERROR_PENDING_REQUEST_MISMATCH =
   'The pending request did not match the expected value';
-export class DeviceManagerStub implements smarthome.DeviceManager {
+export class MockDeviceManager implements smarthome.DeviceManager {
   /** Action to call when an `IntentRequest` is marked with `markPending()`.*/
   private markPendingAction:
     | ((request: smarthome.IntentRequest) => void)
