@@ -3,7 +3,7 @@ import yargs from 'yargs/yargs';
 import * as readline from 'readline';
 import {CommandMessage, READY_FOR_MESSAGE, CHECK_READY} from './commands';
 import {ExecuteMessage, IdentifyMessage, ScanMessage} from './commands';
-import {UDPScanConfig} from '../radio/radio-controller';
+import {UDPScanConfig} from '@google/local-home-testing/build/src/radio';
 
 /**
  * Class to parse raw user input from stdin.
@@ -90,7 +90,8 @@ export class CommandProcessor {
           .option('request_id', {
             describe: 'The request Id',
             type: 'string',
-            demandOption: true,
+            demandOption: false,
+            default: 'sample-request-id',
           })
           .option('local_device_id', {
             describe: 'The local device Id',

@@ -5,16 +5,12 @@
 /// <reference types="@types/node" />
 import test from 'ava';
 import {
-  UdpResponseData,
-  createSimpleExecuteCommands,
-  extractStubs,
-  UdpResponse,
-} from '../../src';
-import {
   identifyHandler,
   createExecuteHandler,
   createUdpDeviceCommand,
 } from './fixtures';
+import {createSimpleExecuteCommands, extractStubs} from '../../src';
+import {UdpResponseData, UdpResponse} from '../../src/radio';
 
 const DEVICE_ID = 'device-id-123';
 const DEVICE_PORT = 12345;

@@ -1,9 +1,8 @@
 {
-  "name": "local-home-testing",
+  "name": "@google/local-home-testing",
   "version": "0.0.1",
   "description": "Testing environment for Local Fulfillment Apps. Mocks behavior of Local Home Platform.",
   "author": "Google LLC",
-  "private": true,
   "main": "./build/src/index.js",
   "license": "Apache-2.0",
   "scripts": {
@@ -13,22 +12,13 @@
     "cli": "node ./build/src/cli/index.js",
     "lint": "eslint './src/**/*.ts' './test/**/*.ts'"
   },
-  "dependencies": {
-    "ava": "^3.10.0",
-    "yargs": "^15.4.1"
-  },
   "devDependencies": {
+    "ava": "^3.11.1",
     "@ava/typescript": "^1.1.1",
+    "@typescript-eslint/eslint-plugin": "^3.7.0",
     "@google/local-home-sdk": "^1.1.0",
     "@types/node": "^13.11.1",
-    "@types/yargs": "^15.0.5",
-    "@typescript-eslint/eslint-plugin": "^3.7.0",
     "chalk": "^4.0.0",
-    "eslint": "^7.5.0",
-    "eslint-config-prettier": "^6.10.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^3.1.2",
-    "esm": "^3.2.25",
     "gts": "^2.0.2",
     "prettier": "^2.0.5",
     "typescript": "^3.8.3"
@@ -37,16 +27,13 @@
     "node": ">12.11.0"
   },
   "files": [
-    "./build/src/**/*.ts",
-    "./build/test/example/**/*.ts"
+    "./build/src/**/*.js",
+    "./build/test/example/**/*.js"
   ],
   "ava": {
     "files": [
       "test/**/*",
       "!test/**/*fixtures.ts"
-    ],
-    "require": [
-      "esm"
     ],
     "typescript": {
       "rewritePaths": {

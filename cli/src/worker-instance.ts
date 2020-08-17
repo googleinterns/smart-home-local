@@ -2,11 +2,10 @@
  * Worker thread that runs an instance of a mocked local fulfillment app.
  */
 import {parentPort, workerData} from 'worker_threads';
-import {smarthomeStub} from '../platform/stub-setup';
-import {AppStub} from '../platform/smart-home-app';
 import * as fs from 'fs';
 import {PlatformWorker} from './platform-worker';
 import {READY_FOR_MESSAGE, CHECK_READY} from './commands';
+import {smarthomeStub, AppStub} from '@google/local-home-testing';
 
 /**
  * Check that this worker thread was started properly

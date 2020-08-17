@@ -2,7 +2,7 @@ import yargs from 'yargs/yargs';
 import {Worker} from 'worker_threads';
 import {CommandProcessor} from './command-processor';
 
-const APP_INSTANCE_PATH = './build/src/cli/worker-instance.js';
+const APP_INSTANCE_PATH = './build/src/worker-instance.js';
 
 /**
  * Process initial command-line arguments.

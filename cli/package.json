@@ -1,0 +1,51 @@
+{
+  "name": "@google/local-home-testing-cli",
+  "version": "0.0.1",
+  "description": "A command-line interface for interacting with Local Home SDK stubs.",
+  "author": "Google LLC.",
+  "license": "Apache-2.0",
+  "main": "./build/src/index.js",
+  "scripts": {
+    "compile": "tsc",
+    "test": "ava",
+    "clean": "gts clean",
+    "cli": "node ./build/src/index.js",
+    "check": "gts check ./src/**/*.ts ./test/**/*.ts",
+    "fix": "gts fix",
+    "pretest": "npm run compile"
+  },
+  "dependencies": {
+    "@google/local-home-testing": "file:../stubs",
+    "yargs": "^15.4.1"
+  },
+  "devDependencies": {
+    "ava": "^3.11.1",
+    "@ava/typescript": "^1.1.1",
+    "@typescript-eslint/eslint-plugin": "^3.9.1",
+    "@google/local-home-sdk": "^1.1.0",
+    "@types/node": "^13.11.1",
+    "@types/yargs": "^15.0.5",
+    "chalk": "^4.0.0",
+    "gts": "^2.0.2",
+    "prettier": "^2.0.5",
+    "typescript": "^3.8.3"
+  },
+  "engines": {
+    "node": ">12.11.0"
+  },
+  "files": [
+    "./build/src/**/*.js",
+    "./build/test/example/**/*.js"
+  ],
+  "ava": {
+    "files": [
+      "test/**/*",
+      "!test/**/*fixtures.ts"
+    ],
+    "typescript": {
+      "rewritePaths": {
+        "test/": "build/test/"
+      }
+    }
+  }
+}

@@ -8,11 +8,11 @@ TODO(cjdaly) update usage
 
 **To start a virtual device:**
 
-`npm start -- --udp_discovery_port 3320 --udp_discovery_packet ff --device_id local-device-id`
+`npm start -- --udp_discovery_port 3320 --udp_discovery_packet ff --device_id local-device-id --control_protocol UDP`
 
 **Example Commands:**
 
-`udp-scan --broadcast_address localhost --broadcast_port 3320 --listen_port 3311 --discovery_packet ff`
+`udp-scan --broadcast_address localhost --broadcast_port 3320 --listen_port 3311 --discovery_packet ff --device_id local-device-id`
 
 `simulate-identify --request_id sample-request-id --discovery_buffer ff --device_id test-device-id-simulate`
 

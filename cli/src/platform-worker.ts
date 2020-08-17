@@ -1,15 +1,20 @@
-import {createSimpleExecuteCommands} from '../platform/execute';
-import {MockLocalHomePlatform} from '../platform/mock-local-home-platform';
-import {AppStub} from '../platform/smart-home-app';
-import {extractStubs} from '../platform/stub-setup';
-import {RadioController} from '../radio/radio-controller';
+import {
+  createSimpleExecuteCommands,
+  extractStubs,
+  AppStub,
+  MockLocalHomePlatform,
+} from '@google/local-home-testing';
+import {
+  RadioDeviceManager,
+  RadioController,
+  NodeRadioController,
+} from '@google/local-home-testing/build/src/radio/index';
 import {
   ScanMessage,
   CommandMessage,
   ExecuteMessage,
   IdentifyMessage,
 } from './commands';
-import {RadioDeviceManager} from '../radio/radio-device-manager';
 
 /**
  * Class to recieve `CommandMessage`s and forward them to
@@ -33,7 +38,7 @@ export class PlatformWorker {
       this.appStub
     ).mockLocalHomePlatform;
     // Save access to radio controls.
-    this.radioController = new RadioController();
+    this.radioController = new NodeRadioController();
     // Create and save a typed `RadioDeviceManager`.
     this.radioDeviceManager = new RadioDeviceManager(this.radioController);
     // Inject radio functionality in the platform.
