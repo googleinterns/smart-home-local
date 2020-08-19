@@ -142,17 +142,18 @@ export class RadioController {
           }
         });
         // Start listening for responses.
-        socket.bind(listenPort);
-        // Send the UDP message, forwarding the given parameters.
-        socket.send(payload, port, address, error => {
-          if (error) {
-            throw new Error(`Failed to send UDP message: ${error.message}`);
-          }
-          console.log('Sent UDP message: ', payload);
-          if (expectedResponsePackets === 0) {
-            // Resolve early if we aren't expecting any response.
-            resolve(new UdpResponse());
-          }
+        socket.bind(listenPort, () => {
+          // Send the UDP message, forwarding the given parameters.
+          socket.send(payload, port, address, error => {
+            if (error) {
+              throw new Error(`Failed to send UDP message: ${error.message}`);
+            }
+            console.log('Sent UDP message: ', payload);
+            if (expectedResponsePackets === 0) {
+              // Resolve early if we aren't expecting any response.
+              resolve(new UdpResponse());
+            }
+          });
         });
       }
     );
