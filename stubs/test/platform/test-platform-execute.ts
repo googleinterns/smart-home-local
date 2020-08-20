@@ -5,14 +5,13 @@
 /// <reference types="@google/local-home-sdk" />
 /// <reference types="@types/node" />
 import test from 'ava';
+import {UdpResponseData, UdpResponse} from '../../src/radio';
+import {createIdentifyHandler} from './test-platform-fixtures';
 import {
   extractStubs,
-  UdpResponseData,
   ERROR_EXECUTE_RESPONSE_ERROR_STATUS,
-  UdpResponse,
   createSimpleExecuteCommands,
 } from '../../src';
-import {createIdentifyHandler} from './test-platform-fixtures';
 import {
   createUdpDeviceCommand,
   createExecuteHandler,

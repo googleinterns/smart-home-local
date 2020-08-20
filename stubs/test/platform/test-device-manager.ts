@@ -6,9 +6,8 @@ import {
   MockDeviceManager,
   ERROR_UNEXPECTED_COMMAND_REQUEST,
   ERROR_PENDING_REQUEST_MISMATCH,
-  UdpResponseData,
-  UdpResponse,
 } from '../../src';
+import {UdpResponseData, UdpResponse} from '../../src/radio';
 import {createUdpDeviceCommand} from '../example/fixtures';
 
 const EXECUTE_REQUEST_ID = 'execute-request-id';

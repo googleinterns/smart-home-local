@@ -2,8 +2,13 @@ import * as net from 'net';
 import test from 'ava';
 import * as dgram from 'dgram';
 import * as http from 'http';
-import {RadioController, UDPScanConfig} from '../../src/radio/radio-controller';
-import {UdpResponse, TcpResponse, HttpResponse} from '../../src';
+import {
+  NodeRadioController,
+  UdpResponse,
+  TcpResponse,
+  UDPScanConfig,
+  HttpResponse,
+} from '../../src/radio';
 
 const UDP_PLACEHOLDER_BUFFER_1 = Buffer.from('test UDP buffer');
 const UDP_PLACEHOLDER_BUFFER_2 = Buffer.from('foo bar lorem ipsum');
@@ -168,7 +173,7 @@ test.serial('udp-scan-finds-server', async t => {
       size: 15,
     },
   };
-  const radioController = new RadioController();
+  const radioController = new NodeRadioController();
   const scanResults = await radioController.udpScan(scanConfig);
   udpServer.stopServer();
   t.deepEqual(expectedScanResults, scanResults);
@@ -183,7 +188,7 @@ test.serial('udp-message-recieves-all-data', async t => {
   const listenPort = 3001;
   const udpServer = new UdpServer();
   udpServer.startServer(serverPort);
-  const radioController = new RadioController();
+  const radioController = new NodeRadioController();
   const expectedUdpResponse = new UdpResponse([
     UDP_PLACEHOLDER_BUFFER_1.toString('hex'),
     UDP_PLACEHOLDER_BUFFER_2.toString('hex'),
@@ -206,7 +211,7 @@ test.serial('tcp-read-operation-reads-from-server', async t => {
   const serverPort = 3312;
   const tcpServer = new TcpServer();
   tcpServer.startServer(serverPort);
-  const radioController = new RadioController();
+  const radioController = new NodeRadioController();
   const expectedTcpResponse = new TcpResponse(
     TCP_PLACEHOLDER_BUFFER.toString('hex')
   );
@@ -225,7 +230,7 @@ test.serial('tcp-write-operation-writes-data', async t => {
   const serverPort = 3312;
   const tcpServer = new TcpServer();
   tcpServer.startServer(serverPort);
-  const radioController = new RadioController();
+  const radioController = new NodeRadioController();
   const expectedTcpResponse = new TcpResponse();
   const actualTcpResponse = await radioController.writeTcpSocket(
     TCP_PLACEHOLDER_BUFFER,
@@ -249,7 +254,7 @@ test.serial('http-get-returns-body', async t => {
     HTTP_SERVER_CHUNKS_1.join(''),
     200
   );
-  const radioController = new RadioController();
+  const radioController = new NodeRadioController();
   const httpResponse = await radioController.sendHttpGet(
     'localhost',
     serverPort,
@@ -275,7 +280,7 @@ test.serial('http-post-writes-data-and-returns-body', async t => {
     HTTP_SERVER_CHUNKS_2.join(''),
     200
   );
-  const radioController = new RadioController();
+  const radioController = new NodeRadioController();
   const nextChunk = httpServer.getNextChunkWritten();
   const httpResponse = await radioController.sendHttpPost(
     'localhost',

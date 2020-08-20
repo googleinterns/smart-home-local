@@ -156,3 +156,46 @@ export class HttpResponse implements smarthome.DataFlow.HttpResponse {
     this.statusCode = statusCode;
   }
 }
+
+/**
+ * A class to contain all parameters required to perform
+ * a UDP scan.
+ */
+export class UDPScanConfig {
+  broadcastAddress: string;
+  broadcastPort: number;
+  listenPort: number;
+  discoveryPacket: string;
+  /**
+   *
+   * @param broadcastAddress  The destination UDP broadcast address.
+   * @param broadcastPort  The destination UDP broadcast port.
+   * @param listenPort  The listen port for the UDP response.
+   * @param discoveryPacket  The payload to send in the UDP broadcast.
+   * @returns  A new `UDPScanConfig` instance.
+   */
+  constructor(
+    broadcastAddress: string,
+    broadcastPort: number,
+    listenPort: number,
+    discoveryPacket: string
+  ) {
+    this.broadcastAddress = broadcastAddress;
+    this.broadcastPort = broadcastPort;
+    this.listenPort = listenPort;
+    this.discoveryPacket = discoveryPacket;
+  }
+}
+
+export interface RemoteInfo {
+  port: number;
+  address: string;
+}
+
+/**
+ * A class to contain the information from a UDP scan.
+ */
+export interface UDPScanResults {
+  buffer: Buffer;
+  rinfo: RemoteInfo;
+}

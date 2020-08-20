@@ -153,7 +153,6 @@ export class RadioDeviceManager implements smarthome.DeviceManager {
     if (!this.deviceIdToAddress.has(command.deviceId)) {
       throw new smarthome.IntentFlow.HandlerError(command.requestId);
     }
-    console.log(command);
     if (command.protocol === 'UDP') {
       return await this.processUdpRequestData(
         command as smarthome.DataFlow.UdpRequestData

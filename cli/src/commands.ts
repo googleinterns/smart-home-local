@@ -1,4 +1,5 @@
-import {UDPScanConfig} from '../radio/radio-controller';
+import {UDPScanConfig} from '@google/local-home-testing/src/radio';
+
 type CommandType = 'SCAN' | 'IDENTIFY' | 'EXECUTE';
 
 /**

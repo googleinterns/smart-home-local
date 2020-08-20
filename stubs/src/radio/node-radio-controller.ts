@@ -1,4 +1,11 @@
-import {TcpResponse, UdpResponse, HttpResponse} from './dataflow';
+import {
+  TcpResponse,
+  UdpResponse,
+  HttpResponse,
+  UDPScanConfig,
+  UDPScanResults,
+  RadioController,
+} from '.';
 import * as dgram from 'dgram';
 import * as http from 'http';
 import * as net from 'net';
@@ -7,59 +14,20 @@ import * as net from 'net';
  * A default radio timeout, in milliseconds.
  */
 const RADIO_TIMEOUT = 2500;
-
 /**
- * A class to contain all parameters required to perform
- * a UDP scan.
+ * A helper function to create timeout promises.
+ * @returns  A new Promise that resolves after RADIO_TIMEOUT milliseconds.
  */
-export class UDPScanConfig {
-  broadcastAddress: string;
-  broadcastPort: number;
-  listenPort: number;
-  discoveryPacket: string;
-  /**
-   *
-   * @param broadcastAddress  The destination UDP broadcast address.
-   * @param broadcastPort  The destination UDP broadcast port.
-   * @param listenPort  The listen port for the UDP response.
-   * @param discoveryPacket  The payload to send in the UDP broadcast.
-   * @returns  A new `UDPScanConfig` instance.
-   */
-  constructor(
-    broadcastAddress: string,
-    broadcastPort: number,
-    listenPort: number,
-    discoveryPacket: string
-  ) {
-    this.broadcastAddress = broadcastAddress;
-    this.broadcastPort = broadcastPort;
-    this.listenPort = listenPort;
-    this.discoveryPacket = discoveryPacket;
-  }
+export function createTimeoutPromise(timeout: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, timeout);
+  });
 }
 
 /**
- * A class to contain the information from a UDP scan.
+ * A class to contain all Node radio fulfillment functionality.
  */
-export interface UDPScanResults {
-  buffer: Buffer;
-  rinfo: dgram.RemoteInfo;
-}
-
-/**
- * A class to contain all Node radio functionality.
- */
-export class RadioController {
-  /**
-   * A helper function to create timeout promises.
-   * @returns  A new Promise that resolves after RADIO_TIMEOUT milliseconds.
-   */
-  private createTimeoutPromise(timeout: number): Promise<void> {
-    return new Promise(resolve => {
-      setTimeout(resolve, timeout);
-    });
-  }
-
+export class NodeRadioController implements RadioController {
   /**
    * Performs a UDP scan according to a `UDPScanConfig`.
    * @param udpScanConfig  A scan configuration containing UDP parameters.
@@ -105,7 +73,7 @@ export class RadioController {
     // Timeout if there hasn't been a response.
     return Promise.race([
       discoveryBuffer,
-      this.createTimeoutPromise(timeout).then(() => {
+      createTimeoutPromise(timeout).then(() => {
         // Close the socket if timed out
         socket.close();
         throw new Error(`UDP scan timed out after ${timeout}ms.`);
@@ -162,7 +130,7 @@ export class RadioController {
     // Timeout if still waiting for a response.
     return Promise.race([
       discoveryBuffer,
-      this.createTimeoutPromise(timeout).then(() => {
+      createTimeoutPromise(timeout).then(() => {
         socket.close();
         throw new Error(`UDP send timed out after ${timeout} ms.`);
       }),
@@ -197,7 +165,7 @@ export class RadioController {
     // Timeout if we haven't recieved data.
     return Promise.race([
       discoveryBuffer,
-      this.createTimeoutPromise(timeout).then(() => {
+      createTimeoutPromise(timeout).then(() => {
         client.destroy();
         throw new Error(`TCP read timed out after ${timeout}ms.`);
       }),
@@ -243,7 +211,7 @@ export class RadioController {
     // Timeout if still waiting for a response.
     return Promise.race([
       httpResponse,
-      this.createTimeoutPromise(timeout).then(() => {
+      createTimeoutPromise(timeout).then(() => {
         throw new Error(`HTTP GET request timed out after ${timeout}ms.`);
       }),
     ]);
@@ -276,7 +244,7 @@ export class RadioController {
     // Timeout if writing takes too long.
     return Promise.race([
       discoveryBuffer,
-      this.createTimeoutPromise(timeout).then(() => {
+      createTimeoutPromise(timeout).then(() => {
         throw new Error(`TCP write timed out after ${timeout}ms.`);
       }),
     ]);
@@ -330,7 +298,7 @@ export class RadioController {
     // Timeout if still waiting for a response.
     return Promise.race([
       httpResponse,
-      this.createTimeoutPromise(timeout).then(() => {
+      createTimeoutPromise(timeout).then(() => {
         throw new Error(`HTTP POST request timed out after ${timeout}ms.`);
       }),
     ]);
