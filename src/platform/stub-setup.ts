@@ -19,6 +19,9 @@ export const smarthomeStub: {
   };
   Constants: {
     Protocol: {[key in keyof typeof smarthome.Constants.Protocol]: string};
+    TcpOperation: {
+      [key in keyof typeof smarthome.Constants.TcpOperation]: string;
+    };
   };
 } = {
   App: AppStub,
@@ -49,6 +52,10 @@ export const smarthomeStub: {
       TCP: 'TCP',
       UDP: 'UDP',
       BLE_MESH: 'BLE_MESH',
+    },
+    TcpOperation: {
+      READ: 'READ',
+      WRITE: 'WRITE',
     },
   },
 };

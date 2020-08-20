@@ -1,5 +1,6 @@
 import * as dgram from 'dgram';
-import {UdpResponse} from './dataflow';
+import * as net from 'net';
+import {UdpResponse, TcpResponse} from './dataflow';
 
 /**
  * A default radio timeout, in milliseconds.
@@ -162,6 +163,74 @@ export class RadioController {
       this.createTimeoutPromise(timeout).then(() => {
         socket.close();
         throw new Error(`UDP send timed out after ${timeout} ms.`);
+      }),
+    ]);
+  }
+
+  /**
+   * Reads data from a TCP socket.
+   * @param address  The address to open a TCP socket on.
+   * @param port  The port to open a TCP socket on.
+   * @param timeout  How long in ms to wait before timing out the request.
+   * @returns  The data read from the TCP socket.
+   */
+  public async readTcpSocket(
+    address: string,
+    port: number,
+    timeout = RADIO_TIMEOUT
+  ): Promise<smarthome.DataFlow.TcpResponse> {
+    // Open the socket.
+    const client = net.createConnection(port, address, () => {});
+    const discoveryBuffer = new Promise<smarthome.DataFlow.TcpResponse>(
+      resolve => {
+        // Resolve when data is recieved.
+        client.on('data', data => {
+          client.on('end', () => {
+            resolve(new TcpResponse(data.toString('hex')));
+          });
+          client.end();
+        });
+      }
+    );
+    // Timeout if we haven't recieved data.
+    return Promise.race([
+      discoveryBuffer,
+      this.createTimeoutPromise(timeout).then(() => {
+        client.destroy();
+        throw new Error(`TCP read timed out after ${timeout}ms.`);
+      }),
+    ]);
+  }
+
+  /**
+   * Open a TCP socket and write to it.
+   * @param payload  The payload to send in the TCP write.
+   * @param address  The address to write to.
+   * @param port  The port to write to.
+   * @param timeout  How long in ms to wait before timing out the request.
+   * @returns  A promise that resolves to the determined `TcpResponse`.
+   */
+  public async writeTcpSocket(
+    payload: Buffer,
+    address: string,
+    port: number,
+    timeout = RADIO_TIMEOUT
+  ): Promise<TcpResponse> {
+    const discoveryBuffer = new Promise<smarthome.DataFlow.TcpResponse>(
+      resolve => {
+        // Open a socket and immediately write to it.
+        const client = net.createConnection(port, address, () => {
+          client.write(payload);
+          client.end();
+          resolve(new TcpResponse());
+        });
+      }
+    );
+    // Timeout if writing takes too long.
+    return Promise.race([
+      discoveryBuffer,
+      this.createTimeoutPromise(timeout).then(() => {
+        throw new Error(`TCP write timed out after ${timeout}ms.`);
       }),
     ]);
   }
