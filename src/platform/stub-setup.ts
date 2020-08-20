@@ -11,9 +11,7 @@ export const smarthomeStub: {
   App: typeof smarthome.App;
   Execute: typeof smarthome.Execute;
   Intents: {[key in keyof typeof smarthome.Intents]: string};
-  DataFlow: {
-    UdpRequestData: typeof smarthome.DataFlow.UdpRequestData;
-  };
+  DataFlow: typeof smarthome.DataFlow;
   IntentFlow: {
     HandlerError: typeof smarthome.IntentFlow.HandlerError;
   };
@@ -21,6 +19,9 @@ export const smarthomeStub: {
     Protocol: {[key in keyof typeof smarthome.Constants.Protocol]: string};
     TcpOperation: {
       [key in keyof typeof smarthome.Constants.TcpOperation]: string;
+    };
+    HttpOperation: {
+      [key in keyof typeof smarthome.Constants.HttpOperation]: string;
     };
   };
 } = {
@@ -56,6 +57,11 @@ export const smarthomeStub: {
     TcpOperation: {
       READ: 'READ',
       WRITE: 'WRITE',
+    },
+    HttpOperation: {
+      GET: 'GET',
+      POST: 'POST',
+      PUT: 'PUT',
     },
   },
 };

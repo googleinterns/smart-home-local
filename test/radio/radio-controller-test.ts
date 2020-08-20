@@ -1,13 +1,32 @@
 import * as net from 'net';
 import test from 'ava';
 import * as dgram from 'dgram';
+import * as http from 'http';
 import {RadioController, UDPScanConfig} from '../../src/radio/radio-controller';
-import {UdpResponse, TcpResponse} from '../../src';
+import {UdpResponse, TcpResponse, HttpResponse} from '../../src';
 
 const UDP_PLACEHOLDER_BUFFER_1 = Buffer.from('test UDP buffer');
 const UDP_PLACEHOLDER_BUFFER_2 = Buffer.from('foo bar lorem ipsum');
 
 const TCP_PLACEHOLDER_BUFFER = Buffer.from('placeholder data');
+
+const HTTP_SERVER_CHUNKS_1 = [
+  '<body>',
+  'I ',
+  ' am',
+  ' a',
+  ' server.',
+  '</body>',
+];
+const HTTP_SERVER_CHUNKS_2 = [
+  '<body>',
+  'Thanks ',
+  'for ',
+  'the ',
+  'data.',
+  '</body>',
+];
+const HTTP_SERVER_ENDPOINT_PATH = '/sample';
 
 /**
  * Class to manage a local UDP server
@@ -70,7 +89,61 @@ class TcpServer {
   }
 }
 
-/*
+/**
+ * Class to manage a simple HTTP server for testing GET and POST
+ */
+class HttpServer {
+  private server: http.Server | undefined;
+  private onChunkWritten: (chunk: Buffer) => void = () => {};
+
+  /**
+   * Starts the HTTP server.
+   * Listens on two paths for GET and POST requests.
+   * @param listenPort  The port to start the server on.
+   */
+  public startServer(listenPort = 5000) {
+    this.server = http.createServer((request, response) => {
+      if (request.url === '/') {
+        response.writeHead(200);
+        HTTP_SERVER_CHUNKS_1.forEach(chunk => {
+          response.write(chunk);
+        });
+        response.end();
+      } else if (request.url === HTTP_SERVER_ENDPOINT_PATH) {
+        request.on('data', chunk => {
+          this.onChunkWritten(chunk);
+        });
+        response.writeHead(200);
+        HTTP_SERVER_CHUNKS_2.forEach(chunk => {
+          response.write(chunk);
+        });
+        response.end();
+      }
+    });
+    this.server.listen(listenPort);
+  }
+
+  /**
+   * Gets the next chunk written to the HTTP server's POST endpoint.
+   * @returns  A promise that resolves to a utf8-encoded `Buffer`.
+   */
+  public async getNextChunkWritten(): Promise<Buffer> {
+    return new Promise<Buffer>(resolve => {
+      this.onChunkWritten = (chunk: Buffer) => {
+        resolve(chunk);
+      };
+    });
+  }
+
+  /**
+   * Closes the HTTP server, if possible.
+   */
+  public stopServer() {
+    this.server?.close();
+  }
+}
+
+/**
  * Tests that a UDP scan finds a simple UDP server
  * and properly returns the UDP discovery data.
  */
@@ -125,6 +198,7 @@ test.serial('udp-message-recieves-all-data', async t => {
   udpServer.stopServer();
   t.deepEqual(expectedUdpResponse, udpResponse);
 });
+
 /**
  * Tests that `readTcpSocket()` is able to read data from a TCP server.
  */
@@ -161,4 +235,56 @@ test.serial('tcp-write-operation-writes-data', async t => {
   tcpServer.closeServer();
   t.deepEqual(actualTcpResponse, expectedTcpResponse);
   t.deepEqual(await tcpServer.getWrittenData(), TCP_PLACEHOLDER_BUFFER);
+});
+
+/**
+ * Tests that an HTTP GET request returns the expected body.
+ */
+test.serial('http-get-returns-body', async t => {
+  const serverPort = 5000;
+  const httpServer = new HttpServer();
+  httpServer.startServer(serverPort);
+
+  const expectedHttpResponse = new HttpResponse(
+    HTTP_SERVER_CHUNKS_1.join(''),
+    200
+  );
+  const radioController = new RadioController();
+  const httpResponse = await radioController.sendHttpGet(
+    'localhost',
+    serverPort,
+    '/'
+  );
+  httpServer.stopServer();
+  t.deepEqual(expectedHttpResponse, httpResponse);
+});
+
+/**
+ * Tests that an HTTP POST request can write data to a server.
+ * Tests that an HTTP POST returns the expected body.
+ */
+test.serial('http-post-writes-data-and-returns-body', async t => {
+  const serverPort = 5000;
+  const httpServer = new HttpServer();
+  httpServer.startServer(serverPort);
+  const sampleJSON = JSON.stringify({
+    foo: 'This is some arbitrary data.',
+    bar: 'This is also data.',
+  });
+  const expectedHttpResponse = new HttpResponse(
+    HTTP_SERVER_CHUNKS_2.join(''),
+    200
+  );
+  const radioController = new RadioController();
+  const nextChunk = httpServer.getNextChunkWritten();
+  const httpResponse = await radioController.sendHttpPost(
+    'localhost',
+    serverPort,
+    HTTP_SERVER_ENDPOINT_PATH,
+    'application/json',
+    sampleJSON
+  );
+  httpServer.stopServer();
+  t.deepEqual(expectedHttpResponse, httpResponse);
+  t.deepEqual((await nextChunk).toString('utf8'), sampleJSON);
 });

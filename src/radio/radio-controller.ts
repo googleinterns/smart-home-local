@@ -1,6 +1,7 @@
+import {TcpResponse, UdpResponse, HttpResponse} from './dataflow';
 import * as dgram from 'dgram';
+import * as http from 'http';
 import * as net from 'net';
-import {UdpResponse, TcpResponse} from './dataflow';
 
 /**
  * A default radio timeout, in milliseconds.
@@ -204,6 +205,51 @@ export class RadioController {
   }
 
   /**
+   * Sends an HTTP GET request using the provided parameters.
+   * @param host  The address to send the HTTP GET request to.
+   * @param port  The port to send the HTTP GET request to.
+   * @param path  The path to send the HTTP GET request to.
+   * @param timeout  How long to wait before rejecting with a timeout.
+   */
+  public async sendHttpGet(
+    host: string,
+    port: number,
+    path: string,
+    timeout = RADIO_TIMEOUT
+  ): Promise<smarthome.DataFlow.HttpResponse> {
+    const options = {
+      host,
+      port,
+      path,
+    };
+    const httpResponse = new Promise<smarthome.DataFlow.HttpResponse>(
+      resolve => {
+        http.get(options, res => {
+          const {statusCode} = res;
+          const dataBuffer: string[] = [];
+          if (statusCode !== 200) {
+            throw new Error(`Request Failed.\nStatus Code: ${statusCode}`);
+          }
+          res.setEncoding('utf8');
+          res.on('data', chunk => {
+            dataBuffer.push(chunk);
+          });
+          res.on('end', () => {
+            resolve(new HttpResponse(dataBuffer.join(''), statusCode));
+          });
+        });
+      }
+    );
+    // Timeout if still waiting for a response.
+    return Promise.race([
+      httpResponse,
+      this.createTimeoutPromise(timeout).then(() => {
+        throw new Error(`HTTP GET request timed out after ${timeout}ms.`);
+      }),
+    ]);
+  }
+
+  /**
    * Open a TCP socket and write to it.
    * @param payload  The payload to send in the TCP write.
    * @param address  The address to write to.
@@ -232,6 +278,60 @@ export class RadioController {
       discoveryBuffer,
       this.createTimeoutPromise(timeout).then(() => {
         throw new Error(`TCP write timed out after ${timeout}ms.`);
+      }),
+    ]);
+  }
+
+  /**
+   * Sends an HTTP POST request using the provided parameters.
+   * @param host  The address to send the HTTP POST request to.
+   * @param port  The port to send the HTTP POST request to.
+   * @param path  The path to send the HTTP POST request to.
+   * @param timeout  How long to wait before rejecting with a timeout.
+   */
+  public async sendHttpPost(
+    host: string,
+    port: number,
+    path: string,
+    dataType: string,
+    data: string,
+    timeout = RADIO_TIMEOUT
+  ): Promise<smarthome.DataFlow.HttpResponse> {
+    const options = {
+      host,
+      port,
+      path,
+      method: 'POST',
+      headers: {
+        'Content-Type': dataType,
+        'Content-Length': Buffer.byteLength(data),
+      },
+    };
+    const httpResponse = new Promise<smarthome.DataFlow.HttpResponse>(
+      resolve => {
+        const postRequest = http.request(options, res => {
+          const {statusCode} = res;
+          const dataBuffer: string[] = [];
+          if (statusCode !== 200) {
+            throw new Error(`Request Failed.\nStatus Code: ${statusCode}`);
+          }
+          res.setEncoding('utf8');
+          res.on('data', chunk => {
+            dataBuffer.push(chunk);
+          });
+          res.on('end', () => {
+            resolve(new HttpResponse(dataBuffer.join(''), statusCode));
+          });
+        });
+        postRequest.write(data);
+        postRequest.end();
+      }
+    );
+    // Timeout if still waiting for a response.
+    return Promise.race([
+      httpResponse,
+      this.createTimeoutPromise(timeout).then(() => {
+        throw new Error(`HTTP POST request timed out after ${timeout}ms.`);
       }),
     ]);
   }

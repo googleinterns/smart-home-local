@@ -20,6 +20,19 @@ export const DataFlowStub = {
     operation: smarthome.Constants.TcpOperation =
       smarthome.Constants.TcpOperation.WRITE;
   },
+  HttpRequestData: class {
+    protocol: smarthome.Constants.Protocol = smarthome.Constants.Protocol.HTTP;
+    requestId = '';
+    deviceId = '';
+    data = '';
+    dataType = '';
+    headers = '';
+    additionalHeaders: {[key: string]: string} = {};
+    method: smarthome.Constants.HttpOperation =
+      smarthome.Constants.HttpOperation.GET;
+    path = '';
+    port?: number;
+  },
 };
 
 /**
@@ -45,21 +58,6 @@ export class UdpResponseData implements smarthome.DataFlow.UdpResponseData {
     this.requestId = requestId;
     this.deviceId = deviceId;
     this.udpResponse = udpResponse;
-  }
-}
-
-/**
- * An implementation of `smarthome.DataFlow.UdpResponse` for
- * responding to UDP requests.
- */
-export class UdpResponse implements smarthome.DataFlow.UdpResponse {
-  responsePackets?: string[];
-  /**
-   * @param responsePackets  The response packets to include in the UdpResponse, if any
-   * @returns  A new `UdpResponse` instance.
-   */
-  constructor(responsePackets?: string[]) {
-    this.responsePackets = responsePackets;
   }
 }
 
@@ -90,6 +88,47 @@ export class TcpResponseData implements smarthome.DataFlow.TcpResponseData {
 }
 
 /**
+ * An implementation of `smarthome.DataFlow.HttpResponseData` for
+ * responding to HTTP requests.
+ */
+export class HttpResponseData implements smarthome.DataFlow.HttpResponseData {
+  deviceId: string;
+  httpResponse: smarthome.DataFlow.HttpResponse;
+  protocol: smarthome.Constants.Protocol = smarthome.Constants.Protocol.HTTP;
+  requestId: string;
+  /**
+   * @param deviceId  The id of the device that the request was sent to.
+   * @param httpResponse  The contents of the response.
+   * @param requestId  The requestId of the associated `HttpRequestData`
+   * @returns  A new `HttpResponseData` instance.
+   */
+  constructor(
+    deviceId: string,
+    httpResponse: smarthome.DataFlow.HttpResponse,
+    requestId: string
+  ) {
+    this.deviceId = deviceId;
+    this.httpResponse = httpResponse;
+    this.requestId = requestId;
+  }
+}
+
+/**
+ * An implementation of `smarthome.DataFlow.UdpResponse` for
+ * responding to UDP requests.
+ */
+export class UdpResponse implements smarthome.DataFlow.UdpResponse {
+  responsePackets?: string[];
+  /**
+   * @param responsePackets  The response packets to include in the UdpResponse, if any
+   * @returns  A new `UdpResponse` instance.
+   */
+  constructor(responsePackets?: string[]) {
+    this.responsePackets = responsePackets;
+  }
+}
+
+/**
  * An implementation of `smarthome.DataFlow.TcpResponse` for
  * responding to TCP requests.
  */
@@ -97,5 +136,23 @@ export class TcpResponse implements smarthome.DataFlow.TcpResponse {
   data: string;
   constructor(data = '') {
     this.data = data;
+  }
+}
+
+/**
+ * An implementation of `smarthome.DataFlow.UdpResponse` for
+ * responding to HTTP requests.
+ */
+export class HttpResponse implements smarthome.DataFlow.HttpResponse {
+  body: unknown;
+  statusCode: number;
+  /**
+   * @param body  The body of the HTTP response.
+   * @param statusCode  The HTTP response code.
+   * @returns  A new `HttpResponse` instance.
+   */
+  constructor(body: unknown, statusCode: number) {
+    this.body = body;
+    this.statusCode = statusCode;
   }
 }
