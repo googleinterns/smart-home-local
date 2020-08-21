@@ -64,7 +64,7 @@ export class PlatformWorker {
           // Trigger the identifyHandler with scan results.
           await this.mockLocalHomePlatform.triggerIdentify(
             scanMessage.requestId,
-            scanRemoteInfo.buffer,
+            Buffer.from(scanRemoteInfo.scanData, 'hex'),
             scanMessage.deviceId
           );
           // Save association between deviceId and local IP address.
