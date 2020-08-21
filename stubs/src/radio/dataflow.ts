@@ -196,6 +196,6 @@ export interface RemoteInfo {
  * A class to contain the information from a UDP scan.
  */
 export interface UDPScanResults {
-  buffer: Buffer;
+  scanData: string;
   rinfo: RemoteInfo;
 }

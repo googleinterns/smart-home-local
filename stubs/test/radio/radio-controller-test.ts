@@ -165,7 +165,7 @@ test.serial('udp-scan-finds-server', async t => {
   udpServer.startServer(serverPort);
 
   const expectedScanResults = {
-    buffer: UDP_PLACEHOLDER_BUFFER_1,
+    scanData: UDP_PLACEHOLDER_BUFFER_1.toString('hex'),
     rinfo: {
       address: '127.0.0.1',
       family: 'IPv4',

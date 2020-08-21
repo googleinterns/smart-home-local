@@ -45,7 +45,7 @@ export class NodeRadioController implements RadioController {
       socket.on('message', (buffer, rinfo) => {
         // Close the socket.
         socket.close();
-        resolve({buffer, rinfo});
+        resolve({scanData: buffer.toString('hex'), rinfo});
       });
 
       // Enable UDP broadcast.
