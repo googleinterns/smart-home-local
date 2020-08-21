@@ -1,0 +1,44 @@
+{
+  "name": "@google/local-home-testing-browser",
+  "version": "0.0.1",
+  "description": "An implementation of the Local Home SDK that runs in a browser.",
+  "author": "Google LLC.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "compile": "tsc",
+    "clean": "gts clean",
+    "build": "webpack --config webpack.config.js",
+    "proxy": "node ./build/src/node/index.js",
+    "host": "npx serve ./dist/",
+    "lint": "eslint './src/**/*.ts' './test/**/*.ts'"
+  },
+  "dependencies": {
+    "@google/local-home-testing": "file:../stubs",
+    "ws": "^7.3.1"
+  },
+  "devDependencies": {
+    "@google/local-home-sdk": "^1.1.0",
+    "@types/node": "^13.11.1",
+    "@types/ws": "^7.2.6",
+    "@typescript-eslint/eslint-plugin": "^3.7.0",
+    "chalk": "^4.0.0",
+    "eslint": "^7.5.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "gts": "^2.0.2",
+    "prettier": "^2.0.5",
+    "typescript": "^3.8.3",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
+  },
+  "engines": {
+    "node": ">12.11.0"
+  },
+  "files": [
+    "./build/src/**/*.ts",
+    "./dist/index.html",
+    "./dist/style.css",
+    "./dist/main.js"
+  ]
+}
