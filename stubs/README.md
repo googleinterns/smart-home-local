@@ -1,10 +1,27 @@
-# Local Home SDK Virtual Environment
+# Local Home SDK Stubs
 
-This is a mock Local Home Platform that depends on the Local Home SDK and a compiled [Local Fulfillment App](https://github.com/actions-on-google/smart-home-local)
+This is a library of stubs for the `Local Home SDK` that simulate the `Local Home Platform`
 
-# Usage
+## Injecting the stubs
 
-- See example tests in `test/example/` directory
+Importing the default module of this library will implicitly load `Local Home SDK` stubs in the global scope and enable usage of the library. This will implement the interfaces in `smarthome` namespace and enable you to run your local fulfillment app locally.
+
+## Extracting the Stubs
+
+There are two main stubs for platform interaction: `MockLocalHomePlatform` and `MockDeviceManager`.
+When the `smarthome.App` constructor is called, a `smarthome.App` stub instance is created in memory and creates instances of these stubs.
+
+To access these stubs and their interfaces, you will need to use the module-level function `extractStubs()` and pass in your app stub.
+
+See `JSDocs` for `MockLocalHomePlatform` and `MockDeviceManager` usage. An example of this is located in the `test/example` directory.
+
+## Automatic testing
+
+Automatic testing can be conducted using the stubs in this library. Example tests are included in the `test/example/` directory.
+
+## Manual testing
+
+To use true UDP, TCP, and HTTP with the stubs, you can use the [command line interface](../cli/), which runs in Node.js or the [graphical user interface](../gui/), which runs in a browser. Please see the respective `README`s for configuration and usage.
 
 ## References & Issues
 
